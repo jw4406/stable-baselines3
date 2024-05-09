@@ -272,7 +272,14 @@ class BaseAlgorithm(ABC):
 
     def _setup_lr_schedule(self) -> None:
         """Transform to callable if needed."""
-        self.lr_schedule = get_schedule_fn(self.learning_rate)
+        try:
+            self.lr_schedule = np.zeros((len(self.learning_rate),), dtype=object)
+        except TypeError:
+            self.lr_schedule = np.zeros((len([self.learning_rate]),), dtype=object)
+            assert len([self.learning_rate]) == 1
+            self.learning_rate = [self.learning_rate]
+        for i in range(len(self.learning_rate)):
+            self.lr_schedule[i] = get_schedule_fn(self.learning_rate[i])
 
     def _update_current_progress_remaining(self, num_timesteps: int, total_timesteps: int) -> None:
         """
@@ -292,12 +299,15 @@ class BaseAlgorithm(ABC):
             An optimizer or a list of optimizers.
         """
         # Log the current learning rate
-        self.logger.record("train/learning_rate", self.lr_schedule(self._current_progress_remaining))
+        for i in range(len(self.lr_schedule)):
+            self.logger.record("train/learning_rate", self.lr_schedule[i](self._current_progress_remaining))
 
         if not isinstance(optimizers, list):
             optimizers = [optimizers]
+        count = 0
         for optimizer in optimizers:
-            update_learning_rate(optimizer, self.lr_schedule(self._current_progress_remaining))
+            update_learning_rate(optimizer, self.lr_schedule[count](self._current_progress_remaining))
+            count = count + 1
 
     def _excluded_save_params(self) -> List[str]:
         """

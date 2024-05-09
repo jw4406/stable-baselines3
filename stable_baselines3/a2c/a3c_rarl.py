@@ -6,14 +6,14 @@ from torch.nn import functional as F
 
 from stable_baselines3.common.buffers import RolloutBuffer
 from stable_baselines3.common.on_policy_algorithm import OnPolicyAlgorithm
-from stable_baselines3.common.policies import ActorCriticCnnPolicy, ActorCriticPolicy, BasePolicy, MultiInputActorCriticPolicy
+from stable_baselines3.common.policies import ActorCriticCnnPolicy, ActorCriticPolicy, BasePolicy, MultiInputActorCriticPolicy, ActorActorCriticPolicy
 from stable_baselines3.common.type_aliases import GymEnv, MaybeCallback, Schedule
 from stable_baselines3.common.utils import explained_variance
 
 SelfA2C = TypeVar("SelfA2C", bound="A2C")
+#SelfAAC = TypeVar("SelfAAC", bound="A3")
 
-
-class A2C(OnPolicyAlgorithm):
+class A3C_rarl(OnPolicyAlgorithm):
     """
     Advantage Actor Critic (A2C)
 
@@ -61,13 +61,16 @@ class A2C(OnPolicyAlgorithm):
         "MlpPolicy": ActorCriticPolicy,
         "CnnPolicy": ActorCriticCnnPolicy,
         "MultiInputPolicy": MultiInputActorCriticPolicy,
+        "MlPAACPolicy": ActorActorCriticPolicy
     }
 
     def __init__(
         self,
         policy: Union[str, Type[ActorCriticPolicy]],
         env: Union[GymEnv, str],
-        learning_rate: Union[float, Schedule] = 7e-4,
+        c_learning_rate: Union[float, Schedule] = 7e-4,
+        d_learning_rate: Union[float, Schedule] = 7e-4,
+        v_learning_rate: Union[float, Schedule] = 7e-4,
         n_steps: int = 5,
         gamma: float = 0.99,
         gae_lambda: float = 1.0,
@@ -88,12 +91,12 @@ class A2C(OnPolicyAlgorithm):
         seed: Optional[int] = None,
         device: Union[th.device, str] = "auto",
         _init_setup_model: bool = True,
-        adversarial=False
+        adversarial=True
     ):
         super().__init__(
             policy,
             env,
-            learning_rate=learning_rate,
+            learning_rate=v_learning_rate,
             n_steps=n_steps,
             gamma=gamma,
             gae_lambda=gae_lambda,
@@ -118,9 +121,12 @@ class A2C(OnPolicyAlgorithm):
                 spaces.MultiBinary,
             ),
         )
-
-        self.normalize_advantage = normalize_advantage
         self.adversarial=adversarial
+        self.normalize_advantage = normalize_advantage
+        self.c_learning_rate = c_learning_rate
+        self.v_learning_rate = v_learning_rate
+        self.d_learning_rate = d_learning_rate
+        self.learning_rate = [v_learning_rate, c_learning_rate, d_learning_rate]
         # Update optimizer inside the policy if we want to use RMSProp
         # (original implementation) rather than Adam
         if use_rms_prop and "optimizer_class" not in self.policy_kwargs:
@@ -139,45 +145,59 @@ class A2C(OnPolicyAlgorithm):
         self.policy.set_training_mode(True)
 
         # Update optimizer learning rate
-        self._update_learning_rate(self.policy.optimizer)
+        self._update_learning_rate(self.policy.ctrl_optimizer)
+        self._update_learning_rate(self.policy.dstb_optimizer)
 
         # This will only loop once (get all data in one go)
         for rollout_data in self.rollout_buffer.get(batch_size=None):
             actions = rollout_data.actions
+            dstb_actions = rollout_data.dstb_actions
             if isinstance(self.action_space, spaces.Discrete):
                 # Convert discrete action from float to long
                 actions = actions.long().flatten()
 
-            values, log_prob, entropy = self.policy.evaluate_actions(rollout_data.observations, actions)
+            values, ctrl_log_prob, ctrl_entropy, dstb_log_prob, dstb_entropy = self.policy.evaluate_actions(rollout_data.observations, actions, dstb_actions)
             values = values.flatten()
-
+            # Value loss using the TD(gae_lambda) target
+            value_loss = F.mse_loss(rollout_data.returns, values)
+            self.policy.value_optimizer.zero_grad()
+            value_loss.backward()
+            th.nn.utils.clip_grad_norm_(self.policy.value_net.parameters(), self.max_grad_norm)
+            self.policy.value_optimizer.step()
             # Normalize advantage (not present in the original implementation)
             advantages = rollout_data.advantages
             if self.normalize_advantage:
                 advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8)
 
             # Policy gradient loss
-            policy_loss = -(advantages * log_prob).mean()
+            for i in range(80):
+                values, ctrl_log_prob, ctrl_entropy, dstb_log_prob, dstb_entropy = self.policy.evaluate_actions(
+                    rollout_data.observations, actions, dstb_actions)
+                c_policy_loss = -(advantages * ctrl_log_prob).mean()
+                d_policy_loss = (advantages * dstb_log_prob).mean()
 
-            # Value loss using the TD(gae_lambda) target
-            value_loss = F.mse_loss(rollout_data.returns, values)
+                # Entropy loss favor exploration
+                if ctrl_entropy is None:
+                    # Approximate entropy when no analytical form
+                    entropy_loss = -th.mean(-ctrl_log_prob)
+                else:
+                    entropy_loss = -th.mean(ctrl_entropy)
 
-            # Entropy loss favor exploration
-            if entropy is None:
-                # Approximate entropy when no analytical form
-                entropy_loss = -th.mean(-log_prob)
-            else:
-                entropy_loss = -th.mean(entropy)
+                #loss = policy_loss + self.ent_coef * entropy_loss + self.vf_coef * value_loss
 
-            loss = policy_loss + self.ent_coef * entropy_loss + self.vf_coef * value_loss
+                # Optimization step
+                self.policy.ctrl_optimizer.zero_grad()
+                c_policy_loss.backward()
+                self.policy.dstb_optimizer.zero_grad()
+                d_policy_loss.backward()
 
-            # Optimization step
-            self.policy.optimizer.zero_grad()
-            loss.backward()
+                # Clip grad norm
+                th.nn.utils.clip_grad_norm_(self.policy.action_net.parameters(), self.max_grad_norm)
+                th.nn.utils.clip_grad_norm_(self.policy.dstb_action_net.parameters(), self.max_grad_norm)
 
-            # Clip grad norm
-            th.nn.utils.clip_grad_norm_(self.policy.parameters(), self.max_grad_norm)
-            self.policy.optimizer.step()
+                self.policy.ctrl_optimizer.step()
+                self.policy.dstb_optimizer.step()
+
 
         explained_var = explained_variance(self.rollout_buffer.values.flatten(), self.rollout_buffer.returns.flatten())
 
@@ -185,7 +205,7 @@ class A2C(OnPolicyAlgorithm):
         self.logger.record("train/n_updates", self._n_updates, exclude="tensorboard")
         self.logger.record("train/explained_variance", explained_var)
         self.logger.record("train/entropy_loss", entropy_loss.item())
-        self.logger.record("train/policy_loss", policy_loss.item())
+        self.logger.record("train/policy_loss", c_policy_loss.item())
         self.logger.record("train/value_loss", value_loss.item())
         if hasattr(self.policy, "log_std"):
             self.logger.record("train/std", th.exp(self.policy.log_std).mean().item())

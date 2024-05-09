@@ -7,7 +7,7 @@ import torch as th
 from gymnasium import spaces
 
 from stable_baselines3.common.base_class import BaseAlgorithm
-from stable_baselines3.common.buffers import DictRolloutBuffer, RolloutBuffer
+from stable_baselines3.common.buffers import DictRolloutBuffer, RolloutBuffer, AdvRolloutBuffer
 from stable_baselines3.common.callbacks import BaseCallback
 from stable_baselines3.common.policies import ActorCriticPolicy
 from stable_baselines3.common.type_aliases import GymEnv, MaybeCallback, Schedule
@@ -119,7 +119,9 @@ class OnPolicyAlgorithm(BaseAlgorithm):
             if isinstance(self.observation_space, spaces.Dict):
                 self.rollout_buffer_class = DictRolloutBuffer
             else:
-                self.rollout_buffer_class = RolloutBuffer
+                self.rollout_buffer_class = RolloutBuffer if self.adversarial is False else AdvRolloutBuffer
+                #self.rollout_buffer_class = AdvRolloutBuffer
+
 
         self.rollout_buffer = self.rollout_buffer_class(
             self.n_steps,
@@ -131,6 +133,7 @@ class OnPolicyAlgorithm(BaseAlgorithm):
             n_envs=self.n_envs,
             **self.rollout_buffer_kwargs,
         )
+
         self.policy = self.policy_class(  # type: ignore[assignment]
             self.observation_space, self.action_space, self.lr_schedule, use_sde=self.use_sde, **self.policy_kwargs
         )
@@ -172,65 +175,128 @@ class OnPolicyAlgorithm(BaseAlgorithm):
             if self.use_sde and self.sde_sample_freq > 0 and n_steps % self.sde_sample_freq == 0:
                 # Sample a new noise matrix
                 self.policy.reset_noise(env.num_envs)
+            if self.adversarial is True:
+                with th.no_grad():
+                    # Convert to pytorch tensor or to TensorDict
+                    obs_tensor = obs_as_tensor(self._last_obs, self.device)
+                    actions, log_probs, values, dstb_actions, dstb_log_probs = self.policy(obs_tensor)
+                actions = actions.cpu().numpy()
+                dstb_actions = dstb_actions.cpu().numpy()
 
-            with th.no_grad():
-                # Convert to pytorch tensor or to TensorDict
-                obs_tensor = obs_as_tensor(self._last_obs, self.device)
-                actions, values, log_probs = self.policy(obs_tensor)
-            actions = actions.cpu().numpy()
+                # Rescale and perform action
+                clipped_actions = actions
+                clipped_dstb_actions = dstb_actions
+                if isinstance(self.action_space, spaces.Box):
+                    if self.policy.squash_output:
+                        # Unscale the actions to match env bounds
+                        # if they were previously squashed (scaled in [-1, 1])
+                        clipped_actions = self.policy.unscale_action(clipped_actions)
+                        clipped_dstb_actions = self.policy.unscale_action(clipped_dstb_actions)
+                    else:
+                        # Otherwise, clip the actions to avoid out of bound error
+                        # as we are sampling from an unbounded Gaussian distribution
+                        clipped_actions = np.clip(actions, self.action_space.low, self.action_space.high)
+                        clipped_dstb_actions = np.clip(clipped_dstb_actions, self.action_space.low, self.action_space.high)
+                new_obs, rewards, dones, infos = env.step([[clipped_actions, clipped_dstb_actions, n_steps]])
 
-            # Rescale and perform action
-            clipped_actions = actions
+                self.num_timesteps += env.num_envs
 
-            if isinstance(self.action_space, spaces.Box):
-                if self.policy.squash_output:
-                    # Unscale the actions to match env bounds
-                    # if they were previously squashed (scaled in [-1, 1])
-                    clipped_actions = self.policy.unscale_action(clipped_actions)
-                else:
-                    # Otherwise, clip the actions to avoid out of bound error
-                    # as we are sampling from an unbounded Gaussian distribution
-                    clipped_actions = np.clip(actions, self.action_space.low, self.action_space.high)
+                # Give access to local variables
+                callback.update_locals(locals())
+                if not callback.on_step():
+                    return False
 
-            new_obs, rewards, dones, infos = env.step(clipped_actions)
+                self._update_info_buffer(infos, dones)
+                n_steps += 1
 
-            self.num_timesteps += env.num_envs
+                if isinstance(self.action_space, spaces.Discrete):
+                    # Reshape in case of discrete action
+                    actions = actions.reshape(-1, 1)
 
-            # Give access to local variables
-            callback.update_locals(locals())
-            if not callback.on_step():
-                return False
+                # Handle timeout by bootstraping with value function
+                # see GitHub issue #633
+                for idx, done in enumerate(dones):
+                    if (
+                            done
+                            and infos[idx].get("terminal_observation") is not None
+                            and infos[idx].get("TimeLimit.truncated", False)
+                    ):
+                        terminal_obs = self.policy.obs_to_tensor(infos[idx]["terminal_observation"])[0]
+                        with th.no_grad():
+                            terminal_value = self.policy.predict_values(terminal_obs)[0]  # type: ignore[arg-type]
+                        rewards[idx] += self.gamma * terminal_value
 
-            self._update_info_buffer(infos, dones)
-            n_steps += 1
+                rollout_buffer.add(
+                    self._last_obs,  # type: ignore[arg-type]
+                    actions,
+                    dstb_actions,
+                    rewards,
+                    self._last_episode_starts,  # type: ignore[arg-type]
+                    values,
+                    log_probs,
+                    dstb_log_probs
+                )
+                self._last_obs = new_obs  # type: ignore[assignment]
+                self._last_episode_starts = dones
+            else:
+                with th.no_grad():
+                    # Convert to pytorch tensor or to TensorDict
+                    obs_tensor = obs_as_tensor(self._last_obs, self.device)
+                    actions, values, log_probs = self.policy(obs_tensor)
+                actions = actions.cpu().numpy()
 
-            if isinstance(self.action_space, spaces.Discrete):
-                # Reshape in case of discrete action
-                actions = actions.reshape(-1, 1)
+                # Rescale and perform action
+                clipped_actions = actions
 
-            # Handle timeout by bootstraping with value function
-            # see GitHub issue #633
-            for idx, done in enumerate(dones):
-                if (
-                    done
-                    and infos[idx].get("terminal_observation") is not None
-                    and infos[idx].get("TimeLimit.truncated", False)
-                ):
-                    terminal_obs = self.policy.obs_to_tensor(infos[idx]["terminal_observation"])[0]
-                    with th.no_grad():
-                        terminal_value = self.policy.predict_values(terminal_obs)[0]  # type: ignore[arg-type]
-                    rewards[idx] += self.gamma * terminal_value
+                if isinstance(self.action_space, spaces.Box):
+                    if self.policy.squash_output:
+                        # Unscale the actions to match env bounds
+                        # if they were previously squashed (scaled in [-1, 1])
+                        clipped_actions = self.policy.unscale_action(clipped_actions)
+                    else:
+                        # Otherwise, clip the actions to avoid out of bound error
+                        # as we are sampling from an unbounded Gaussian distribution
+                        clipped_actions = np.clip(actions, self.action_space.low, self.action_space.high)
 
-            rollout_buffer.add(
-                self._last_obs,  # type: ignore[arg-type]
-                actions,
-                rewards,
-                self._last_episode_starts,  # type: ignore[arg-type]
-                values,
-                log_probs,
-            )
-            self._last_obs = new_obs  # type: ignore[assignment]
-            self._last_episode_starts = dones
+                new_obs, rewards, dones, infos = env.step(clipped_actions)
+
+                self.num_timesteps += env.num_envs
+
+                # Give access to local variables
+                callback.update_locals(locals())
+                if not callback.on_step():
+                    return False
+
+                self._update_info_buffer(infos, dones)
+                n_steps += 1
+
+                if isinstance(self.action_space, spaces.Discrete):
+                    # Reshape in case of discrete action
+                    actions = actions.reshape(-1, 1)
+
+                # Handle timeout by bootstraping with value function
+                # see GitHub issue #633
+                for idx, done in enumerate(dones):
+                    if (
+                        done
+                        and infos[idx].get("terminal_observation") is not None
+                        and infos[idx].get("TimeLimit.truncated", False)
+                    ):
+                        terminal_obs = self.policy.obs_to_tensor(infos[idx]["terminal_observation"])[0]
+                        with th.no_grad():
+                            terminal_value = self.policy.predict_values(terminal_obs)[0]  # type: ignore[arg-type]
+                        rewards[idx] += self.gamma * terminal_value
+
+                rollout_buffer.add(
+                    self._last_obs,  # type: ignore[arg-type]
+                    actions,
+                    rewards,
+                    self._last_episode_starts,  # type: ignore[arg-type]
+                    values,
+                    log_probs,
+                )
+                self._last_obs = new_obs  # type: ignore[assignment]
+                self._last_episode_starts = dones
 
         with th.no_grad():
             # Compute value for the last timestep
@@ -317,6 +383,10 @@ class OnPolicyAlgorithm(BaseAlgorithm):
         return self
 
     def _get_torch_save_params(self) -> Tuple[List[str], List[str]]:
-        state_dicts = ["policy", "policy.optimizer"]
+        is_adversarial = hasattr(self, 'adversarial')
+        if is_adversarial and self.adversarial is True:
+            state_dicts = ["policy", "policy.value_optimizer", "policy.ctrl_optimizer", "policy.dstb_optimizer"]
+        else:
+            state_dicts = ["policy", "policy.optimizer"]
 
         return state_dicts, []
