@@ -307,7 +307,7 @@ class OnPolicyAlgorithm(BaseAlgorithm):
         callback.update_locals(locals())
 
         callback.on_rollout_end()
-
+        assert 1 in self.rollout_buffer.episode_starts
         return True
 
     def train(self) -> None:
