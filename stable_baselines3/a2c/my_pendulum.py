@@ -138,11 +138,17 @@ class my_PendulumEnv(gym.Env):
         #u = np.clip(u, -self.max_torque, self.max_torque)[0]
         u = np.clip(u, -1.8, 1.8)[0]
         d = np.clip(d, -.2, .2)[0]
+        try:
+            len(d)
+            d = d[0]
+        except:
+            pass
+
         self.last_u = u  # for rendering
         self.last_d = d
-        costs = angle_normalize(th) ** 2 + 0.1 * thdot**2 + 0.001 * (u**2)
+        costs = angle_normalize(th) ** 2 + 0.1 * thdot**2 + 0.001 * ((u+d)**2)
 
-        newthdot = thdot + (3 * g / (2 * l) * np.sin(th) + 3.0 / (m * l**2) * u) * dt
+        newthdot = thdot + (3 * g / (2 * l) * np.sin(th) + 3.0 / (m * l**2) * (u+d)) * dt
         newthdot = np.clip(newthdot, -self.max_speed, self.max_speed)
         newth = th + newthdot * dt
 
@@ -250,7 +256,7 @@ class my_PendulumEnv(gym.Env):
         if self.last_u is not None and self.last_d is not None:
             scale_img = pygame.transform.smoothscale(
                 img,
-                (scale * np.abs(self.last_u + self.last_d[0]) / 2, scale * np.abs(self.last_u + self.last_d[0]) / 2),
+                (scale * np.abs(self.last_u + self.last_d) / 2, scale * np.abs(self.last_u + self.last_d) / 2),
             )
             is_flip = bool(self.last_u > 0)
             scale_img = pygame.transform.flip(scale_img, is_flip, True)

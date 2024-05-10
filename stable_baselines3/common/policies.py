@@ -11,7 +11,7 @@ import numpy as np
 import torch as th
 from gymnasium import spaces
 from torch import nn
-
+import itertools
 from stable_baselines3.common.distributions import (
     BernoulliDistribution,
     CategoricalDistribution,
@@ -630,10 +630,10 @@ class ActorCriticPolicy(BasePolicy):
 
             for module, gain in module_gains.items():
                 module.apply(partial(self.init_weights, gain=gain))
-
+        import itertools
         # Setup optimizer with initial learning rate
         self.optimizer = self.optimizer_class(self.parameters(), lr=lr_schedule[0](1), **self.optimizer_kwargs)  # type: ignore[call-arg]
-
+        #self.optimizer = self.optimizer_class(itertools.chain([self.log_std], self.mlp_extractor.policy_net.parameters(), self.mlp_extractor.value_net.parameters(), self.action_net.parameters(), self.value_net.parameters()))
     def forward(self, obs: th.Tensor, deterministic: bool = False) -> Tuple[th.Tensor, th.Tensor, th.Tensor]:
         """
         Forward pass in all the networks (actor and critic)
@@ -1072,11 +1072,16 @@ class ActorActorCriticPolicy(BasePolicy):
 
         # Setup optimizer with initial learning rate
         #self.ctrl_optimizer = self.optimizer_class(self.parameters(), lr=lr_schedule(1), **self.optimizer_kwargs)  # type: ignore[call-arg]
-
+        #itertools.chain([self.log_std], self.mlp_extractor.policy_net.parameters(),
+        #                self.mlp_extractor.value_net.parameters(), self.action_net.parameters(),
+        #                self.value_net.parameters())
+        #itertools.chain([self.dstb_log_std], self.mlp_extractor.dstb_net.parameters(), self.dstb_action_net.parameters())
+        #itertools.chain([self.log_std], self.mlp_extractor.policy_net.parameters(), self.action_net.parameters())
+        #itertools.chain(self.mlp_extractor.value_net.parameters(), self.value_net.parameters())
         #TODO: DIFFERENT LEARNING RATES FOR CTRL AND DSTB
-        self.ctrl_optimizer = self.optimizer_class(self.action_net.parameters(), joint_schedule[1](1), **self.optimizer_kwargs)
-        self.dstb_optimizer = self.optimizer_class(self.dstb_action_net.parameters(), joint_schedule[2](1), **self.optimizer_kwargs)
-        self.value_optimizer = self.optimizer_class(self.value_net.parameters(), joint_schedule[0](1), **self.optimizer_kwargs)
+        self.ctrl_optimizer = self.optimizer_class(itertools.chain([self.log_std], self.mlp_extractor.policy_net.parameters(), self.action_net.parameters()), joint_schedule[1](1),maximize=True)
+        self.dstb_optimizer = self.optimizer_class(itertools.chain([self.dstb_log_std], self.mlp_extractor.dstb_net.parameters(), self.dstb_action_net.parameters()), joint_schedule[2](1), maximize=False)
+        self.value_optimizer = self.optimizer_class(itertools.chain(self.mlp_extractor.value_net.parameters(), self.value_net.parameters()), joint_schedule[0](1), **self.optimizer_kwargs)
     def forward(self, obs: th.Tensor, deterministic: bool = False) -> Tuple[th.Tensor, th.Tensor, th.Tensor, th.Tensor, th.Tensor]:
         """
         Forward pass in all the networks (actor and critic)
@@ -1168,13 +1173,14 @@ class ActorActorCriticPolicy(BasePolicy):
         ctrl_dstro, dstb_dstro = self.get_distribution(observation)
         return ctrl_dstro.get_actions(deterministic=deterministic), dstb_dstro.get_actions(deterministic=deterministic)
 
-    def evaluate_actions(self, obs: PyTorchObs, actions: th.Tensor, dstb_actions) -> Tuple[th.Tensor, th.Tensor, Optional[th.Tensor]]:
+    def evaluate_actions(self, obs: PyTorchObs, actions: th.Tensor, dstb_actions: th. Tensor) -> Tuple[th.Tensor, th.Tensor, th.Tensor, th.Tensor, th.Tensor]:
         """
         Evaluate actions according to the current policy,
         given the observations.
 
         :param obs: Observation
         :param actions: Actions
+        :param dstb_actions: dstb Actions
         :return: estimated value, log likelihood of taking those actions
             and entropy of the action distribution.
         """

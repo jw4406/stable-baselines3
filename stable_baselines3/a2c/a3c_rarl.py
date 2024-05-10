@@ -66,7 +66,7 @@ class A3C_rarl(OnPolicyAlgorithm):
 
     def __init__(
         self,
-        policy: Union[str, Type[ActorCriticPolicy]],
+        policy: Union[str, Type[ActorActorCriticPolicy]],
         env: Union[GymEnv, str],
         c_learning_rate: Union[float, Schedule] = 7e-4,
         d_learning_rate: Union[float, Schedule] = 7e-4,
@@ -147,7 +147,7 @@ class A3C_rarl(OnPolicyAlgorithm):
         # Update optimizer learning rate
         self._update_learning_rate(self.policy.ctrl_optimizer)
         self._update_learning_rate(self.policy.dstb_optimizer)
-
+        self._update_learning_rate(self.policy.value_optimizer)
         # This will only loop once (get all data in one go)
         for rollout_data in self.rollout_buffer.get(batch_size=None):
             actions = rollout_data.actions
@@ -160,6 +160,7 @@ class A3C_rarl(OnPolicyAlgorithm):
             values = values.flatten()
             # Value loss using the TD(gae_lambda) target
             value_loss = F.mse_loss(rollout_data.returns, values)
+            value_loss = self.vf_coef * value_loss
             self.policy.value_optimizer.zero_grad()
             value_loss.backward()
             th.nn.utils.clip_grad_norm_(self.policy.value_net.parameters(), self.max_grad_norm)
@@ -170,10 +171,9 @@ class A3C_rarl(OnPolicyAlgorithm):
                 advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8)
 
             # Policy gradient loss
-            for i in range(80):
-                values, ctrl_log_prob, ctrl_entropy, dstb_log_prob, dstb_entropy = self.policy.evaluate_actions(
-                    rollout_data.observations, actions, dstb_actions)
-                c_policy_loss = -(advantages * ctrl_log_prob).mean()
+            inner_steps = 1
+            for i in range(inner_steps):
+                c_policy_loss = (advantages * ctrl_log_prob).mean()
                 d_policy_loss = (advantages * dstb_log_prob).mean()
 
                 # Entropy loss favor exploration
@@ -197,6 +197,11 @@ class A3C_rarl(OnPolicyAlgorithm):
 
                 self.policy.ctrl_optimizer.step()
                 self.policy.dstb_optimizer.step()
+                if i == inner_steps - 1:
+                    break
+                else:
+                    values, ctrl_log_prob, ctrl_entropy, dstb_log_prob, dstb_entropy = self.policy.evaluate_actions(
+                        rollout_data.observations, actions, dstb_actions)
 
 
         explained_var = explained_variance(self.rollout_buffer.values.flatten(), self.rollout_buffer.returns.flatten())

@@ -654,7 +654,7 @@ class AdvRolloutBuffer(BaseBuffer):
 
         # Reshape to handle multi-dim and discrete action spaces, see GH #970 #1392
         action = action.reshape((self.n_envs, self.action_dim))
-        dstb_action = action.reshape((self.n_envs, self.action_dim))
+        dstb_action = dstb_action.reshape((self.n_envs, self.action_dim))
         self.observations[self.pos] = np.array(obs)
         self.actions[self.pos] = np.array(action)
         self.dstb_actions[self.pos] = np.array(dstb_action)
@@ -699,7 +699,7 @@ class AdvRolloutBuffer(BaseBuffer):
             self,
             batch_inds: np.ndarray,
             env: Optional[VecNormalize] = None,
-    ) -> RolloutBufferSamples:
+    ) -> AdvRolloutBufferSamples:
         data = (
             self.observations[batch_inds],
             self.actions[batch_inds],
