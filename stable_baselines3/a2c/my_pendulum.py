@@ -129,15 +129,14 @@ class my_PendulumEnv(gym.Env):
         th, thdot = self.state  # th := theta
         u = joint_action[0][0]
         d = joint_action[1]
-        stepcount=joint_action[2]
         g = self.g
         m = self.m
         l = self.l
         dt = self.dt
 
         #u = np.clip(u, -self.max_torque, self.max_torque)[0]
-        u = np.clip(u, -1.8, 1.8)[0]
-        d = np.clip(d, -.2, .2)[0]
+        u = np.clip(u, -2, 2)[0]
+        d = 0
         try:
             len(d)
             d = d[0]
@@ -156,12 +155,8 @@ class my_PendulumEnv(gym.Env):
 
         if self.render_mode == "human":
             self.render()
-        if (stepcount % 499 == 0 and stepcount != 0):
-            done = True
-        else:
-            done = False
         # truncation=False as the time limit is handled by the `TimeLimit` wrapper added during `make`
-        return self._get_obs(), -costs, done, False, {}
+        return self._get_obs(), -costs, False, False, {}
 
     def reset(self, *, seed: Optional[int] = None, options: Optional[dict] = None):
         super().reset(seed=seed)

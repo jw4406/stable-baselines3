@@ -5,6 +5,7 @@ from gymnasium import spaces
 from torch.nn import functional as F
 
 from stable_baselines3.common.buffers import RolloutBuffer
+from stable_baselines3.common.buffers import AdvRolloutBuffer
 from stable_baselines3.common.on_policy_algorithm import OnPolicyAlgorithm
 from stable_baselines3.common.policies import ActorCriticCnnPolicy, ActorCriticPolicy, BasePolicy, MultiInputActorCriticPolicy, ActorActorCriticPolicy
 from stable_baselines3.common.type_aliases import GymEnv, MaybeCallback, Schedule
@@ -82,7 +83,7 @@ class A3C_rarl(OnPolicyAlgorithm):
         use_rms_prop: bool = True,
         use_sde: bool = False,
         sde_sample_freq: int = -1,
-        rollout_buffer_class: Optional[Type[RolloutBuffer]] = None,
+        rollout_buffer_class: Optional[Type[AdvRolloutBuffer]] = None,
         rollout_buffer_kwargs: Optional[Dict[str, Any]] = None,
         normalize_advantage: bool = False,
         stats_window_size: int = 100,
@@ -146,9 +147,10 @@ class A3C_rarl(OnPolicyAlgorithm):
         self.policy.set_training_mode(True)
 
         # Update optimizer learning rate
-        self._update_learning_rate(self.policy.ctrl_optimizer)
-        self._update_learning_rate(self.policy.dstb_optimizer)
-        self._update_learning_rate(self.policy.value_optimizer)
+        #self._update_learning_rate(self.policy.ctrl_optimizer)
+        #self._update_learning_rate(self.policy.dstb_optimizer)
+        #self._update_learning_rate(self.policy.value_optimizer)
+        self._update_learning_rate(self.policy.optimizer)
         # This will only loop once (get all data in one go)
         for rollout_data in self.rollout_buffer.get(batch_size=None):
             actions = rollout_data.actions
@@ -159,60 +161,32 @@ class A3C_rarl(OnPolicyAlgorithm):
 
             values, ctrl_log_prob, ctrl_entropy, dstb_log_prob, dstb_entropy = self.policy.evaluate_actions(rollout_data.observations, actions, dstb_actions)
             values = values.flatten()
-            # Value loss using the TD(gae_lambda) target
-            value_loss = F.mse_loss(rollout_data.returns, values)
-            value_loss = self.vf_coef * value_loss
-            self.policy.value_optimizer.zero_grad()
-            value_loss.backward()
-            th.nn.utils.clip_grad_norm_(self.policy.value_net.parameters(), self.max_grad_norm)
-            self.policy.value_optimizer.step()
-            # Normalize advantage (not present in the original implementation)
             advantages = rollout_data.advantages
             if self.normalize_advantage:
                 advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8)
 
             # Policy gradient loss
-            inner_steps = 80
-            reltol = .05
-            c_grad_sum = 1
-            d_grad_sum = 1
-            count = 0
-            for i in range(1):
-                c_grad_sum = 0
-                d_grad_sum = 0
-                c_policy_loss = (advantages * ctrl_log_prob).mean()
-                d_policy_loss = (advantages * dstb_log_prob).mean()
+            policy_loss = -(advantages * ctrl_log_prob).mean()
 
-                # Entropy loss favor exploration
-                if ctrl_entropy is None:
-                    # Approximate entropy when no analytical form
-                    entropy_loss = -th.mean(-ctrl_log_prob)
-                else:
-                    entropy_loss = -th.mean(ctrl_entropy)
+            # Value loss using the TD(gae_lambda) target
+            value_loss = F.mse_loss(rollout_data.returns, values)
 
-                #loss = policy_loss + self.ent_coef * entropy_loss + self.vf_coef * value_loss
+            # Entropy loss favor exploration
+            if ctrl_entropy is None:
+                # Approximate entropy when no analytical form
+                entropy_loss = -th.mean(-ctrl_log_prob)
+            else:
+                entropy_loss = -th.mean(ctrl_entropy)
 
-                # Optimization step
-                self.policy.ctrl_optimizer.zero_grad()
-                c_policy_loss.backward()
-                self.policy.dstb_optimizer.zero_grad()
-                d_policy_loss.backward()
+            loss = policy_loss + self.ent_coef * entropy_loss + self.vf_coef * value_loss
 
-                # Clip grad norm
-                th.nn.utils.clip_grad_norm_(self.policy.action_net.parameters(), self.max_grad_norm)
-                th.nn.utils.clip_grad_norm_(self.policy.dstb_action_net.parameters(), self.max_grad_norm)
+            # Optimization step
+            self.policy.optimizer.zero_grad()
+            loss.backward()
 
-                self.policy.ctrl_optimizer.step()
-                self.policy.dstb_optimizer.step()
-                #with torch.no_grad():
-                #    for i in range(len(self.policy.ctrl_optimizer.param_groups[0]['params'])):
-                #        c_grad_sum = c_grad_sum + torch.linalg.norm(self.policy.ctrl_optimizer.param_groups[0]['params'][i].grad)
-                #        d_grad_sum = d_grad_sum + torch.linalg.norm(self.policy.dstb_optimizer.param_groups[0]['params'][i].grad)
-                #    if c_grad_sum <= reltol and d_grad_sum <= reltol:
-                #        break
-                values, ctrl_log_prob, ctrl_entropy, dstb_log_prob, dstb_entropy = self.policy.evaluate_actions(
-                    rollout_data.observations, actions, dstb_actions)
-                count = count + 1
+            # Clip grad norm
+            th.nn.utils.clip_grad_norm_(self.policy.parameters(), self.max_grad_norm)
+            self.policy.optimizer.step()
 
 
         explained_var = explained_variance(self.rollout_buffer.values.flatten(), self.rollout_buffer.returns.flatten())
@@ -221,7 +195,7 @@ class A3C_rarl(OnPolicyAlgorithm):
         self.logger.record("train/n_updates", self._n_updates, exclude="tensorboard")
         self.logger.record("train/explained_variance", explained_var)
         self.logger.record("train/entropy_loss", entropy_loss.item())
-        self.logger.record("train/policy_loss", c_policy_loss.item())
+        self.logger.record("train/policy_loss", policy_loss.item())
         self.logger.record("train/value_loss", value_loss.item())
         if hasattr(self.policy, "log_std"):
             self.logger.record("train/std", th.exp(self.policy.log_std).mean().item())

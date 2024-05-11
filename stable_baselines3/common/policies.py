@@ -11,6 +11,7 @@ import numpy as np
 import torch as th
 from gymnasium import spaces
 from torch import nn
+import torch
 import itertools
 from stable_baselines3.common.distributions import (
     BernoulliDistribution,
@@ -461,7 +462,7 @@ class ActorCriticPolicy(BasePolicy):
         squash_output: bool = False,
         features_extractor_class: Type[BaseFeaturesExtractor] = FlattenExtractor,
         features_extractor_kwargs: Optional[Dict[str, Any]] = None,
-        share_features_extractor: bool = True,
+        share_features_extractor: bool = False,
         normalize_images: bool = True,
         optimizer_class: Type[th.optim.Optimizer] = th.optim.Adam,
         optimizer_kwargs: Optional[Dict[str, Any]] = None,
@@ -883,7 +884,7 @@ class ActorActorCriticPolicy(BasePolicy):
         squash_output: bool = False,
         features_extractor_class: Type[BaseFeaturesExtractor] = FlattenExtractor,
         features_extractor_kwargs: Optional[Dict[str, Any]] = None,
-        share_features_extractor: bool = False,
+        share_features_extractor: bool = True,
         normalize_images: bool = True,
         optimizer_class: Type[th.optim.Optimizer] = th.optim.Adam,
         optimizer_kwargs: Optional[Dict[str, Any]] = None,
@@ -921,7 +922,7 @@ class ActorActorCriticPolicy(BasePolicy):
             if features_extractor_class == NatureCNN:
                 net_arch = []
             else:
-                net_arch = dict(pi=[128,128], vf=[128,128])
+                net_arch = dict(pi=[64,64], vf=[64,64])
 
         self.net_arch = net_arch
         self.activation_fn = activation_fn
@@ -955,8 +956,8 @@ class ActorActorCriticPolicy(BasePolicy):
 
         # Action distribution
         self.action_dist = make_proba_distribution(action_space, use_sde=use_sde, dist_kwargs=dist_kwargs)
-        if self.adversarial == True:
-            self.dstb_action_dist = make_proba_distribution(action_space, use_sde=use_sde, dist_kwargs=dist_kwargs)
+
+        self.dstb_action_dist = make_proba_distribution(action_space, use_sde=use_sde, dist_kwargs=dist_kwargs)
 
         self._build(lr_schedule)
 
@@ -1079,9 +1080,10 @@ class ActorActorCriticPolicy(BasePolicy):
         #itertools.chain([self.log_std], self.mlp_extractor.policy_net.parameters(), self.action_net.parameters())
         #itertools.chain(self.mlp_extractor.value_net.parameters(), self.value_net.parameters())
         #TODO: DIFFERENT LEARNING RATES FOR CTRL AND DSTB
-        self.ctrl_optimizer = self.optimizer_class(itertools.chain([self.log_std], self.mlp_extractor.policy_net.parameters(), self.action_net.parameters()), joint_schedule[1](1),maximize=True)
-        self.dstb_optimizer = self.optimizer_class(itertools.chain([self.dstb_log_std], self.mlp_extractor.dstb_net.parameters(), self.dstb_action_net.parameters()), joint_schedule[2](1), maximize=False)
-        self.value_optimizer = self.optimizer_class(itertools.chain(self.mlp_extractor.value_net.parameters(), self.value_net.parameters()), joint_schedule[0](1), **self.optimizer_kwargs)
+        self.optimizer = self.optimizer_class(self.parameters(), joint_schedule[0](1), **self.optimizer_kwargs)
+        #self.ctrl_optimizer = self.optimizer_class(itertools.chain([self.log_std], self.mlp_extractor.policy_net.parameters(), self.action_net.parameters()), joint_schedule[1](1),maximize=True)
+        #self.dstb_optimizer = self.optimizer_class(itertools.chain([self.dstb_log_std], self.mlp_extractor.dstb_net.parameters(), self.dstb_action_net.parameters()), joint_schedule[2](1), maximize=False)
+        #self.value_optimizer = self.optimizer_class(itertools.chain(self.mlp_extractor.value_net.parameters(), self.value_net.parameters()), joint_schedule[0](1), **self.optimizer_kwargs)
     def forward(self, obs: th.Tensor, deterministic: bool = False) -> Tuple[th.Tensor, th.Tensor, th.Tensor, th.Tensor, th.Tensor]:
         """
         Forward pass in all the networks (actor and critic)
@@ -1111,7 +1113,7 @@ class ActorActorCriticPolicy(BasePolicy):
         dstb_log_prob = dstb_distribution.log_prob(dstb_actions)
         ctrl_actions = ctrl_actions.reshape((-1, *self.action_space.shape))  # type: ignore[misc]
         dstb_actions = dstb_actions.reshape((-1, *self.action_space.shape))
-        return ctrl_actions, dstb_actions, values, ctrl_log_prob, dstb_log_prob
+        return ctrl_actions, ctrl_log_prob, values, torch.tensor([0]), torch.tensor([0])
 
     def extract_features(  # type: ignore[override]
         self, obs: PyTorchObs, features_extractor: Optional[BaseFeaturesExtractor] = None
@@ -1202,7 +1204,7 @@ class ActorActorCriticPolicy(BasePolicy):
         values = self.value_net(latent_vf)
         ctrl_entropy = ctrl_distribution.entropy()
         dstb_entropy = dstb_distribution.entropy()
-        return values, ctrl_log_prob, ctrl_entropy, dstb_log_prob, dstb_entropy
+        return values, ctrl_log_prob, ctrl_entropy, torch.tensor([0]), dstb_entropy
 
     def get_distribution(self, obs: PyTorchObs) -> Distribution:
         """

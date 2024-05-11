@@ -296,8 +296,8 @@ class MlpExtractorAdv(nn.Module):
         # If the list of layers is empty, the network will just act as an Identity module
         self.policy_net = nn.Sequential(*policy_net).to(device)
         self.value_net = nn.Sequential(*value_net).to(device)
-        if adversarial == True:
-            self.dstb_net = nn.Sequential(*dstb_net).to(device)
+
+        self.dstb_net = nn.Sequential(*dstb_net).to(device)
 
     def forward(self, features: th.Tensor) -> Tuple[th.Tensor, th.Tensor]:
         """

@@ -195,6 +195,7 @@ class OnPolicyAlgorithm(BaseAlgorithm):
                     else:
                         # Otherwise, clip the actions to avoid out of bound error
                         # as we are sampling from an unbounded Gaussian distribution
+                        #print(actions)
                         clipped_actions = np.clip(actions, self.action_space.low, self.action_space.high)
                         clipped_dstb_actions = np.clip(clipped_dstb_actions, self.action_space.low, self.action_space.high)
                 new_obs, rewards, dones, infos = env.step([[clipped_actions, clipped_dstb_actions, n_steps]])
@@ -256,6 +257,7 @@ class OnPolicyAlgorithm(BaseAlgorithm):
                     else:
                         # Otherwise, clip the actions to avoid out of bound error
                         # as we are sampling from an unbounded Gaussian distribution
+                        #print(actions)
                         clipped_actions = np.clip(actions, self.action_space.low, self.action_space.high)
 
                 new_obs, rewards, dones, infos = env.step(clipped_actions)
@@ -384,9 +386,9 @@ class OnPolicyAlgorithm(BaseAlgorithm):
 
     def _get_torch_save_params(self) -> Tuple[List[str], List[str]]:
         is_adversarial = hasattr(self, 'adversarial')
-        if is_adversarial and self.adversarial is True:
-            state_dicts = ["policy", "policy.value_optimizer", "policy.ctrl_optimizer", "policy.dstb_optimizer"]
-        else:
-            state_dicts = ["policy", "policy.optimizer"]
+        #if is_adversarial and self.adversarial is True:
+        #    state_dicts = ["policy", "policy.value_optimizer", "policy.ctrl_optimizer", "policy.dstb_optimizer"]
+        #else:
+        state_dicts = ["policy", "policy.optimizer"]
 
         return state_dicts, []
