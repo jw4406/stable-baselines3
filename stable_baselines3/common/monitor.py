@@ -10,7 +10,7 @@ from typing import Any, Dict, List, Optional, SupportsFloat, Tuple, Union
 import gymnasium as gym
 import pandas
 from gymnasium.core import ActType, ObsType
-
+import matplotlib.pyplot as plt
 
 class Monitor(gym.Wrapper[ObsType, ActType, ObsType, ActType]):
     """
@@ -103,6 +103,10 @@ class Monitor(gym.Wrapper[ObsType, ActType, ObsType, ActType]):
             self.episode_returns.append(ep_rew)
             self.episode_lengths.append(ep_len)
             self.episode_times.append(time.time() - self.t_start)
+            plt.plot(range(len(self.episode_returns)), self.episode_returns)
+            #plt.show(block=False)
+            plt.savefig("pug_%d.png" % len(self.episode_returns))
+            plt.close()
             ep_info.update(self.current_reset_info)
             if self.results_writer:
                 self.results_writer.write_row(ep_info)

@@ -9,7 +9,8 @@ from stable_baselines3.common.on_policy_algorithm import OnPolicyAlgorithm
 from stable_baselines3.common.policies import ActorCriticCnnPolicy, ActorCriticPolicy, BasePolicy, MultiInputActorCriticPolicy, ActorActorCriticPolicy
 from stable_baselines3.common.type_aliases import GymEnv, MaybeCallback, Schedule
 from stable_baselines3.common.utils import explained_variance
-
+import torch
+import torch.autograd as autograd
 SelfA2C = TypeVar("SelfA2C", bound="A2C")
 #SelfAAC = TypeVar("SelfAAC", bound="A3")
 
@@ -171,8 +172,14 @@ class A3C_rarl(OnPolicyAlgorithm):
                 advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8)
 
             # Policy gradient loss
-            inner_steps = 1
-            for i in range(inner_steps):
+            inner_steps = 80
+            reltol = .05
+            c_grad_sum = 1
+            d_grad_sum = 1
+            count = 0
+            for i in range(1):
+                c_grad_sum = 0
+                d_grad_sum = 0
                 c_policy_loss = (advantages * ctrl_log_prob).mean()
                 d_policy_loss = (advantages * dstb_log_prob).mean()
 
@@ -197,11 +204,15 @@ class A3C_rarl(OnPolicyAlgorithm):
 
                 self.policy.ctrl_optimizer.step()
                 self.policy.dstb_optimizer.step()
-                if i == inner_steps - 1:
-                    break
-                else:
-                    values, ctrl_log_prob, ctrl_entropy, dstb_log_prob, dstb_entropy = self.policy.evaluate_actions(
-                        rollout_data.observations, actions, dstb_actions)
+                #with torch.no_grad():
+                #    for i in range(len(self.policy.ctrl_optimizer.param_groups[0]['params'])):
+                #        c_grad_sum = c_grad_sum + torch.linalg.norm(self.policy.ctrl_optimizer.param_groups[0]['params'][i].grad)
+                #        d_grad_sum = d_grad_sum + torch.linalg.norm(self.policy.dstb_optimizer.param_groups[0]['params'][i].grad)
+                #    if c_grad_sum <= reltol and d_grad_sum <= reltol:
+                #        break
+                values, ctrl_log_prob, ctrl_entropy, dstb_log_prob, dstb_entropy = self.policy.evaluate_actions(
+                    rollout_data.observations, actions, dstb_actions)
+                count = count + 1
 
 
         explained_var = explained_variance(self.rollout_buffer.values.flatten(), self.rollout_buffer.returns.flatten())

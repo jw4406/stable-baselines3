@@ -921,7 +921,7 @@ class ActorActorCriticPolicy(BasePolicy):
             if features_extractor_class == NatureCNN:
                 net_arch = []
             else:
-                net_arch = dict(pi=[64, 64], vf=[64, 64])
+                net_arch = dict(pi=[128,128], vf=[128,128])
 
         self.net_arch = net_arch
         self.activation_fn = activation_fn
@@ -992,7 +992,7 @@ class ActorActorCriticPolicy(BasePolicy):
         """
         assert isinstance(self.action_dist, StateDependentNoiseDistribution), "reset_noise() is only available when using gSDE"
         self.action_dist.sample_weights(self.log_std, batch_size=n_envs)
-
+        self.dstb_action_dist.sample_weights(self.dstb_log_std, batch_size=n_envs)
     def _build_mlp_extractor(self) -> None:
         """
         Create the policy and value networks.
