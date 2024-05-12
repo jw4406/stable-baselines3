@@ -1080,10 +1080,10 @@ class ActorActorCriticPolicy(BasePolicy):
         #itertools.chain([self.log_std], self.mlp_extractor.policy_net.parameters(), self.action_net.parameters())
         #itertools.chain(self.mlp_extractor.value_net.parameters(), self.value_net.parameters())
         #TODO: DIFFERENT LEARNING RATES FOR CTRL AND DSTB
-        self.optimizer = self.optimizer_class(self.parameters(), joint_schedule[0](1), **self.optimizer_kwargs)
-        #self.ctrl_optimizer = self.optimizer_class(itertools.chain([self.log_std], self.mlp_extractor.policy_net.parameters(), self.action_net.parameters()), joint_schedule[1](1),maximize=True)
-        #self.dstb_optimizer = self.optimizer_class(itertools.chain([self.dstb_log_std], self.mlp_extractor.dstb_net.parameters(), self.dstb_action_net.parameters()), joint_schedule[2](1), maximize=False)
-        #self.value_optimizer = self.optimizer_class(itertools.chain(self.mlp_extractor.value_net.parameters(), self.value_net.parameters()), joint_schedule[0](1), **self.optimizer_kwargs)
+        #self.optimizer = self.optimizer_class(self.parameters(), joint_schedule[0](1), **self.optimizer_kwargs)
+        self.ctrl_optimizer = self.optimizer_class(itertools.chain([self.log_std], self.mlp_extractor.policy_net.parameters(), self.action_net.parameters()), joint_schedule[1](1),maximize=True)
+        self.dstb_optimizer = self.optimizer_class(itertools.chain([self.dstb_log_std], self.mlp_extractor.dstb_net.parameters(), self.dstb_action_net.parameters()), joint_schedule[2](1), maximize=False)
+        self.value_optimizer = self.optimizer_class(itertools.chain(self.mlp_extractor.value_net.parameters(), self.value_net.parameters()), joint_schedule[0](1), **self.optimizer_kwargs)
     def forward(self, obs: th.Tensor, deterministic: bool = False) -> Tuple[th.Tensor, th.Tensor, th.Tensor, th.Tensor, th.Tensor]:
         """
         Forward pass in all the networks (actor and critic)

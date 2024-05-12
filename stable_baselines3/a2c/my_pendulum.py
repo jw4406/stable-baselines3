@@ -135,8 +135,8 @@ class my_PendulumEnv(gym.Env):
         dt = self.dt
 
         #u = np.clip(u, -self.max_torque, self.max_torque)[0]
-        u = np.clip(u, -1.8, 1.8)[0]
-        d = np.clip(d, -.2, .2)[0]
+        u = np.clip(u, -1.5, 1.5)[0]
+        d = np.clip(d, -.5, .5)[0]
         #d = 0
         try:
             len(d)

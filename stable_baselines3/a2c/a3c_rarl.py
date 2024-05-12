@@ -147,10 +147,10 @@ class A3C_rarl(OnPolicyAlgorithm):
         self.policy.set_training_mode(True)
 
         # Update optimizer learning rate
-        #self._update_learning_rate(self.policy.ctrl_optimizer)
-        #self._update_learning_rate(self.policy.dstb_optimizer)
-        #self._update_learning_rate(self.policy.value_optimizer)
-        self._update_learning_rate(self.policy.optimizer)
+        self._update_learning_rate(self.policy.ctrl_optimizer)
+        self._update_learning_rate(self.policy.dstb_optimizer)
+        self._update_learning_rate(self.policy.value_optimizer)
+        #self._update_learning_rate(self.policy.optimizer)
         # This will only loop once (get all data in one go)
         for rollout_data in self.rollout_buffer.get(batch_size=None):
             actions = rollout_data.actions
@@ -178,14 +178,22 @@ class A3C_rarl(OnPolicyAlgorithm):
             else:
                 entropy_loss = -th.mean(ctrl_entropy)
 
-            loss = policy_loss + dstb_policy_loss + self.ent_coef * entropy_loss + self.vf_coef * value_loss
+            #loss = policy_loss + dstb_policy_loss + self.ent_coef * entropy_loss + self.vf_coef * value_loss
 
             # Optimization step
-            self.policy.optimizer.zero_grad()
-            loss.backward()
+            self.policy.value_optimizer.zero_grad()
+            value_loss.backward()
+            self.policy.ctrl_optimizer.zero_grad()
+            policy_loss.backward()
+            self.policy.dstb_optimizer.zero_grad()
+            dstb_policy_loss.backward()
             # Clip grad norm
             th.nn.utils.clip_grad_norm_(self.policy.parameters(), self.max_grad_norm)
-            self.policy.optimizer.step()
+            #th.nn.utils.clip_grad_norm_(self.policy.advantages.parameters(), self.max_grad_norm)
+            #self.policy.optimizer.step()
+            self.policy.value_optimizer.step()
+            self.policy.ctrl_optimizer.step()
+            self.policy.dstb_optimizer.step()
 
 
         explained_var = explained_variance(self.rollout_buffer.values.flatten(), self.rollout_buffer.returns.flatten())
