@@ -1113,7 +1113,7 @@ class ActorActorCriticPolicy(BasePolicy):
         dstb_log_prob = dstb_distribution.log_prob(dstb_actions)
         ctrl_actions = ctrl_actions.reshape((-1, *self.action_space.shape))  # type: ignore[misc]
         dstb_actions = dstb_actions.reshape((-1, *self.action_space.shape))
-        return ctrl_actions, ctrl_log_prob, values, torch.tensor([0]), torch.tensor([0])
+        return ctrl_actions, ctrl_log_prob, values, dstb_actions, dstb_log_prob
 
     def extract_features(  # type: ignore[override]
         self, obs: PyTorchObs, features_extractor: Optional[BaseFeaturesExtractor] = None
@@ -1204,7 +1204,7 @@ class ActorActorCriticPolicy(BasePolicy):
         values = self.value_net(latent_vf)
         ctrl_entropy = ctrl_distribution.entropy()
         dstb_entropy = dstb_distribution.entropy()
-        return values, ctrl_log_prob, ctrl_entropy, torch.tensor([0]), dstb_entropy
+        return values, ctrl_log_prob, ctrl_entropy, dstb_log_prob, dstb_entropy
 
     def get_distribution(self, obs: PyTorchObs) -> Distribution:
         """

@@ -167,7 +167,7 @@ class A3C_rarl(OnPolicyAlgorithm):
 
             # Policy gradient loss
             policy_loss = -(advantages * ctrl_log_prob).mean()
-
+            dstb_policy_loss = (advantages * dstb_log_prob).mean()
             # Value loss using the TD(gae_lambda) target
             value_loss = F.mse_loss(rollout_data.returns, values)
 
@@ -178,12 +178,11 @@ class A3C_rarl(OnPolicyAlgorithm):
             else:
                 entropy_loss = -th.mean(ctrl_entropy)
 
-            loss = policy_loss + self.ent_coef * entropy_loss + self.vf_coef * value_loss
+            loss = policy_loss + dstb_policy_loss + self.ent_coef * entropy_loss + self.vf_coef * value_loss
 
             # Optimization step
             self.policy.optimizer.zero_grad()
             loss.backward()
-
             # Clip grad norm
             th.nn.utils.clip_grad_norm_(self.policy.parameters(), self.max_grad_norm)
             self.policy.optimizer.step()
