@@ -31,7 +31,7 @@ model = A3C_rarl("MlPAACPolicy", env=env, verbose=2, normalize_advantage=False,g
 #model.d_learning_rate = 6e-7
 #callback_on_best = StopTrainingOnRewardThreshold(reward_threshold=-1, verbose=1)
 #eval_callback = EvalCallback(env, callback_on_new_best=callback_on_best, verbose=1)
-model.learn(total_timesteps=2_000_000)#, callback=eval_callback)
+model.learn(total_timesteps=3_000_000)#, callback=eval_callback)
 #callback_on_best = StopTrainingOnRewardThreshold(reward_threshold=-1, verbose=1)
 #eval_callback = EvalCallback(env, callback_on_new_best=callback_on_best, verbose=1)
 model.save("adv_pendulum_split_0.zip")

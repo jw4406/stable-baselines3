@@ -386,9 +386,9 @@ class OnPolicyAlgorithm(BaseAlgorithm):
 
     def _get_torch_save_params(self) -> Tuple[List[str], List[str]]:
         is_adversarial = hasattr(self, 'adversarial')
-        #if is_adversarial and self.adversarial is True:
-        #    state_dicts = ["policy", "policy.value_optimizer", "policy.ctrl_optimizer", "policy.dstb_optimizer"]
-        #else:
-        state_dicts = ["policy", "policy.optimizer"]
+        if is_adversarial and self.adversarial is True:
+            state_dicts = ["policy", "policy.value_optimizer", "policy.ctrl_optimizer", "policy.dstb_optimizer"]
+        else:
+            state_dicts = ["policy", "policy.optimizer"]
 
         return state_dicts, []
