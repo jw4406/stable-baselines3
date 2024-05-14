@@ -161,40 +161,49 @@ class A3C_rarl(OnPolicyAlgorithm):
 
             values, ctrl_log_prob, ctrl_entropy, dstb_log_prob, dstb_entropy = self.policy.evaluate_actions(rollout_data.observations, actions, dstb_actions)
             values = values.flatten()
-            advantages = rollout_data.advantages
-            if self.normalize_advantage:
-                advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8)
-
-            # Policy gradient loss
-            policy_loss = -(advantages * ctrl_log_prob).mean()
-            dstb_policy_loss = (advantages * dstb_log_prob).mean()
-            # Value loss using the TD(gae_lambda) target
             value_loss = F.mse_loss(rollout_data.returns, values)
-
-            # Entropy loss favor exploration
-            if ctrl_entropy is None:
-                # Approximate entropy when no analytical form
-                entropy_loss = -th.mean(-ctrl_log_prob)
-            else:
-                entropy_loss = -th.mean(ctrl_entropy)
-
-            #loss = policy_loss + dstb_policy_loss + self.ent_coef * entropy_loss + self.vf_coef * value_loss
-
-            # Optimization step
             self.policy.value_optimizer.zero_grad()
             value_loss.backward()
-            self.policy.ctrl_optimizer.zero_grad()
-            policy_loss.backward()
-            self.policy.dstb_optimizer.zero_grad()
-            dstb_policy_loss.backward()
-            # Clip grad norm
             th.nn.utils.clip_grad_norm_(self.policy.parameters(), self.max_grad_norm)
-            #th.nn.utils.clip_grad_norm_(self.policy.advantages.parameters(), self.max_grad_norm)
-            #self.policy.optimizer.step()
             self.policy.value_optimizer.step()
-            self.policy.ctrl_optimizer.step()
-            self.policy.dstb_optimizer.step()
+            num_iter = 50
+            for i in range(num_iter):
 
+                advantages = rollout_data.advantages
+                if self.normalize_advantage:
+                    advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8)
+
+                # Policy gradient loss
+                policy_loss = -(advantages * ctrl_log_prob).mean()
+                dstb_policy_loss = (advantages * dstb_log_prob).mean()
+                # Value loss using the TD(gae_lambda) target
+                #value_loss = F.mse_loss(rollout_data.returns, values)
+
+                # Entropy loss favor exploration
+                if ctrl_entropy is None:
+                    # Approximate entropy when no analytical form
+                    entropy_loss = -th.mean(-ctrl_log_prob)
+                else:
+                    entropy_loss = -th.mean(ctrl_entropy)
+
+                #loss = policy_loss + dstb_policy_loss + self.ent_coef * entropy_loss + self.vf_coef * value_loss
+
+                # Optimization step
+                self.policy.ctrl_optimizer.zero_grad()
+                policy_loss.backward()
+                self.policy.dstb_optimizer.zero_grad()
+                dstb_policy_loss.backward()
+                # Clip grad norm
+
+                #th.nn.utils.clip_grad_norm_(self.policy.advantages.parameters(), self.max_grad_norm)
+                #self.policy.optimizer.step()
+                #self.policy.value_optimizer.step()
+                self.policy.ctrl_optimizer.step()
+                self.policy.dstb_optimizer.step()
+                if i == num_iter - 1:
+                    break
+                values, ctrl_log_prob, ctrl_entropy, dstb_log_prob, dstb_entropy = self.policy.evaluate_actions(
+                    rollout_data.observations, actions, dstb_actions)
 
         explained_var = explained_variance(self.rollout_buffer.values.flatten(), self.rollout_buffer.returns.flatten())
 

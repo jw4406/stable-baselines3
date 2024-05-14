@@ -85,13 +85,22 @@ def evaluate_policy(
     states = None
     episode_starts = np.ones((env.num_envs,), dtype=bool)
     while (episode_counts < episode_count_targets).any():
-        actions, states = model.predict(
-            observations,  # type: ignore[arg-type]
-            state=states,
-            episode_start=episode_starts,
-            deterministic=deterministic,
-        )
-        new_observations, rewards, dones, infos = env.step(actions)
+        if hasattr(model, 'adversarial'):
+            actions, dstb_actions, states = model.predict(
+                observations,  # type: ignore[arg-type]
+                state=states,
+                episode_start=episode_starts,
+                deterministic=deterministic,
+            )
+            new_observations, rewards, dones, infos = env.step([[actions, dstb_actions, episode_counts]])
+        else:
+            actions, states = model.predict(
+                observations,  # type: ignore[arg-type]
+                state=states,
+                episode_start=episode_starts,
+                deterministic=deterministic,
+            )
+            new_observations, rewards, dones, infos = env.step(actions)
         current_rewards += rewards
         current_lengths += 1
         for i in range(n_envs):
