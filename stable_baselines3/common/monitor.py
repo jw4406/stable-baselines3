@@ -105,7 +105,7 @@ class Monitor(gym.Wrapper[ObsType, ActType, ObsType, ActType]):
             self.episode_times.append(time.time() - self.t_start)
             plt.plot(range(len(self.episode_returns)), self.episode_returns)
             #plt.show(block=False)
-            plt.savefig("pug_%d.png" % len(self.episode_returns))
+            plt.savefig("train_mcc_try_%d.png" % len(self.episode_returns))
             plt.close()
             ep_info.update(self.current_reset_info)
             if self.results_writer:
