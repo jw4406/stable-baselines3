@@ -36,20 +36,20 @@ env = gym.make("my_mountain_car_continuous", render_mode='human')
 #model = A2C("MlpPolicy", env, verbose=1, normalize_advantage=False,gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,n_steps=8,vf_coef=.4,gamma=.9,learning_rate=1e-4,use_sde=True,use_rms_prop=True)
 #model = A2C("MlpPolicy", env=env, verbose=1, normalize_advantage=True, n_steps=100, use_sde=True, use_rms_prop=False)
 #model = A3C_rarl("MlPAACPolicy", env=env, verbose=2, normalize_advantage=False,gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,n_steps=8,vf_coef=1,gamma=.9,v_learning_rate=1e-4, c_learning_rate=5e-4,d_learning_rate=2e-3, use_sde=True,use_rms_prop=False)
-model = A3C_rarl("MlPAACPolicy", env=env, verbose=1, normalize_advantage=True, n_steps=100, v_learning_rate=1e-4, c_learning_rate=5e-3,d_learning_rate=.01, use_sde=True, use_rms_prop=False)
+model = A3C_rarl("MlPAACPolicy", use_stackelberg=False,env=env, verbose=1, normalize_advantage=True, n_steps=100, v_learning_rate=1e-4, c_learning_rate=5e-3,d_learning_rate=1e-2, use_sde=True, use_rms_prop=False)
 
-model = A3C_rarl.load("adv_mcc_pug.zip", env=env)
+model = A3C_rarl.load("adv_mcc_sanity.zip", env=env)
 #model = A2C.load("mcc_0.zip", env=env)
 #model = A3C_rarl.load("adv_pendulum_split_0.zip", env=env)
 #model.v_learning_rate = 1e-6
 #model.c_learning_rate = 1e-7
 #model.d_learning_rate = 6e-7
-#callback_on_best = StopTrainingOnRewardThreshold(reward_threshold=85, verbose=1)
+#callback_on_best = StopTrainingOnRewardThreshold(reward_threshold=70, verbose=1)
 #eval_callback = EvalCallback(env, callback_on_new_best=callback_on_best, verbose=1)
 #model.learn(total_timesteps=5_000_000, callback=eval_callback)
 #callback_on_best = StopTrainingOnRewardThreshold(reward_threshold=-200, verbose=1)
 #eval_callback = EvalCallback(env, callback_on_new_best=callback_on_best, verbose=1)
-model.save("adv_mcc_pug.zip")
+#model.save("adv_mcc_sanity.zip")
 vec_env = model.get_env()
 obs = vec_env.reset()
 for i in range(10000):

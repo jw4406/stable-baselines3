@@ -309,7 +309,21 @@ class OnPolicyAlgorithm(BaseAlgorithm):
         callback.update_locals(locals())
 
         callback.on_rollout_end()
-
+        '''
+        rollout_buffer.value_start = []
+        rollout_buffer.return_start = []
+        rollout_buffer.traj_start_locations = []
+        if 1 in rollout_buffer.episode_starts:
+            rollout_buffer.has_multi_start = False
+            if np.argwhere(rollout_buffer.episode_starts).shape[0] > 1:
+                rollout_buffer.has_multi_start = True
+            loc = np.argwhere(rollout_buffer.episode_starts)
+            for i in range(loc.shape[0]):
+                rollout_buffer.value_start.append(rollout_buffer.values[loc[i,0]])
+                rollout_buffer.return_start.append(rollout_buffer.returns[loc[i,0]])
+                rollout_buffer.traj_start_locations.append(loc[i,0])
+            #print(loc)
+        '''
         return True
 
     def train(self) -> None:
