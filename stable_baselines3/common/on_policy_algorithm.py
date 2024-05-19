@@ -309,21 +309,41 @@ class OnPolicyAlgorithm(BaseAlgorithm):
         callback.update_locals(locals())
 
         callback.on_rollout_end()
-        '''
-        rollout_buffer.value_start = []
-        rollout_buffer.return_start = []
-        rollout_buffer.traj_start_locations = []
+
+        if rollout_buffer.split_trajectories is True:
+            # we need to discard the previous trajectory and set V_\omega (x_0) and V^\pi (x_0) to the correct values
+            rollout_buffer.split_trajectories = False
+            rollout_buffer.value_start = rollout_buffer.split_value_start
+            rollout_buffer.return_start = rollout_buffer.split_return_start
+            rollout_buffer.split_value_start = []
+            rollout_buffer.split_return_start = []
+
+
         if 1 in rollout_buffer.episode_starts:
             rollout_buffer.has_multi_start = False
+            rollout_buffer.split_trajectories = False
+            rollout_buffer.next_traj_begin = None
             if np.argwhere(rollout_buffer.episode_starts).shape[0] > 1:
                 rollout_buffer.has_multi_start = True
             loc = np.argwhere(rollout_buffer.episode_starts)
-            for i in range(loc.shape[0]):
-                rollout_buffer.value_start.append(rollout_buffer.values[loc[i,0]])
-                rollout_buffer.return_start.append(rollout_buffer.returns[loc[i,0]])
-                rollout_buffer.traj_start_locations.append(loc[i,0])
+            rollout_buffer.next_traj_begin = loc[0, 0]
+            if loc[0,0] != 0:
+                # this rollout buffer has the end of one trajectory and the start of another!
+                # example: traj1, traj1, traj1_end, traj2_begin, traj2, traj2, etc etc
+                rollout_buffer.split_trajectories = True
+
+
+                rollout_buffer.split_value_start = rollout_buffer.values[loc[0, 0]]
+                rollout_buffer.split_return_start = rollout_buffer.returns[loc[0, 0]]
+            else:
+                rollout_buffer.value_start = rollout_buffer.values[loc[0, 0]]
+                rollout_buffer.return_start = rollout_buffer.returns[loc[0, 0]]
+
             #print(loc)
-        '''
+            if rollout_buffer.has_multi_start is True:
+                assert len(rollout_buffer.value_start) > 1
+                assert (len(rollout_buffer.value_start) == len(rollout_buffer.return_start)) and (len(rollout_buffer.return_start) == len(rollout_buffer.traj_start_locations))
+
         return True
 
     def train(self) -> None:

@@ -58,6 +58,13 @@ class BaseBuffer(ABC):
         self.full = False
         self.device = get_device(device)
         self.n_envs = n_envs
+        self.value_start = []
+        self.split_value_start = []
+        self.return_start = []
+        self.split_return_start = []
+        self.traj_start_locations = []
+        self.split_trajectories = False
+        self.indices = []
 
     @staticmethod
     def swap_and_flatten(arr: np.ndarray) -> np.ndarray:
@@ -670,6 +677,7 @@ class AdvRolloutBuffer(BaseBuffer):
     def get(self, batch_size: Optional[int] = None) -> Generator[RolloutBufferSamples, None, None]:
         assert self.full, ""
         indices = np.random.permutation(self.buffer_size * self.n_envs)
+        self.indices = indices
         # Prepare the data
         if not self.generator_ready:
             _tensor_names = [

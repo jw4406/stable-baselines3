@@ -3,7 +3,7 @@ from typing import Any, ClassVar, Dict, Optional, Type, TypeVar, Union
 import torch as th
 from gymnasium import spaces
 from torch.nn import functional as F
-
+import numpy as np
 from stable_baselines3.common.buffers import RolloutBuffer
 from stable_baselines3.common.buffers import AdvRolloutBuffer
 from stable_baselines3.common.on_policy_algorithm import OnPolicyAlgorithm
@@ -162,11 +162,46 @@ class A3C_rarl(OnPolicyAlgorithm):
                 actions = actions.long().flatten()
 
             values, ctrl_log_prob, ctrl_entropy, dstb_log_prob, dstb_entropy = self.policy.evaluate_actions(rollout_data.observations, actions, dstb_actions)
+
+            if self.use_stackelberg is True: # need to get V^\pi (x0) and V_\omega (x0) from the scrambled data
+                if self.rollout_buffer.split_trajectories is True:
+                    # we need to discard the previous trajectory and set V_\omega (x_0) and V^\pi (x_0) to the correct values
+                    self.rollout_buffer.split_trajectories = False
+                    self.rollout_buffer.value_start = self.rollout_buffer.split_value_start
+                    self.rollout_buffer.return_start = self.rollout_buffer.split_return_start
+                    self.rollout_buffer.split_value_start = []
+                    self.rollout_buffer.split_return_start = []
+
+                if 1 in self.rollout_buffer.episode_starts:
+                    self.rollout_buffer.has_multi_start = False
+                    self.rollout_buffer.split_trajectories = False
+                    self.rollout_buffer.next_traj_begin = None
+                    if np.argwhere(self.rollout_buffer.episode_starts).shape[0] > 1:
+                        self.rollout_buffer.has_multi_start = True
+                    loc = np.argwhere(self.rollout_buffer.episode_starts)
+                    self.rollout_buffer.next_traj_begin = loc[0, 0]
+                    index_0 = np.argwhere(self.rollout_buffer.indices == loc[0, 0])
+                    if loc[0, 0] != 0:
+                        # this rollout buffer has the end of one trajectory and the start of another!
+                        # example: traj1, traj1, traj1_end, traj2_begin, traj2, traj2, etc etc
+                        self.rollout_buffer.split_trajectories = True
+
+                        self.rollout_buffer.split_value_start = values[index_0]
+                        self.rollout_buffer.split_return_start = rollout_data.returns[index_0]
+                    else:
+                        rollout_data.observations[0] - torch.tensor(self.rollout_buffer.observations[self.rollout_buffer.indices[0], :])
+                        with torch.no_grad():
+                            assert torch.allclose(torch.tensor(self.rollout_buffer.value_start), values[index_0])
+                            assert torch.allclose(torch.tensor(self.rollout_buffer.return_start), rollout_data.returns[index_0])
+                        self.rollout_buffer.value_start = values[index_0]
+                        self.rollout_buffer.return_start = rollout_data.returns[index_0]
             values = values.flatten()
             advantages = rollout_data.advantages
             if self.normalize_advantage:
                 advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8)
             if self.use_stackelberg is True:
+                self.use_stackelberg = False
+                '''
                 # Build h1 vector
                 h1_upper_pre = self.prep_grad_theta_omega_J(values, ctrl_log_prob)
                 h1_upper_grad_batched = autograd.grad(h1_upper_pre, self.policy.ctrl_optimizer.param_groups[0]['params'], create_graph=True, retain_graph=True)
@@ -178,7 +213,7 @@ class A3C_rarl(OnPolicyAlgorithm):
                 #TODO: jvp with h1
 
                 # Build h2 vector
-                h2_upper_pre = self.prep_grad_theta_L(advantages, ctrl_log_prob, rollout_data.returns, values)
+                h2_upper_pre = self.prep_grad_theta_L(advantages, ctrl_log_prob)
                 h2_upper_grad_batched = autograd.grad(h2_upper_pre, self.policy.ctrl_optimizer.param_groups[0]['params'], create_graph=True, retain_graph=True)
                 h2_upper = torch.hstack([t.flatten() for t in h2_upper_grad_batched])
                 h2_lower_pre = self.prep_grad_psi_L(advantages, dstb_log_prob, rollout_data.returns, values)
@@ -218,7 +253,7 @@ class A3C_rarl(OnPolicyAlgorithm):
                 #TODO: need to test if doing a grad omega on h1 and then multiply that to ivpH_H2 is the same as
                 #TODO: doing h1 times ivp_H_h2 and then doing a grad (basically whether grad is first or last)
                 imp = autograd.grad(h1_pre_omega, self.policy.value_optimizer.param_groups[0]['params'], ivp_H_h2, create_graph=True, retain_graph=True)
-
+                '''
             # Policy gradient loss
             policy_loss = -(advantages * ctrl_log_prob).mean()
             dstb_policy_loss = (advantages * dstb_log_prob).mean()
@@ -300,10 +335,15 @@ class A3C_rarl(OnPolicyAlgorithm):
 
     def prep_grad_theta_psi_J(self, advantages, ctrl_logp, dstb_logp):
         return (advantages * ctrl_logp * dstb_logp).mean()
-    def prep_grad_theta_L(self, advantages, ctrl_logp, returns, values):
+    def prep_grad_theta_L(self, advantages, ctrl_logp):
         # TODO: make sure returns is correct!
         if self.rollout_buffer.has_multi_start is False:
-            return 2 * (advantages * ctrl_logp).mean() * (self.rollout_buffer.return_start[0][0] - self.rollout_buffer.value_start[0][0])
+            if self.rollout_buffer.split_trajectories is True: # we have split trajectories in this buffer sample
+                # this is the harder case
+                grad_estimator = None
+            else: # all belong to one trajectory; this is the easier case
+                grad_estimator = 2 * (advantages * ctrl_logp).mean() * (self.rollout_buffer.return_start - self.rollout_buffer.value_start)
+            return grad_estimator
     def prep_grad_psi_L(self, advantages, dstb_logp, returns, values):
         return 2 * (advantages * dstb_logp).mean() * (returns[0] - values[0])
     def matrix_unbatch(self, to_be_unbatched, size1, size2=None):
