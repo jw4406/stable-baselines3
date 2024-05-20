@@ -309,15 +309,15 @@ class OnPolicyAlgorithm(BaseAlgorithm):
         callback.update_locals(locals())
 
         callback.on_rollout_end()
-
+        '''
         if rollout_buffer.split_trajectories is True:
             # we need to discard the previous trajectory and set V_\omega (x_0) and V^\pi (x_0) to the correct values
-            rollout_buffer.split_trajectories = False
-            rollout_buffer.value_start = rollout_buffer.split_value_start
-            rollout_buffer.return_start = rollout_buffer.split_return_start
-            rollout_buffer.split_value_start = []
-            rollout_buffer.split_return_start = []
-
+            rollout_buffer.sanity_split_trajectories = False
+            rollout_buffer.sanity_value_start = rollout_buffer.split_value_start
+            rollout_buffer.sanity_return_start = rollout_buffer.split_return_start
+            rollout_buffer.sanity_split_value_start = []
+            rollout_buffer.sanity_split_return_start = []
+        
 
         if 1 in rollout_buffer.episode_starts:
             rollout_buffer.has_multi_start = False
@@ -335,6 +335,8 @@ class OnPolicyAlgorithm(BaseAlgorithm):
 
                 rollout_buffer.split_value_start = rollout_buffer.values[loc[0, 0]]
                 rollout_buffer.split_return_start = rollout_buffer.returns[loc[0, 0]]
+                rollout_buffer.sanity_value_start = rollout_buffer.values[loc[0, 0]]
+                rollout_buffer.sanity_return_start = rollout_buffer.returns[loc[0, 0]]
             else:
                 rollout_buffer.value_start = rollout_buffer.values[loc[0, 0]]
                 rollout_buffer.return_start = rollout_buffer.returns[loc[0, 0]]
@@ -343,7 +345,7 @@ class OnPolicyAlgorithm(BaseAlgorithm):
             if rollout_buffer.has_multi_start is True:
                 assert len(rollout_buffer.value_start) > 1
                 assert (len(rollout_buffer.value_start) == len(rollout_buffer.return_start)) and (len(rollout_buffer.return_start) == len(rollout_buffer.traj_start_locations))
-
+        '''
         return True
 
     def train(self) -> None:

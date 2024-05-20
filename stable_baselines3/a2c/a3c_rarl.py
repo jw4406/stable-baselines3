@@ -162,11 +162,13 @@ class A3C_rarl(OnPolicyAlgorithm):
                 actions = actions.long().flatten()
 
             values, ctrl_log_prob, ctrl_entropy, dstb_log_prob, dstb_entropy = self.policy.evaluate_actions(rollout_data.observations, actions, dstb_actions)
-
+            self.use_stackelberg = True
             if self.use_stackelberg is True: # need to get V^\pi (x0) and V_\omega (x0) from the scrambled data
                 if self.rollout_buffer.split_trajectories is True:
                     # we need to discard the previous trajectory and set V_\omega (x_0) and V^\pi (x_0) to the correct values
                     self.rollout_buffer.split_trajectories = False
+                    #assert self.rollout_buffer.sanity_value_start == self.rollout_buffer.split_value_start
+                    #assert self.rollout_buffer.sanity_return_start == self.rollout_buffer.split_return_start
                     self.rollout_buffer.value_start = self.rollout_buffer.split_value_start
                     self.rollout_buffer.return_start = self.rollout_buffer.split_return_start
                     self.rollout_buffer.split_value_start = []
@@ -185,14 +187,16 @@ class A3C_rarl(OnPolicyAlgorithm):
                         # this rollout buffer has the end of one trajectory and the start of another!
                         # example: traj1, traj1, traj1_end, traj2_begin, traj2, traj2, etc etc
                         self.rollout_buffer.split_trajectories = True
-
+                        #with torch.no_grad():
+                        #    assert torch.allclose(torch.tensor(self.rollout_buffer.split_value_start), values[index_0])
+                        #    assert torch.allclose(torch.tensor(self.rollout_buffer.split_return_start), rollout_data.returns[index_0])
                         self.rollout_buffer.split_value_start = values[index_0]
                         self.rollout_buffer.split_return_start = rollout_data.returns[index_0]
                     else:
                         rollout_data.observations[0] - torch.tensor(self.rollout_buffer.observations[self.rollout_buffer.indices[0], :])
-                        with torch.no_grad():
-                            assert torch.allclose(torch.tensor(self.rollout_buffer.value_start), values[index_0])
-                            assert torch.allclose(torch.tensor(self.rollout_buffer.return_start), rollout_data.returns[index_0])
+                        #with torch.no_grad():
+                        #    assert torch.allclose(torch.tensor(self.rollout_buffer.value_start), values[index_0])
+                        #    assert torch.allclose(torch.tensor(self.rollout_buffer.return_start), rollout_data.returns[index_0])
                         self.rollout_buffer.value_start = values[index_0]
                         self.rollout_buffer.return_start = rollout_data.returns[index_0]
             values = values.flatten()
@@ -201,7 +205,7 @@ class A3C_rarl(OnPolicyAlgorithm):
                 advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8)
             if self.use_stackelberg is True:
                 self.use_stackelberg = False
-                '''
+
                 # Build h1 vector
                 h1_upper_pre = self.prep_grad_theta_omega_J(values, ctrl_log_prob)
                 h1_upper_grad_batched = autograd.grad(h1_upper_pre, self.policy.ctrl_optimizer.param_groups[0]['params'], create_graph=True, retain_graph=True)
@@ -253,7 +257,7 @@ class A3C_rarl(OnPolicyAlgorithm):
                 #TODO: need to test if doing a grad omega on h1 and then multiply that to ivpH_H2 is the same as
                 #TODO: doing h1 times ivp_H_h2 and then doing a grad (basically whether grad is first or last)
                 imp = autograd.grad(h1_pre_omega, self.policy.value_optimizer.param_groups[0]['params'], ivp_H_h2, create_graph=True, retain_graph=True)
-                '''
+
             # Policy gradient loss
             policy_loss = -(advantages * ctrl_log_prob).mean()
             dstb_policy_loss = (advantages * dstb_log_prob).mean()
