@@ -231,12 +231,12 @@ class A3C_rarl(OnPolicyAlgorithm):
                 # TODO: jvp with h1
 
                 # Build h2 vector
-                h2_upper_pre = self.prep_grad_theta_L(advantages, ctrl_log_prob)
+                h2_upper_pre = self.prep_grad_theta_L(advantages, ctrl_log_prob, x0_values)
                 h2_upper_grad_batched = autograd.grad(h2_upper_pre,
                                                       self.policy.ctrl_optimizer.param_groups[0]['params'],
                                                       create_graph=True, retain_graph=True)
                 h2_upper = torch.hstack([t.flatten() for t in h2_upper_grad_batched])
-                h2_lower_pre = self.prep_grad_psi_L(advantages, dstb_log_prob, rollout_data.returns, values)
+                h2_lower_pre = self.prep_grad_psi_L(advantages, dstb_log_prob, x0_values)
                 h2_lower_grad_batched = autograd.grad(h2_lower_pre,
                                                       self.policy.dstb_optimizer.param_groups[0]['params'],
                                                       create_graph=True, retain_graph=True)
@@ -373,17 +373,17 @@ class A3C_rarl(OnPolicyAlgorithm):
 
     def prep_grad_theta_psi_J(self, advantages, ctrl_logp, dstb_logp):
         return (advantages * ctrl_logp * dstb_logp).mean()
-    def prep_grad_theta_L(self, advantages, ctrl_logp):
+    def prep_grad_theta_L(self, advantages, ctrl_logp, x0_values):
         # TODO: make sure returns is correct!
 
         if self.rollout_buffer.split_trajectories is True: # we have split trajectories in this buffer sample
             # this is the harder case
             grad_estimator = None
         else: # all belong to one trajectory; this is the easier case
-            grad_estimator = 2 * (advantages * ctrl_logp).mean() * (self.rollout_buffer.return_start - self.rollout_buffer.value_start)
+            grad_estimator = 2 * (advantages * ctrl_logp).mean() * (self.rollout_buffer.return_start - x0_values)
         return grad_estimator
-    def prep_grad_psi_L(self, advantages, dstb_logp, returns, values):
-        return 2 * (advantages * dstb_logp).mean() * (self.rollout_buffer.return_start - self.rollout_buffer.value_start)
+    def prep_grad_psi_L(self, advantages, dstb_logp, x0_values):
+        return 2 * (advantages * dstb_logp).mean() * (self.rollout_buffer.return_start - x0_values)
     def matrix_unbatch(self, to_be_unbatched, size1, size2=None):
         if size2 is None:
             size2 = size1
