@@ -65,6 +65,9 @@ class BaseBuffer(ABC):
         self.traj_start_locations = []
         self.split_trajectories = False
         self.indices = []
+        self.value_x1 = []
+        self.rew_zero = []
+        self.obs_x0 = []
 
     @staticmethod
     def swap_and_flatten(arr: np.ndarray) -> np.ndarray:

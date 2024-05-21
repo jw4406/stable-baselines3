@@ -145,6 +145,8 @@ class A3C_rarl(OnPolicyAlgorithm):
         Update policy using the currently gathered
         rollout buffer (one gradient step over whole data).
         """
+
+
         # Switch to train mode (this affects batch norm / dropout)
         self.policy.set_training_mode(True)
 
@@ -162,7 +164,6 @@ class A3C_rarl(OnPolicyAlgorithm):
                 actions = actions.long().flatten()
 
             values, ctrl_log_prob, ctrl_entropy, dstb_log_prob, dstb_entropy = self.policy.evaluate_actions(rollout_data.observations, actions, dstb_actions)
-            self.use_stackelberg = True
             if self.use_stackelberg is True: # need to get V^\pi (x0) and V_\omega (x0) from the scrambled data
                 if self.rollout_buffer.split_trajectories is True:
                     # we need to discard the previous trajectory and set V_\omega (x_0) and V^\pi (x_0) to the correct values
@@ -183,6 +184,7 @@ class A3C_rarl(OnPolicyAlgorithm):
                     loc = np.argwhere(self.rollout_buffer.episode_starts)
                     self.rollout_buffer.next_traj_begin = loc[0, 0]
                     index_0 = np.argwhere(self.rollout_buffer.indices == loc[0, 0])
+                    index_1 = np.argwhere(self.rollout_buffer.indices == loc[0,0]+1)
                     if loc[0, 0] != 0:
                         # this rollout buffer has the end of one trajectory and the start of another!
                         # example: traj1, traj1, traj1_end, traj2_begin, traj2, traj2, etc etc
@@ -192,36 +194,52 @@ class A3C_rarl(OnPolicyAlgorithm):
                         #    assert torch.allclose(torch.tensor(self.rollout_buffer.split_return_start), rollout_data.returns[index_0])
                         self.rollout_buffer.split_value_start = values[index_0]
                         self.rollout_buffer.split_return_start = rollout_data.returns[index_0]
+                        self.rollout_buffer.rew_zero = self.rollout_buffer.rewards[loc[0,0]]
+                        self.rollout_buffer.value_x1 = values[index_1]
                     else:
-                        rollout_data.observations[0] - torch.tensor(self.rollout_buffer.observations[self.rollout_buffer.indices[0], :])
+                        #rollout_data.observations[0] - torch.tensor(self.rollout_buffer.observations[self.rollout_buffer.indices[0], :])
                         #with torch.no_grad():
                         #    assert torch.allclose(torch.tensor(self.rollout_buffer.value_start), values[index_0])
                         #    assert torch.allclose(torch.tensor(self.rollout_buffer.return_start), rollout_data.returns[index_0])
                         self.rollout_buffer.value_start = values[index_0]
                         self.rollout_buffer.return_start = rollout_data.returns[index_0]
+                        self.rollout_buffer.rew_zero = self.rollout_buffer.rewards[loc[0,0]]
+                        self.rollout_buffer.value_x1 = values[index_1]
+                        self.rollout_buffer.obs_x0 = rollout_data.observations[index_0]
+                        self.rollout_buffer.obs_x1 = rollout_data.observations[index_1]
             values = values.flatten()
             advantages = rollout_data.advantages
+            if self.use_stackelberg:
+                x0_values,  _, _, _, _ = self.policy.evaluate_actions(self.rollout_buffer.obs_x0, actions[0], dstb_actions[0])
+                x1_values, _, _, _, _ = self.policy.evaluate_actions(self.rollout_buffer.obs_x1, actions[0], dstb_actions[0])
             if self.normalize_advantage:
                 advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8)
-            if self.use_stackelberg is True:
-                self.use_stackelberg = False
 
+            if self.use_stackelberg is True:
                 # Build h1 vector
-                h1_upper_pre = self.prep_grad_theta_omega_J(values, ctrl_log_prob)
-                h1_upper_grad_batched = autograd.grad(h1_upper_pre, self.policy.ctrl_optimizer.param_groups[0]['params'], create_graph=True, retain_graph=True)
+                h1_upper_pre = self.prep_grad_theta_omega_J(x1_values, ctrl_log_prob)
+                h1_upper_grad_batched = autograd.grad(h1_upper_pre,
+                                                      self.policy.ctrl_optimizer.param_groups[0]['params'],
+                                                      create_graph=True, retain_graph=True)
                 h1_upper = torch.hstack([t.flatten() for t in h1_upper_grad_batched])
-                h1_lower_pre = self.prep_grad_psi_omega_J(values, dstb_log_prob)
-                h1_lower_grad_batched = autograd.grad(h1_lower_pre, self.policy.dstb_optimizer.param_groups[0]['params'], create_graph=True, retain_graph=True)
+                h1_lower_pre = self.prep_grad_psi_omega_J(x1_values, dstb_log_prob)
+                h1_lower_grad_batched = autograd.grad(h1_lower_pre,
+                                                      self.policy.dstb_optimizer.param_groups[0]['params'],
+                                                      create_graph=True, retain_graph=True)
                 h1_lower = torch.hstack([t.flatten() for t in h1_lower_grad_batched])
                 h1_pre_omega = torch.hstack((h1_upper, h1_lower))
-                #TODO: jvp with h1
+                # TODO: jvp with h1
 
                 # Build h2 vector
                 h2_upper_pre = self.prep_grad_theta_L(advantages, ctrl_log_prob)
-                h2_upper_grad_batched = autograd.grad(h2_upper_pre, self.policy.ctrl_optimizer.param_groups[0]['params'], create_graph=True, retain_graph=True)
+                h2_upper_grad_batched = autograd.grad(h2_upper_pre,
+                                                      self.policy.ctrl_optimizer.param_groups[0]['params'],
+                                                      create_graph=True, retain_graph=True)
                 h2_upper = torch.hstack([t.flatten() for t in h2_upper_grad_batched])
                 h2_lower_pre = self.prep_grad_psi_L(advantages, dstb_log_prob, rollout_data.returns, values)
-                h2_lower_grad_batched = autograd.grad(h2_lower_pre, self.policy.dstb_optimizer.param_groups[0]['params'], create_graph=True, retain_graph=True)
+                h2_lower_grad_batched = autograd.grad(h2_lower_pre,
+                                                      self.policy.dstb_optimizer.param_groups[0]['params'],
+                                                      create_graph=True, retain_graph=True)
                 h2_lower = torch.hstack([t.flatten() for t in h2_lower_grad_batched])
                 h2 = torch.hstack((h2_upper, h2_lower))
 
@@ -231,46 +249,59 @@ class A3C_rarl(OnPolicyAlgorithm):
                 # We assemble it block by block.
 
                 # Diagonal terms (Hessians) first
-                hess_theta_J_batched = autograd.grad(h1_upper, self.policy.ctrl_optimizer.param_groups[0]['params'], torch.eye(h1_upper.shape[0]), is_grads_batched=True, create_graph=True, retain_graph=True)
-                hess_psi_J_batched = autograd.grad(h1_lower, self.policy.dstb_optimizer.param_groups[0]['params'], torch.eye(h1_lower.shape[0]), is_grads_batched=True, create_graph=True, retain_graph=True)
+                hess_theta_J_batched = autograd.grad(h1_upper, self.policy.ctrl_optimizer.param_groups[0]['params'],
+                                                     torch.eye(h1_upper.shape[0], device=self.device),
+                                                     is_grads_batched=True, create_graph=True, retain_graph=True)
+                hess_psi_J_batched = autograd.grad(h1_lower, self.policy.dstb_optimizer.param_groups[0]['params'],
+                                                   torch.eye(h1_lower.shape[0], device=self.device),
+                                                   is_grads_batched=True, create_graph=True, retain_graph=True)
                 num_params = 0
                 for ele in self.policy.ctrl_optimizer.param_groups[0]['params']:
                     num_params = num_params + torch.numel(ele)
 
-                hess_theta_J = self.matrix_unbatch(hess_theta_J_batched, num_params) # this is the 1,1 position
-                hess_psi_J = self.matrix_unbatch(hess_psi_J_batched, num_params) # this is the 2,2 position
+                hess_theta_J = self.matrix_unbatch(hess_theta_J_batched, num_params)  # this is the 1,1 position
+                hess_psi_J = self.matrix_unbatch(hess_psi_J_batched, num_params)  # this is the 2,2 position
 
                 # Cross terms next. This is the harder part
                 cross_pre = self.prep_grad_theta_psi_J(advantages, ctrl_log_prob, dstb_log_prob)
-                grad_theta_J_batched = autograd.grad(cross_pre, self.policy.ctrl_optimizer.param_groups[0]['params'], create_graph=True, retain_graph=True)
+                grad_theta_J_batched = autograd.grad(cross_pre,
+                                                     self.policy.ctrl_optimizer.param_groups[0]['params'],
+                                                     create_graph=True, retain_graph=True)
                 grad_theta_J = torch.hstack([t.flatten() for t in grad_theta_J_batched])
-                grad_theta_psi_J_batched = autograd.grad(grad_theta_J, self.policy.dstb_optimizer.param_groups[0]['params'], torch.eye(num_params), is_grads_batched=True, create_graph=True, retain_graph=True)
+                grad_theta_psi_J_batched = autograd.grad(grad_theta_J,
+                                                         self.policy.dstb_optimizer.param_groups[0]['params'],
+                                                         torch.eye(num_params, device=self.device),
+                                                         is_grads_batched=True, create_graph=True,
+                                                         retain_graph=True)
 
-                grad_theta_psi_J = self.matrix_unbatch(grad_theta_psi_J_batched, num_params) # this is the 1,2 position
+                grad_theta_psi_J = self.matrix_unbatch(grad_theta_psi_J_batched,
+                                                       num_params)  # this is the 1,2 position
 
-                grad_theta_psi_J_t = torch.transpose(grad_theta_psi_J, 0,1) # this is the 2,1 position
+                grad_theta_psi_J_t = torch.transpose(grad_theta_psi_J, 0, 1)  # this is the 2,1 position
                 x, y = torch.cat((hess_theta_J, grad_theta_psi_J, grad_theta_psi_J_t, hess_psi_J),
                                  dim=1).t().chunk(2)
                 H = torch.cat((x, y), dim=1).t()
                 ivp_H_h2 = torch.linalg.solve(H, h2)
 
-                #TODO: need to test if doing a grad omega on h1 and then multiply that to ivpH_H2 is the same as
-                #TODO: doing h1 times ivp_H_h2 and then doing a grad (basically whether grad is first or last)
-                imp = autograd.grad(h1_pre_omega, self.policy.value_optimizer.param_groups[0]['params'], ivp_H_h2, create_graph=True, retain_graph=True)
+                # TODO: need to test if doing a grad omega on h1 and then multiply that to ivpH_H2 is the same as
+                # TODO: doing h1 times ivp_H_h2 and then doing a grad (basically whether grad is first or last)
+                imp = autograd.grad(h1_pre_omega, self.policy.value_optimizer.param_groups[0]['params'], ivp_H_h2,
+                                    create_graph=True, retain_graph=True)
+                # imp is the stackelberg part of the total derivative
 
             # Policy gradient loss
             policy_loss = -(advantages * ctrl_log_prob).mean()
             dstb_policy_loss = (advantages * dstb_log_prob).mean()
             # Value loss using the TD(gae_lambda) target
             value_loss = F.mse_loss(rollout_data.returns, values)
-            if self.use_stackelberg is True:
-                grad_omega_L_batched = autograd.grad(value_loss, self.policy.value_optimizer.param_groups[0]['params'])
+            #if self.use_stackelberg is True:
+            #    grad_omega_L_batched = autograd.grad(value_loss, self.policy.value_optimizer.param_groups[0]['params'])
 
-                #stackelberg_loss = grad_omega_L_batched - imp
-                stackelberg_loss = list()
-                assert len(grad_omega_L_batched) == len(imp)
-                for i in range(len(grad_omega_L_batched)):
-                    stackelberg_loss.append(grad_omega_L_batched[i] - imp[i])
+            #    #stackelberg_loss = grad_omega_L_batched - imp
+            #    stackelberg_loss = list()
+            #    assert len(grad_omega_L_batched) == len(imp)
+            #    for i in range(len(grad_omega_L_batched)):
+            #        stackelberg_loss.append(grad_omega_L_batched[i] - imp[i])
 
             # Entropy loss favor exploration
             if ctrl_entropy is None:
@@ -282,12 +313,17 @@ class A3C_rarl(OnPolicyAlgorithm):
             #loss = policy_loss + dstb_policy_loss + self.ent_coef * entropy_loss + self.vf_coef * value_loss
 
             # Optimization step
-            if not self.use_stackelberg:
-                self.policy.value_optimizer.zero_grad()
-                value_loss.backward()
-            if self.use_stackelberg:
+
+            self.policy.value_optimizer.zero_grad()
+            value_loss.backward()
+
+            if self.use_stackelberg is True:
                 for i in range(len(self.policy.value_optimizer.param_groups[0]['params'])):
-                    self.policy.value_optimizer.param_groups[0]['params'][i] = self.policy.value_optimizer.param_groups[0]['params'][i] - self.v_learning_rate * stackelberg_loss[i]
+                    self.policy.value_optimizer.param_groups[0]['params'][i].grad = self.policy.value_optimizer.param_groups[0]['params'][i].grad - imp[i]
+                del imp
+            #if self.use_stackelberg:
+            #    for i in range(len(self.policy.value_optimizer.param_groups[0]['params'])):
+            #        self.policy.value_optimizer.param_groups[0]['params'][i] = self.policy.value_optimizer.param_groups[0]['params'][i] - self.v_learning_rate * stackelberg_loss[i]
 
             self.policy.ctrl_optimizer.zero_grad()
             policy_loss.backward()
@@ -297,11 +333,9 @@ class A3C_rarl(OnPolicyAlgorithm):
             th.nn.utils.clip_grad_norm_(self.policy.parameters(), self.max_grad_norm)
             #th.nn.utils.clip_grad_norm_(self.policy.advantages.parameters(), self.max_grad_norm)
             #self.policy.optimizer.step()
-            if not self.use_stackelberg:
-                self.policy.value_optimizer.step()
+            self.policy.value_optimizer.step()
             self.policy.ctrl_optimizer.step()
             self.policy.dstb_optimizer.step()
-
 
         explained_var = explained_variance(self.rollout_buffer.values.flatten(), self.rollout_buffer.returns.flatten())
 
@@ -331,29 +365,29 @@ class A3C_rarl(OnPolicyAlgorithm):
             reset_num_timesteps=reset_num_timesteps,
             progress_bar=progress_bar,
         )
-    def prep_grad_theta_omega_J(self, values, ctrl_logp):
-        return ((self.rollout_buffer.rewards[0,0] + values[1]) * ctrl_logp).mean()
+    def prep_grad_theta_omega_J(self, x1_values, ctrl_logp):
+        return ((torch.tensor(self.rollout_buffer.rew_zero, device=self.device) + x1_values) * ctrl_logp).mean()
 
-    def prep_grad_psi_omega_J(self, values, dstb_logp):
-        return ((self.rollout_buffer.rewards[0, 0] + values[1]) * dstb_logp).mean()
+    def prep_grad_psi_omega_J(self, x1_values, dstb_logp):
+        return ((torch.tensor(self.rollout_buffer.rew_zero, device=self.device) + x1_values) * dstb_logp).mean()
 
     def prep_grad_theta_psi_J(self, advantages, ctrl_logp, dstb_logp):
         return (advantages * ctrl_logp * dstb_logp).mean()
     def prep_grad_theta_L(self, advantages, ctrl_logp):
         # TODO: make sure returns is correct!
-        if self.rollout_buffer.has_multi_start is False:
-            if self.rollout_buffer.split_trajectories is True: # we have split trajectories in this buffer sample
-                # this is the harder case
-                grad_estimator = None
-            else: # all belong to one trajectory; this is the easier case
-                grad_estimator = 2 * (advantages * ctrl_logp).mean() * (self.rollout_buffer.return_start - self.rollout_buffer.value_start)
-            return grad_estimator
+
+        if self.rollout_buffer.split_trajectories is True: # we have split trajectories in this buffer sample
+            # this is the harder case
+            grad_estimator = None
+        else: # all belong to one trajectory; this is the easier case
+            grad_estimator = 2 * (advantages * ctrl_logp).mean() * (self.rollout_buffer.return_start - self.rollout_buffer.value_start)
+        return grad_estimator
     def prep_grad_psi_L(self, advantages, dstb_logp, returns, values):
-        return 2 * (advantages * dstb_logp).mean() * (returns[0] - values[0])
+        return 2 * (advantages * dstb_logp).mean() * (self.rollout_buffer.return_start - self.rollout_buffer.value_start)
     def matrix_unbatch(self, to_be_unbatched, size1, size2=None):
         if size2 is None:
             size2 = size1
-        unbatched = torch.zeros((size1,size2))
+        unbatched = torch.zeros((size1,size2), device=self.device)
         for jac_row_count in range(size1):
             curr = 0
             for count in range(len(to_be_unbatched)):
