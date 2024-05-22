@@ -572,17 +572,24 @@ class AdvRolloutBuffer(BaseBuffer):
             gae_lambda: float = 1,
             gamma: float = 0.99,
             n_envs: int = 1,
+            dstb_action_space=None
     ):
         super().__init__(buffer_size, observation_space, action_space, device, n_envs=n_envs)
         self.gae_lambda = gae_lambda
         self.gamma = gamma
         self.generator_ready = False
+
+        if dstb_action_space is not None:
+            self.dstb_action_dim = dstb_action_space.shape[0]
+        else:
+            self.dstb_action_dim = self.action_dim
+
         self.reset()
 
     def reset(self) -> None:
         self.observations = np.zeros((self.buffer_size, self.n_envs, *self.obs_shape), dtype=np.float32)
         self.actions = np.zeros((self.buffer_size, self.n_envs, self.action_dim), dtype=np.float32)
-        self.dstb_actions = np.zeros((self.buffer_size, self.n_envs, self.action_dim), dtype=np.float32)
+        self.dstb_actions = np.zeros((self.buffer_size, self.n_envs, self.dstb_action_dim), dtype=np.float32)
         self.rewards = np.zeros((self.buffer_size, self.n_envs), dtype=np.float32)
         self.returns = np.zeros((self.buffer_size, self.n_envs), dtype=np.float32)
         self.episode_starts = np.zeros((self.buffer_size, self.n_envs), dtype=np.float32)
@@ -664,7 +671,7 @@ class AdvRolloutBuffer(BaseBuffer):
 
         # Reshape to handle multi-dim and discrete action spaces, see GH #970 #1392
         action = action.reshape((self.n_envs, self.action_dim))
-        dstb_action = dstb_action.reshape((self.n_envs, self.action_dim))
+        dstb_action = dstb_action.reshape((self.n_envs, self.dstb_action_dim))
         self.observations[self.pos] = np.array(obs)
         self.actions[self.pos] = np.array(action)
         self.dstb_actions[self.pos] = np.array(dstb_action)

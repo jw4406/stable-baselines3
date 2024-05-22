@@ -6,7 +6,8 @@ from stable_baselines3.a2c.my_walker2d_v4 import my_Walker2dEnv
 from stable_baselines3.a2c.my_mountain_car_continuous import my_Continuous_MountainCarEnv
 from stable_baselines3 import SAC
 from stable_baselines3.common.callbacks import EvalCallback, StopTrainingOnRewardThreshold
-
+from gymnasium.spaces import Box
+import numpy as np
 register(
     # unique identifier for the env `name-version`
     id="my_pendulum",
@@ -38,28 +39,29 @@ import stable_baselines3.a2c
 from stable_baselines3 import A2C
 from stable_baselines3 import A3C_rarl
 
-#env = gym.make("my_pendulum", render_mode='human')
-env = gym.make("my_walker2d_v4")
 #env = gym.make("my_pendulum")
-model = A2C("MlpPolicy", env, verbose=1, normalize_advantage=False,gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,n_steps=8,vf_coef=.4,gamma=.9,learning_rate=1e-4,use_sde=True,use_rms_prop=True)
+env = gym.make("my_mountain_car_continuous", render_mode='human')
+#env = gym.make("my_pendulum")
+#model = A2C("MlpPolicy", env, verbose=1, normalize_advantage=False,gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,n_steps=8,vf_coef=.4,gamma=.9,learning_rate=1e-4,use_sde=True,use_rms_prop=True)
 #model = A2C("MlpPolicy", env=env, verbose=1, normalize_advantage=True, n_steps=100, use_sde=True, use_rms_prop=False)
 #model = A3C_rarl("MlPAACPolicy", use_stackelberg=True, env=env, verbose=2, normalize_advantage=False,gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,n_steps=8,vf_coef=.4,gamma=.9,v_learning_rate=1e-4, c_learning_rate=5e-4,d_learning_rate=1e-3, use_sde=True,use_rms_prop=False)
-#model = A3C_rarl("MlPAACPolicy", use_stackelberg=True,env=env, verbose=1, normalize_advantage=True, n_steps=8, v_learning_rate=1e-4, c_learning_rate=5e-3,d_learning_rate=1e-2, use_sde=True, use_rms_prop=False)
+#model = A3C_rarl("MlPAACPolicy", dstb_action_space=Box(low=-.2, high=.2, shape=(2,), dtype=np.float64), use_stackelberg=True,env=env, verbose=1, normalize_advantage=True, n_steps=8, v_learning_rate=1e-4, c_learning_rate=5e-3,d_learning_rate=1e-2, use_sde=True, use_rms_prop=False)
+model = A3C_rarl("MlPAACPolicy", use_stackelberg=False,env=env, verbose=1, normalize_advantage=True, n_steps=100, v_learning_rate=5e-4, c_learning_rate=1e-3,d_learning_rate=5e-3, use_sde=True, use_rms_prop=False)
 
-#model = A3C_rarl.load("warm_8.zip", env=env)
+model = A3C_rarl.load("stac_mcc_ws.zip", env=env)
 #model = A2C.load("mcc_0.zip", env=env)
 #model = A3C_rarl.load("adv_pendulum_split_0.zip", env=env)
 #model.v_learning_rate = 1e-6
 #model.c_learning_rate = 1e-7
 #model.d_learning_rate = 6e-7
 #model.n_steps = 7
-#model.use_stackelberg=True
-callback_on_best = StopTrainingOnRewardThreshold(reward_threshold=-200, verbose=1)
+model.use_stackelberg=True
+callback_on_best = StopTrainingOnRewardThreshold(reward_threshold=60, verbose=1)
 eval_callback = EvalCallback(env, callback_on_new_best=callback_on_best, verbose=1)
-model.learn(total_timesteps=5_000_000, callback=eval_callback)
+#model.learn(total_timesteps=5_000_000, callback=eval_callback)
 #callback_on_best = StopTrainingOnRewardThreshold(reward_threshold=-200, verbose=1)
 #eval_callback = EvalCallback(env, callback_on_new_best=callback_on_best, verbose=1)
-model.save("full_pend_slow.zip")
+model.save("stac_mcc_ws.zip")
 vec_env = model.get_env()
 obs = vec_env.reset()
 for i in range(10000):

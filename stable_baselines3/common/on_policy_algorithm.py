@@ -122,7 +122,8 @@ class OnPolicyAlgorithm(BaseAlgorithm):
                 self.rollout_buffer_class = RolloutBuffer if self.adversarial is False else AdvRolloutBuffer
                 #self.rollout_buffer_class = AdvRolloutBuffer
 
-
+        if len(self.policy_kwargs) > 0:
+            self.rollout_buffer_kwargs.update(self.policy_kwargs)
         self.rollout_buffer = self.rollout_buffer_class(
             self.n_steps,
             self.observation_space,  # type: ignore[arg-type]
@@ -197,7 +198,7 @@ class OnPolicyAlgorithm(BaseAlgorithm):
                         # as we are sampling from an unbounded Gaussian distribution
                         #print(actions)
                         clipped_actions = np.clip(actions, self.action_space.low, self.action_space.high)
-                        clipped_dstb_actions = np.clip(clipped_dstb_actions, self.action_space.low, self.action_space.high)
+                        clipped_dstb_actions = np.clip(clipped_dstb_actions, self.dstb_action_space.low, self.dstb_action_space.high)
                 new_obs, rewards, dones, infos = env.step([[clipped_actions, clipped_dstb_actions, n_steps]])
 
                 self.num_timesteps += env.num_envs

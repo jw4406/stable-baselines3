@@ -94,7 +94,8 @@ class A3C_rarl(OnPolicyAlgorithm):
         device: Union[th.device, str] = "auto",
         _init_setup_model: bool = True,
         adversarial=True,
-        use_stackelberg=False
+        use_stackelberg=False,
+        dstb_action_space: spaces.Space = None
     ):
         super().__init__(
             policy,
@@ -131,6 +132,11 @@ class A3C_rarl(OnPolicyAlgorithm):
         self.v_learning_rate = v_learning_rate
         self.d_learning_rate = d_learning_rate
         self.learning_rate = [v_learning_rate, c_learning_rate, d_learning_rate]
+        self.policy_kwargs['dstb_action_space'] = dstb_action_space
+        if dstb_action_space is None:
+            self.dstb_action_space = env.action_space
+        else:
+            self.dstb_action_space = dstb_action_space
         # Update optimizer inside the policy if we want to use RMSProp
         # (original implementation) rather than Adam
         if use_rms_prop and "optimizer_class" not in self.policy_kwargs:
@@ -255,12 +261,15 @@ class A3C_rarl(OnPolicyAlgorithm):
                 hess_psi_J_batched = autograd.grad(h1_lower, self.policy.dstb_optimizer.param_groups[0]['params'],
                                                    torch.eye(h1_lower.shape[0], device=self.device),
                                                    is_grads_batched=True, create_graph=True, retain_graph=True)
-                num_params = 0
+                num_ctrl_params = 0
                 for ele in self.policy.ctrl_optimizer.param_groups[0]['params']:
-                    num_params = num_params + torch.numel(ele)
+                    num_ctrl_params = num_ctrl_params + torch.numel(ele)
+                num_dstb_params = 0
+                for ele in self.policy.dstb_optimizer.param_groups[0]['params']:
+                    num_dstb_params = num_dstb_params + torch.numel(ele)
 
-                hess_theta_J = self.matrix_unbatch(hess_theta_J_batched, num_params)  # this is the 1,1 position
-                hess_psi_J = self.matrix_unbatch(hess_psi_J_batched, num_params)  # this is the 2,2 position
+                hess_theta_J = self.matrix_unbatch(hess_theta_J_batched, num_ctrl_params)  # this is the 1,1 position
+                hess_psi_J = self.matrix_unbatch(hess_psi_J_batched, num_dstb_params)  # this is the 2,2 position
 
                 # Cross terms next. This is the harder part
                 cross_pre = self.prep_grad_theta_psi_J(advantages, ctrl_log_prob, dstb_log_prob)
@@ -270,17 +279,20 @@ class A3C_rarl(OnPolicyAlgorithm):
                 grad_theta_J = torch.hstack([t.flatten() for t in grad_theta_J_batched])
                 grad_theta_psi_J_batched = autograd.grad(grad_theta_J,
                                                          self.policy.dstb_optimizer.param_groups[0]['params'],
-                                                         torch.eye(num_params, device=self.device),
+                                                         torch.eye(num_ctrl_params, device=self.device),
                                                          is_grads_batched=True, create_graph=True,
                                                          retain_graph=True)
 
                 grad_theta_psi_J = self.matrix_unbatch(grad_theta_psi_J_batched,
-                                                       num_params)  # this is the 1,2 position
+                                                       num_ctrl_params, size2=num_dstb_params)  # this is the 1,2 position
 
                 grad_theta_psi_J_t = torch.transpose(grad_theta_psi_J, 0, 1)  # this is the 2,1 position
-                x, y = torch.cat((hess_theta_J, grad_theta_psi_J, grad_theta_psi_J_t, hess_psi_J),
-                                 dim=1).t().chunk(2)
-                H = torch.cat((x, y), dim=1).t()
+                upper_rows = torch.cat((hess_theta_J, grad_theta_psi_J), dim=1)
+                lower_rows = torch.cat((grad_theta_psi_J_t, hess_psi_J), dim=1)
+                #x, y = torch.cat((hess_theta_J, grad_theta_psi_J, grad_theta_psi_J_t, hess_psi_J),
+                #                 dim=1).t().chunk(2)
+                #H = torch.cat((x, y), dim=1).t()
+                H = torch.cat((upper_rows, lower_rows), dim=0)
                 ivp_H_h2 = torch.linalg.solve(H, h2)
 
                 # TODO: need to test if doing a grad omega on h1 and then multiply that to ivpH_H2 is the same as
@@ -378,12 +390,27 @@ class A3C_rarl(OnPolicyAlgorithm):
 
         if self.rollout_buffer.split_trajectories is True: # we have split trajectories in this buffer sample
             # this is the harder case
-            grad_estimator = None
+            index_list = np.zeros(self.rollout_buffer.next_traj_begin)
+            for i in range(len(self.rollout_buffer.indices)):
+                if self.rollout_buffer.indices[i] < self.rollout_buffer.next_traj_begin:
+                    index_list[self.rollout_buffer.indices[i]] = int(i)
+            grad_estimator = 2 * (advantages[index_list] * ctrl_logp[index_list]).mean() * (self.rollout_buffer.return_start - x0_values)
         else: # all belong to one trajectory; this is the easier case
             grad_estimator = 2 * (advantages * ctrl_logp).mean() * (self.rollout_buffer.return_start - x0_values)
         return grad_estimator
     def prep_grad_psi_L(self, advantages, dstb_logp, x0_values):
-        return 2 * (advantages * dstb_logp).mean() * (self.rollout_buffer.return_start - x0_values)
+        if self.rollout_buffer.split_trajectories is True:  # we have split trajectories in this buffer sample
+            index_list = np.zeros(self.rollout_buffer.next_traj_begin)
+            for i in range(len(self.rollout_buffer.indices)):
+                if self.rollout_buffer.indices[i] < self.rollout_buffer.next_traj_begin:
+                    index_list[self.rollout_buffer.indices[i]] = int(i)
+
+            grad_estimator = 2 * (advantages[index_list] * dstb_logp[index_list]).mean() * (
+                        self.rollout_buffer.return_start - x0_values)
+        else:
+
+            grad_estimator = 2 * (advantages * dstb_logp).mean() * (self.rollout_buffer.return_start - x0_values)
+        return grad_estimator
     def matrix_unbatch(self, to_be_unbatched, size1, size2=None):
         if size2 is None:
             size2 = size1

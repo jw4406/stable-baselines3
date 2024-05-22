@@ -120,7 +120,22 @@ class my_Walker2dEnv(MujocoEnv, utils.EzPickle):
         observation = np.concatenate((position, velocity)).ravel()
         return observation
 
-    def step(self, action):
+    def step(self, joint_action):
+        ctrl_action = joint_action[0].flatten()
+        if ctrl_action[2] > .8:
+            ctrl_action[2] = .8
+        elif ctrl_action[2] < -.8:
+            ctrl_action[2] = -.8
+        if ctrl_action[5] > .8:
+            ctrl_action[5] = .8
+        elif ctrl_action[5] < -.8:
+            ctrl_action[5] = -.8
+        dstb_action = joint_action[1].flatten()
+        expanded_dstb_action = np.zeros(np.shape(ctrl_action))
+        expanded_dstb_action[2] = dstb_action[0]
+        expanded_dstb_action[5] = dstb_action[1]
+        action = ctrl_action + expanded_dstb_action
+        action
         x_position_before = self.data.qpos[0]
         self.do_simulation(action, self.frame_skip)
         x_position_after = self.data.qpos[0]

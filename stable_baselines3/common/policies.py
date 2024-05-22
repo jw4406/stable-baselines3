@@ -888,7 +888,8 @@ class ActorActorCriticPolicy(BasePolicy):
         normalize_images: bool = True,
         optimizer_class: Type[th.optim.Optimizer] = th.optim.Adam,
         optimizer_kwargs: Optional[Dict[str, Any]] = None,
-        adversarial=True
+        adversarial=True,
+        dstb_action_space: spaces.Space = None
     ):
         if optimizer_kwargs is None:
             optimizer_kwargs = {}
@@ -956,8 +957,11 @@ class ActorActorCriticPolicy(BasePolicy):
 
         # Action distribution
         self.action_dist = make_proba_distribution(action_space, use_sde=use_sde, dist_kwargs=dist_kwargs)
-
-        self.dstb_action_dist = make_proba_distribution(action_space, use_sde=use_sde, dist_kwargs=dist_kwargs)
+        self.dstb_action_space = dstb_action_space
+        if dstb_action_space is None:
+            self.dstb_action_space = action_space
+            dstb_action_space = action_space
+        self.dstb_action_dist = make_proba_distribution(dstb_action_space, use_sde=use_sde, dist_kwargs=dist_kwargs)
 
         self._build(lr_schedule)
 
@@ -1112,7 +1116,7 @@ class ActorActorCriticPolicy(BasePolicy):
         dstb_actions = dstb_distribution.get_actions(deterministic=deterministic)
         dstb_log_prob = dstb_distribution.log_prob(dstb_actions)
         ctrl_actions = ctrl_actions.reshape((-1, *self.action_space.shape))  # type: ignore[misc]
-        dstb_actions = dstb_actions.reshape((-1, *self.action_space.shape))
+        dstb_actions = dstb_actions.reshape((-1, *self.dstb_action_space.shape))
         return ctrl_actions, ctrl_log_prob, values, dstb_actions, dstb_log_prob
 
     def extract_features(  # type: ignore[override]
