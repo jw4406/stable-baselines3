@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
 
 import gymnasium as gym
 import numpy as np
+import matplotlib.pyplot as plt
 
 from stable_baselines3.common.logger import Logger
 
@@ -407,6 +408,7 @@ class EvalCallback(EventCallback):
         # For computing success rate
         self._is_success_buffer: List[bool] = []
         self.evaluations_successes: List[List[bool]] = []
+        self.episode_returns: List[float] = []
 
     def _init_callback(self) -> None:
         # Does not work in some corner cases, where the wrapper is not the same
@@ -492,7 +494,10 @@ class EvalCallback(EventCallback):
             mean_reward, std_reward = np.mean(episode_rewards), np.std(episode_rewards)
             mean_ep_length, std_ep_length = np.mean(episode_lengths), np.std(episode_lengths)
             self.last_mean_reward = float(mean_reward)
-
+            self.episode_returns.append(mean_reward)
+            plt.plot(range(len(self.episode_returns)), self.episode_returns, "bd-")
+            plt.savefig("grad_step_%d_return.png" % len(self.episode_returns))
+            plt.close()
             if self.verbose >= 1:
                 print(f"Eval num_timesteps={self.num_timesteps}, " f"episode_reward={mean_reward:.2f} +/- {std_reward:.2f}")
                 print(f"Episode length: {mean_ep_length:.2f} +/- {std_ep_length:.2f}")
