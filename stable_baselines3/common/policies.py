@@ -875,7 +875,7 @@ class ActorActorCriticPolicy(BasePolicy):
         action_space: spaces.Space,
         lr_schedule: Schedule,
         net_arch: Optional[Union[List[int], Dict[str, List[int]]]] = None,
-        activation_fn: Type[nn.Module] = nn.Tanh,
+        activation_fn: Type[nn.Module] = nn.LeakyReLU,
         ortho_init: bool = True,
         use_sde: bool = False,
         log_std_init: float = 0.0,
@@ -923,7 +923,7 @@ class ActorActorCriticPolicy(BasePolicy):
             if features_extractor_class == NatureCNN:
                 net_arch = []
             else:
-                net_arch = dict(pi=[8,8], vf=[64,64])
+                net_arch = dict(pi=[128,128], vf=[512,512])
 
         self.net_arch = net_arch
         self.activation_fn = activation_fn
@@ -1273,7 +1273,7 @@ class ActorActorCriticPolicy(BasePolicy):
             actions, dstb_actions = self._predict(obs_tensor, deterministic=deterministic)
         # Convert to numpy, and reshape to the original action shape
         actions = actions.cpu().numpy().reshape((-1, *self.action_space.shape))  # type: ignore[misc]
-        dstb_actions = dstb_actions.cpu().numpy().reshape((-1, *self.action_space.shape))
+        dstb_actions = dstb_actions.cpu().numpy().reshape((-1, *self.dstb_action_space.shape))
         if isinstance(self.action_space, spaces.Box):
             if self.squash_output:
                 # Rescale to proper domain when using squashing
@@ -1283,7 +1283,7 @@ class ActorActorCriticPolicy(BasePolicy):
                 # Actions could be on arbitrary scale, so clip the actions to avoid
                 # out of bound error (e.g. if sampling from a Gaussian distribution)
                 actions = np.clip(actions, self.action_space.low, self.action_space.high)  # type: ignore[assignment, arg-type]
-                dstb_actions = np.clip(dstb_actions, self.action_space.low, self.action_space.high)
+                dstb_actions = np.clip(dstb_actions, self.dstb_action_space.low, self.dstb_action_space.high)
         # Remove batch dimension if needed
         if not vectorized_env:
             assert isinstance(actions, np.ndarray)

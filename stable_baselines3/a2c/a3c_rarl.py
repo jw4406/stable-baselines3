@@ -189,6 +189,7 @@ class A3C_rarl(OnPolicyAlgorithm):
                     self.rollout_buffer.next_traj_begin = None
                     if np.argwhere(self.rollout_buffer.episode_starts).shape[0] > 1:
                         self.rollout_buffer.has_multi_start = True
+                        raise ValueError("bro what the fuck")
                     loc = np.argwhere(self.rollout_buffer.episode_starts)
                     self.rollout_buffer.next_traj_begin = loc[0, 0]
                     index_0 = np.argwhere(self.rollout_buffer.indices == loc[0, 0])
@@ -291,12 +292,14 @@ class A3C_rarl(OnPolicyAlgorithm):
                                                        num_ctrl_params, size2=num_dstb_params)  # this is the 1,2 position
 
                 grad_theta_psi_J_t = torch.transpose(grad_theta_psi_J, 0, 1)  # this is the 2,1 position
-                #upper_rows = torch.cat((hess_theta_J, grad_theta_psi_J), dim=1)
-                #lower_rows = torch.cat((grad_theta_psi_J_t, hess_psi_J), dim=1)
-                x, y = torch.cat((hess_theta_J, grad_theta_psi_J, grad_theta_psi_J_t, hess_psi_J),
-                                 dim=1).t().chunk(2)
-                H = torch.cat((x, y), dim=1).t()
-                #H = torch.cat((upper_rows, lower_rows), dim=0)
+                upper_rows = torch.cat((hess_theta_J, grad_theta_psi_J), dim=1)
+                lower_rows = torch.cat((grad_theta_psi_J_t, hess_psi_J), dim=1)
+                #x, y = torch.cat((hess_theta_J, grad_theta_psi_J, grad_theta_psi_J_t, hess_psi_J),
+                #                 dim=1).t().chunk(2)
+                #H = torch.cat((x, y), dim=1).t()
+                H = torch.cat((upper_rows, lower_rows), dim=0)
+                #assert torch.allclose(H, H_test)
+                #assert torch.equal(H, H_test)
                 ivp_H_h2 = torch.linalg.solve(H, h2)
 
                 # TODO: need to test if doing a grad omega on h1 and then multiply that to ivpH_H2 is the same as
