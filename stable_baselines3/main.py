@@ -4,6 +4,7 @@ from gymnasium.envs.registration import register
 from stable_baselines3.a2c.my_pendulum import my_PendulumEnv
 from stable_baselines3.a2c.my_walker2d_v4 import my_Walker2dEnv
 from stable_baselines3.a2c.my_mountain_car_continuous import my_Continuous_MountainCarEnv
+from stable_baselines3.a2c.my_half_cheetah import my_HalfCheetahEnv
 from stable_baselines3 import SAC
 from stable_baselines3.common.callbacks import EvalCallback, StopTrainingOnRewardThreshold, CheckpointCallback, CallbackList
 from gymnasium.spaces import Box
@@ -34,13 +35,21 @@ register(# unique identifier for the env `name-version`
     max_episode_steps=999,
 )
 
+register(# unique identifier for the env `name-version`
+    id="my_half_cheetah",
+    # path to the class for creating the env
+    # Note: entry_point also accept a class as input (and not only a string)
+    entry_point=my_HalfCheetahEnv,
+    # Max number of steps per episode, using a `TimeLimitWrapper`
+    max_episode_steps=1000,
+)
 
 import stable_baselines3.a2c
 from stable_baselines3 import A2C
 from stable_baselines3 import A3C_rarl
 
 #env = gym.make("my_pendulum")
-env = gym.make("my_walker2d_v4", terminate_when_unhealthy=False)
+env = gym.make("my_half_cheetah")
 #env = gym.make("my_pendulum")
 #model = A2C("MlpPolicy", env, verbose=1, normalize_advantage=False,gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,n_steps=8,vf_coef=.4,gamma=.9,learning_rate=1e-4,use_sde=True,use_rms_prop=True)
 #model = A2C("MlpPolicy", env=env, verbose=1, normalize_advantage=True, n_steps=100, use_sde=True, use_rms_prop=False)
@@ -56,7 +65,7 @@ model = A3C_rarl("MlPAACPolicy", dstb_action_space=Box(-.7, .7, (2,), dtype=np.f
 #model.d_learning_rate = 6e-7
 #model.n_steps = 7
 #model.use_stackelberg=True
-callback_on_best = StopTrainingOnRewardThreshold(reward_threshold=1500, verbose=1)
+callback_on_best = StopTrainingOnRewardThreshold(reward_threshold=5000, verbose=1)
 eval_callback = EvalCallback(env, callback_on_new_best=callback_on_best, verbose=1)
 checkpoint_callback = CheckpointCallback(
   save_freq=10,
