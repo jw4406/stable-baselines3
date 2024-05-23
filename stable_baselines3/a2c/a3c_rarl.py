@@ -180,6 +180,8 @@ class A3C_rarl(OnPolicyAlgorithm):
                     self.rollout_buffer.return_start = self.rollout_buffer.split_return_start
                     self.rollout_buffer.split_value_start = []
                     self.rollout_buffer.split_return_start = []
+                    self.rollout_buffer.obs_x0 = self.rollout_buffer.split_obs_x0
+                    self.rollout_buffer.obs_x1 = self.rollout_buffer.split_obs_x1
 
                 if 1 in self.rollout_buffer.episode_starts:
                     self.rollout_buffer.has_multi_start = False
@@ -202,6 +204,8 @@ class A3C_rarl(OnPolicyAlgorithm):
                         self.rollout_buffer.split_return_start = rollout_data.returns[index_0]
                         self.rollout_buffer.rew_zero = self.rollout_buffer.rewards[loc[0,0]]
                         self.rollout_buffer.value_x1 = values[index_1]
+                        self.rollout_buffer.split_obs_x0 = rollout_data.observations[index_0]
+                        self.rollout_buffer.split_obs_x1 = rollout_data.observations[index_1]
                     else:
                         #rollout_data.observations[0] - torch.tensor(self.rollout_buffer.observations[self.rollout_buffer.indices[0], :])
                         #with torch.no_grad():
@@ -287,12 +291,12 @@ class A3C_rarl(OnPolicyAlgorithm):
                                                        num_ctrl_params, size2=num_dstb_params)  # this is the 1,2 position
 
                 grad_theta_psi_J_t = torch.transpose(grad_theta_psi_J, 0, 1)  # this is the 2,1 position
-                upper_rows = torch.cat((hess_theta_J, grad_theta_psi_J), dim=1)
-                lower_rows = torch.cat((grad_theta_psi_J_t, hess_psi_J), dim=1)
-                #x, y = torch.cat((hess_theta_J, grad_theta_psi_J, grad_theta_psi_J_t, hess_psi_J),
-                #                 dim=1).t().chunk(2)
-                #H = torch.cat((x, y), dim=1).t()
-                H = torch.cat((upper_rows, lower_rows), dim=0)
+                #upper_rows = torch.cat((hess_theta_J, grad_theta_psi_J), dim=1)
+                #lower_rows = torch.cat((grad_theta_psi_J_t, hess_psi_J), dim=1)
+                x, y = torch.cat((hess_theta_J, grad_theta_psi_J, grad_theta_psi_J_t, hess_psi_J),
+                                 dim=1).t().chunk(2)
+                H = torch.cat((x, y), dim=1).t()
+                #H = torch.cat((upper_rows, lower_rows), dim=0)
                 ivp_H_h2 = torch.linalg.solve(H, h2)
 
                 # TODO: need to test if doing a grad omega on h1 and then multiply that to ivpH_H2 is the same as
