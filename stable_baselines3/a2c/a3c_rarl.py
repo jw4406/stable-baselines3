@@ -189,7 +189,7 @@ class A3C_rarl(OnPolicyAlgorithm):
                     self.rollout_buffer.next_traj_begin = None
                     if np.argwhere(self.rollout_buffer.episode_starts).shape[0] > 1:
                         self.rollout_buffer.has_multi_start = True
-                        raise ValueError("bro what the fuck")
+                        #raise ValueError("bro what the fuck")
                     loc = np.argwhere(self.rollout_buffer.episode_starts)
                     self.rollout_buffer.next_traj_begin = loc[0, 0]
                     index_0 = np.argwhere(self.rollout_buffer.indices == loc[0, 0])
@@ -298,6 +298,8 @@ class A3C_rarl(OnPolicyAlgorithm):
                 #                 dim=1).t().chunk(2)
                 #H = torch.cat((x, y), dim=1).t()
                 H = torch.cat((upper_rows, lower_rows), dim=0)
+                reg_param = 0
+                H = H + torch.eye(H.shape[0], device=self.device) * reg_param
                 #assert torch.allclose(H, H_test)
                 #assert torch.equal(H, H_test)
                 ivp_H_h2 = torch.linalg.solve(H, h2)

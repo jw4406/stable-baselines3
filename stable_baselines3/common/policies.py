@@ -923,7 +923,7 @@ class ActorActorCriticPolicy(BasePolicy):
             if features_extractor_class == NatureCNN:
                 net_arch = []
             else:
-                net_arch = dict(pi=[16,16], vf=[64,64])
+                net_arch = dict(pi=[8,8], vf=[64,64])
 
         self.net_arch = net_arch
         self.activation_fn = activation_fn
