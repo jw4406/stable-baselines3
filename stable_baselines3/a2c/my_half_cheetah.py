@@ -73,14 +73,14 @@ class my_HalfCheetahEnv(MujocoEnv, utils.EzPickle):
 
     def step(self, joint_action):
         ctrl_action = joint_action[0].flatten()
-        # if ctrl_action[2] > .8:
-        #    ctrl_action[2] = .8
-        # elif ctrl_action[2] < -.8:
-        #    ctrl_action[2] = -.8
-        # if ctrl_action[5] > .8:
-        #    ctrl_action[5] = .8
-        # elif ctrl_action[5] < -.8:
-        #    ctrl_action[5] = -.8
+        if ctrl_action[2] > .7:
+           ctrl_action[2] = .7
+        elif ctrl_action[2] < -.7:
+           ctrl_action[2] = -.7
+        if ctrl_action[5] > .7:
+           ctrl_action[5] = .7
+        elif ctrl_action[5] < -.7:
+           ctrl_action[5] = -.7
         dstb_action = joint_action[1].flatten()
         expanded_dstb_action = np.zeros(np.shape(ctrl_action))
         expanded_dstb_action[2] = dstb_action[0]
