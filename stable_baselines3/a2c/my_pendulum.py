@@ -205,9 +205,7 @@ class my_PendulumEnv(gym.Env):
             pygame.init()
             if self.render_mode == "human":
                 pygame.display.init()
-                self.screen = pygame.display.set_mode(
-                    (self.screen_dim, self.screen_dim)
-                )
+                self.screen = pygame.display.set_mode((self.screen_dim, self.screen_dim))
             else:  # mode in "rgb_array"
                 self.screen = pygame.Surface((self.screen_dim, self.screen_dim))
         if self.clock is None:
@@ -233,38 +231,40 @@ class my_PendulumEnv(gym.Env):
         gfxdraw.filled_polygon(self.surf, transformed_coords, (204, 77, 77))
 
         gfxdraw.aacircle(self.surf, offset, offset, int(rod_width / 2), (204, 77, 77))
-        gfxdraw.filled_circle(
-            self.surf, offset, offset, int(rod_width / 2), (204, 77, 77)
-        )
+        gfxdraw.filled_circle(self.surf, offset, offset, int(rod_width / 2), (204, 77, 77))
 
         rod_end = (rod_length, 0)
         rod_end = pygame.math.Vector2(rod_end).rotate_rad(self.state[0] + np.pi / 2)
         rod_end = (int(rod_end[0] + offset), int(rod_end[1] + offset))
-        gfxdraw.aacircle(
-            self.surf, rod_end[0], rod_end[1], int(rod_width / 2), (204, 77, 77)
-        )
-        gfxdraw.filled_circle(
-            self.surf, rod_end[0], rod_end[1], int(rod_width / 2), (204, 77, 77)
-        )
+        gfxdraw.aacircle(self.surf, rod_end[0], rod_end[1], int(rod_width / 2), (204, 77, 77))
+        gfxdraw.filled_circle(self.surf, rod_end[0], rod_end[1], int(rod_width / 2), (204, 77, 77))
 
-        fname = path.join(path.dirname(__file__), "assets/clockwise.png")
-        img = pygame.image.load(fname)
-        if self.last_u is not None and self.last_d is not None:
-            scale_img = pygame.transform.smoothscale(
-                img,
-                (scale * np.abs(self.last_u + self.last_d) / 2, scale * np.abs(self.last_u + self.last_d) / 2),
-            )
-            is_flip = bool(self.last_u > 0)
-            scale_img = pygame.transform.flip(scale_img, is_flip, True)
-            self.surf.blit(
-                scale_img,
-                (
-                    offset - scale_img.get_rect().centerx,
-                    offset - scale_img.get_rect().centery,
-                ),
-            )
+        # Plot control torque arrow
+        fname_control = path.join(path.dirname(__file__), "assets/clockwise.png")
+        img_control = pygame.image.load(fname_control)
+        if self.last_u is not None:
+            img_size_control = int(scale * np.abs(self.last_u) / 2)
+            scale_img_control = pygame.transform.smoothscale(img_control, (img_size_control, img_size_control))
+            if self.last_u < 0:
+                scale_img_control = pygame.transform.flip(scale_img_control, True, False)
+            self.surf.blit(scale_img_control, (
+                offset - scale_img_control.get_rect().centerx,
+                offset - scale_img_control.get_rect().centery
+            ))
 
-        # drawing axle
+        # Plot disturbance torque arrow
+        fname_disturbance = path.join(path.dirname(__file__), "assets/dstb_arrow.png")
+        img_disturbance = pygame.image.load(fname_disturbance)
+        if self.last_d is not None:
+            img_size_disturbance = int(scale * np.abs(self.last_d) / 2)
+            scale_img_disturbance = pygame.transform.smoothscale(img_disturbance, (img_size_disturbance, img_size_disturbance))
+            if self.last_d < 0:
+                scale_img_disturbance = pygame.transform.flip(scale_img_disturbance, True, False)
+            self.surf.blit(scale_img_disturbance, (
+                offset - scale_img_disturbance.get_rect().centerx,
+                offset - scale_img_disturbance.get_rect().centery
+            ))
+
         gfxdraw.aacircle(self.surf, offset, offset, int(0.05 * scale), (0, 0, 0))
         gfxdraw.filled_circle(self.surf, offset, offset, int(0.05 * scale), (0, 0, 0))
 
@@ -274,8 +274,7 @@ class my_PendulumEnv(gym.Env):
             pygame.event.pump()
             self.clock.tick(self.metadata["render_fps"])
             pygame.display.flip()
-
-        else:  # mode == "rgb_array":
+        else:  # mode == "rgb_array"
             return np.transpose(
                 np.array(pygame.surfarray.pixels3d(self.screen)), axes=(1, 0, 2)
             )

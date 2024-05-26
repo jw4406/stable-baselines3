@@ -48,16 +48,16 @@ import stable_baselines3.a2c
 from stable_baselines3 import A2C
 from stable_baselines3 import A3C_rarl
 
-#env = gym.make("my_pendulum")
 env = gym.make("my_half_cheetah")
+#env = gym.make("my_half_cheetah")
 #env = gym.make("my_pendulum")
 #model = A2C("MlpPolicy", env, verbose=1, normalize_advantage=False,gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,n_steps=8,vf_coef=.4,gamma=.9,learning_rate=1e-4,use_sde=True,use_rms_prop=True)
 #model = A2C("MlpPolicy", env=env, verbose=1, normalize_advantage=True, n_steps=100, use_sde=True, use_rms_prop=False)
-model = A3C_rarl("MlPAACPolicy", dstb_action_space=Box(-.3, .3, (2,), dtype=np.float32), use_stackelberg=True, env=env, verbose=2, n_steps=8, normalize_advantage=False,gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,vf_coef=.4,gamma=.99,v_learning_rate=5e-4, c_learning_rate=1e-3,d_learning_rate=5e-3, use_sde=True,use_rms_prop=False)
+model = A3C_rarl("MlPAACPolicy", dstb_action_space=Box(-.3, .3, (2,), dtype=np.float32), use_stackelberg=True, env=env, verbose=2, n_steps=16, normalize_advantage=False,gae_lambda=.92,ent_coef=0.0,max_grad_norm=.5,vf_coef=.4,gamma=.98,v_learning_rate=6e-4, c_learning_rate=1.2e-3,d_learning_rate=6e-3, use_sde=True,use_rms_prop=False)
 #model = A3C_rarl("MlPAACPolicy", use_stackelberg=True,env=env, verbose=1, normalize_advantage=False, n_steps=8, v_learning_rate=5e-4, c_learning_rate=1e-3,d_learning_rate=5e-3, use_sde=True, use_rms_prop=False)
 #model = A3C_rarl("MlPAACPolicy", use_stackelberg=True,env=env, verbose=1, normalize_advantage=True, n_steps=100, v_learning_rate=5e-4, c_learning_rate=1e-3,d_learning_rate=5e-3, use_sde=True, use_rms_prop=False)
 
-#model = A3C_rarl.load("stac_pend_sanity.zip", env=env)
+#model = A3C_rarl.load("./logs/stac_pend_model_820000_steps.zip", env=env)
 #model = A2C.load("mcc_0.zip", env=env)
 #model = A3C_rarl.load("adv_pendulum_split_0.zip", env=env)
 #model.v_learning_rate = 1e-6
@@ -65,7 +65,7 @@ model = A3C_rarl("MlPAACPolicy", dstb_action_space=Box(-.3, .3, (2,), dtype=np.f
 #model.d_learning_rate = 6e-7
 #model.n_steps = 7
 #model.use_stackelberg=True
-callback_on_best = StopTrainingOnRewardThreshold(reward_threshold=5000, verbose=1)
+callback_on_best = StopTrainingOnRewardThreshold(reward_threshold=2500, verbose=1)
 eval_callback = EvalCallback(env, callback_on_new_best=callback_on_best, verbose=1)
 checkpoint_callback = CheckpointCallback(
   save_freq=10,
