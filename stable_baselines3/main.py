@@ -66,7 +66,7 @@ model = A3C_rarl("MlPAACPolicy", dstb_action_space=Box(-.3, .3, (2,), dtype=np.f
 #model.n_steps = 7
 #model.use_stackelberg=True
 callback_on_best = StopTrainingOnRewardThreshold(reward_threshold=2500, verbose=1)
-eval_callback = EvalCallback(env, callback_on_new_best=callback_on_best, verbose=1)
+eval_callback = EvalCallback(env, callback_on_new_best=callback_on_best, verbose=1, eval_freq=16)
 checkpoint_callback = CheckpointCallback(
   save_freq=10,
   save_path="./logs/",

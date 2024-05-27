@@ -9,7 +9,7 @@ from stable_baselines3.common.buffers import AdvRolloutBuffer
 from stable_baselines3.common.on_policy_algorithm import OnPolicyAlgorithm
 from stable_baselines3.common.policies import ActorCriticCnnPolicy, ActorCriticPolicy, BasePolicy, MultiInputActorCriticPolicy, ActorActorCriticPolicy
 from stable_baselines3.common.type_aliases import GymEnv, MaybeCallback, Schedule
-from stable_baselines3.common.utils import explained_qvariance
+from stable_baselines3.common.utils import explained_variance
 import torch
 import torch.autograd as autograd
 SelfA2C = TypeVar("SelfA2C", bound="A2C")
