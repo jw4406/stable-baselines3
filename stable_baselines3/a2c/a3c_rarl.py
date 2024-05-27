@@ -309,7 +309,6 @@ class A3C_rarl(OnPolicyAlgorithm):
                 imp = autograd.grad(h1_pre_omega, self.policy.value_optimizer.param_groups[0]['params'], ivp_H_h2,
                                     create_graph=True, retain_graph=True)
                 # imp is the stackelberg part of the total derivative
-
             # Policy gradient loss
             policy_loss = -(advantages * ctrl_log_prob).mean()
             dstb_policy_loss = (advantages * dstb_log_prob).mean()
