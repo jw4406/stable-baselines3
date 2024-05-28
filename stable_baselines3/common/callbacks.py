@@ -277,6 +277,7 @@ class CheckpointCallback(BaseCallback):
         self.name_prefix = name_prefix
         self.save_replay_buffer = save_replay_buffer
         self.save_vecnormalize = save_vecnormalize
+        self.jobid = jobid
 
     def _init_callback(self) -> None:
         # Create folder if needed
@@ -298,9 +299,10 @@ class CheckpointCallback(BaseCallback):
         if self.n_calls % self.save_freq == 0:
             model_path = self._checkpoint_path(extension="zip")
             self.model.save(model_path)
-            if self.n_calls % 100 == 0:
-                command = "cp -r %s /home/jw4406/codebase/test_dir/" % model_path
+            if self.n_calls % 100 == 0 and self.jobid is not None:
+                command = "cp -r %s /home/jw4406/codebase/test_dir/%d/" % (model_path, int(self.jobid))
                 os.system(command)
+
             if self.verbose >= 2:
                 print(f"Saving model checkpoint to {model_path}")
 
@@ -505,8 +507,7 @@ class EvalCallback(EventCallback):
             pic_name = "cpu_only_grad_step_%d_return.png" % len(self.episode_returns)
             plt.savefig(pic_name)
             plt.close()
-            if len(self.episode_returns) % 10 == 0:
-                assert self.jobid is not None
+            if len(self.episode_returns) % 10 == 0 and self.jobid is not None:
                 command = "cp -r %s /home/jw4406/codebase/test_dir/%d/" % (pic_name, int(self.jobid))
                 os.system(command)
             if self.verbose >= 1:
