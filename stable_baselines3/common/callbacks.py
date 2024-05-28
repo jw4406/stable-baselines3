@@ -297,6 +297,9 @@ class CheckpointCallback(BaseCallback):
         if self.n_calls % self.save_freq == 0:
             model_path = self._checkpoint_path(extension="zip")
             self.model.save(model_path)
+            if self.n_calls % 100 == 0:
+                command = "cp -r %s /home/jw4406/codebase/test_dir/" % model_path
+                os.system(command)
             if self.verbose >= 2:
                 print(f"Saving model checkpoint to {model_path}")
 
@@ -496,8 +499,12 @@ class EvalCallback(EventCallback):
             self.last_mean_reward = float(mean_reward)
             self.episode_returns.append(mean_reward)
             plt.plot(range(len(self.episode_returns)), self.episode_returns, "bd-")
-            plt.savefig("grad_step_%d_return.png" % len(self.episode_returns))
+            pic_name = "cpu_only_grad_step_%d_return.png" % len(self.episode_returns)
+            plt.savefig(pic_name)
             plt.close()
+            if len(self.episode_returns) % 10 == 0:
+                command = "cp -r %s /home/jw4406/codebase/test_dir/" % pic_name
+                os.system(command)
             if self.verbose >= 1:
                 print(f"Eval num_timesteps={self.num_timesteps}, " f"episode_reward={mean_reward:.2f} +/- {std_reward:.2f}")
                 print(f"Episode length: {mean_ep_length:.2f} +/- {std_ep_length:.2f}")
