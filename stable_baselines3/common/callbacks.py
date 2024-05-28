@@ -269,6 +269,7 @@ class CheckpointCallback(BaseCallback):
         save_replay_buffer: bool = False,
         save_vecnormalize: bool = False,
         verbose: int = 0,
+        jobid=None
     ):
         super().__init__(verbose)
         self.save_freq = save_freq
@@ -413,6 +414,7 @@ class EvalCallback(EventCallback):
         self._is_success_buffer: List[bool] = []
         self.evaluations_successes: List[List[bool]] = []
         self.episode_returns: List[float] = []
+        self.jobid = jobid
 
     def _init_callback(self) -> None:
         # Does not work in some corner cases, where the wrapper is not the same
@@ -504,7 +506,8 @@ class EvalCallback(EventCallback):
             plt.savefig(pic_name)
             plt.close()
             if len(self.episode_returns) % 10 == 0:
-                command = "cp -r %s /home/jw4406/codebase/test_dir/" % pic_name
+                assert self.jobid is not None
+                command = "cp -r %s /home/jw4406/codebase/test_dir/%d/" % (pic_name, int(self.jobid))
                 os.system(command)
             if self.verbose >= 1:
                 print(f"Eval num_timesteps={self.num_timesteps}, " f"episode_reward={mean_reward:.2f} +/- {std_reward:.2f}")

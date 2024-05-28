@@ -11,7 +11,10 @@ import argparse
 from gymnasium.spaces import Box
 import numpy as np
 parser = argparse.ArgumentParser()
-parser.add_argument('jobid')
+parser.add_argument('--jobid', default=None, required=False)
+#parser.set_defaults(jobid=0)
+
+args = parser.parse_args()
 register(
     # unique identifier for the env `name-version`
     id="my_pendulum",
@@ -71,13 +74,14 @@ model = A3C_rarl("MlPAACPolicy", dstb_action_space=Box(-.3, .3, (2,), dtype=np.f
 #model.n_steps = 7
 #model.use_stackelberg=True
 callback_on_best = StopTrainingOnRewardThreshold(reward_threshold=1000, verbose=1)
-eval_callback = EvalCallback(env, callback_on_new_best=callback_on_best, verbose=1, eval_freq=16)
+eval_callback = EvalCallback(env, callback_on_new_best=callback_on_best, verbose=1, eval_freq=16, jobid=args.jobid)
 checkpoint_callback = CheckpointCallback(
   save_freq=10,
   save_path="./logs/",
   name_prefix="cpu_cheetah_model",
   save_replay_buffer=True,
   save_vecnormalize=True,
+  jobid=args.jobid
 )
 callback_list = CallbackList([eval_callback, checkpoint_callback])
 model.learn(total_timesteps=10_000_000, callback=callback_list)
