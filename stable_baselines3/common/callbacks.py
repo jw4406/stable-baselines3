@@ -299,8 +299,8 @@ class CheckpointCallback(BaseCallback):
         if self.n_calls % self.save_freq == 0:
             model_path = self._checkpoint_path(extension="zip")
             self.model.save(model_path)
-            if self.n_calls % 100 == 0 and self.jobid is not None:
-                command = "cp -r %s /home/jw4406/codebase/test_dir/%d/" % (model_path, int(self.jobid))
+            if self.n_calls % 1000 == 0 and self.jobid is not None:
+                command = "cp -r %s /u/jw4406/run_models/%d/" % (model_path, int(self.jobid))
                 os.system(command)
 
             if self.verbose >= 2:
@@ -508,7 +508,7 @@ class EvalCallback(EventCallback):
             plt.savefig(pic_name)
             plt.close()
             if len(self.episode_returns) % 10 == 0 and self.jobid is not None:
-                command = "cp -r %s /home/jw4406/codebase/test_dir/%d/" % (pic_name, int(self.jobid))
+                command = "cp -r %s /u/jw4406/run_pics/%d" % (pic_name, int(self.jobid))
                 os.system(command)
             if self.verbose >= 1:
                 print(f"Eval num_timesteps={self.num_timesteps}, " f"episode_reward={mean_reward:.2f} +/- {std_reward:.2f}")
