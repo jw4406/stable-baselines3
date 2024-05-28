@@ -299,7 +299,7 @@ class A3C_rarl(OnPolicyAlgorithm):
                 #H = torch.cat((x, y), dim=1).t()
                 H = torch.cat((upper_rows, lower_rows), dim=0)
                 reg_param = 0
-                H = H + torch.eye(H.shape[0], device=self.device) * reg_param
+                #H = H + torch.eye(H.shape[0], device=self.device) * reg_param
                 #assert torch.allclose(H, H_test)
                 #assert torch.equal(H, H_test)
                 ivp_H_h2 = torch.linalg.solve(H, h2)
