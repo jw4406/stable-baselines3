@@ -379,6 +379,7 @@ class EvalCallback(EventCallback):
         render: bool = False,
         verbose: int = 1,
         warn: bool = True,
+        jobid = None
     ):
         super().__init__(callback_after_eval, verbose=verbose)
 
