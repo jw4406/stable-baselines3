@@ -281,7 +281,7 @@ class SACPolicy(BasePolicy):
         self.actor = self.make_actor()
         self.actor.optimizer = self.optimizer_class(
             self.actor.parameters(),
-            lr=lr_schedule(1),  # type: ignore[call-arg]
+            lr=lr_schedule[0](1),  # type: ignore[call-arg]
             **self.optimizer_kwargs,
         )
 
@@ -302,7 +302,7 @@ class SACPolicy(BasePolicy):
 
         self.critic.optimizer = self.optimizer_class(
             critic_parameters,
-            lr=lr_schedule(1),  # type: ignore[call-arg]
+            lr=lr_schedule[0](1),  # type: ignore[call-arg]
             **self.optimizer_kwargs,
         )
 

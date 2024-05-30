@@ -28,6 +28,18 @@ if TYPE_CHECKING:
     from stable_baselines3.common import base_class
 
 
+def tsplot(ax, means, stds,**kw):
+    means = np.array(means)
+    stds = np.array(stds)
+    x = np.arange(len(means))
+    #est = np.mean(data, axis=0)
+    #sd = np.std(data, axis=0)
+    cis = (means - stds, means + stds)
+    ax.fill_between(x,cis[0],cis[1],alpha=0.2, **kw)
+    ax.plot(x,means,**kw)
+    ax.margins(x=0)
+
+
 class BaseCallback(ABC):
     """
     Base class for callback.
@@ -417,6 +429,7 @@ class EvalCallback(EventCallback):
         self.evaluations_successes: List[List[bool]] = []
         self.episode_returns: List[float] = []
         self.jobid = jobid
+        self.last_std = []
 
     def _init_callback(self) -> None:
         # Does not work in some corner cases, where the wrapper is not the same
@@ -503,8 +516,10 @@ class EvalCallback(EventCallback):
             mean_ep_length, std_ep_length = np.mean(episode_lengths), np.std(episode_lengths)
             self.last_mean_reward = float(mean_reward)
             self.episode_returns.append(mean_reward)
-            plt.plot(range(len(self.episode_returns)), self.episode_returns, "bd-")
-            pic_name = "cpu_only_grad_step_%d_return.png" % len(self.episode_returns)
+            self.last_std.append(std_reward)
+            fig, ax = plt.subplots(1,1)
+            tsplot(ax, self.episode_returns, self.last_std)
+            pic_name = "shaded_boi_%d.png" % len(self.episode_returns)
             plt.savefig(pic_name)
             plt.close()
             if len(self.episode_returns) % 10 == 0 and self.jobid is not None:
