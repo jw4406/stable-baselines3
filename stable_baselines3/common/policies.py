@@ -365,27 +365,53 @@ class BasePolicy(BaseModel, ABC):
             )
 
         obs_tensor, vectorized_env = self.obs_to_tensor(observation)
+        if hasattr(self, "smart") and self.smart is True:
+            with th.no_grad():
+                actions, dstb_actions = self._predict(obs_tensor, deterministic=deterministic)
+            # Convert to numpy, and reshape to the original action shape
+            actions = actions.cpu().numpy().reshape((-1, *self.action_space.shape))  # type: ignore[misc]
+            dstb_actions = dstb_actions.cpu().numpy().reshape((-1, *self.dstb_action_space.shape))
+            if isinstance(self.action_space, spaces.Box):
+                if self.squash_output:
+                    # Rescale to proper domain when using squashing
+                    actions = self.unscale_action(actions)  # type: ignore[assignment, arg-type]
+                    dstb_actions = self.unscale_dstb_action(dstb_actions)
+                else:
+                    # Actions could be on arbitrary scale, so clip the actions to avoid
+                    # out of bound error (e.g. if sampling from a Gaussian distribution)
+                    actions = np.clip(actions, self.action_space.low,
+                                      self.action_space.high)  # type: ignore[assignment, arg-type]
+                    dstb_actions = np.clip(dstb_actions, self.dstb_action_space.low, self.dstb_action_space.high)
 
-        with th.no_grad():
-            actions = self._predict(obs_tensor, deterministic=deterministic)
-        # Convert to numpy, and reshape to the original action shape
-        actions = actions.cpu().numpy().reshape((-1, *self.action_space.shape))  # type: ignore[misc]
+            # Remove batch dimension if needed
+            if not vectorized_env:
+                assert isinstance(actions, np.ndarray)
+                assert isinstance(dstb_actions, np.ndarray)
+                actions = actions.squeeze(axis=0)
+                dstb_actions = dstb_actions.squeeze(axis=0)
 
-        if isinstance(self.action_space, spaces.Box):
-            if self.squash_output:
-                # Rescale to proper domain when using squashing
-                actions = self.unscale_action(actions)  # type: ignore[assignment, arg-type]
-            else:
-                # Actions could be on arbitrary scale, so clip the actions to avoid
-                # out of bound error (e.g. if sampling from a Gaussian distribution)
-                actions = np.clip(actions, self.action_space.low, self.action_space.high)  # type: ignore[assignment, arg-type]
+            return actions, dstb_actions, state  # type: ignore[return-value]
+        else:
+            with th.no_grad():
+                actions = self._predict(obs_tensor, deterministic=deterministic)
+            # Convert to numpy, and reshape to the original action shape
+            actions = actions.cpu().numpy().reshape((-1, *self.action_space.shape))  # type: ignore[misc]
 
-        # Remove batch dimension if needed
-        if not vectorized_env:
-            assert isinstance(actions, np.ndarray)
-            actions = actions.squeeze(axis=0)
+            if isinstance(self.action_space, spaces.Box):
+                if self.squash_output:
+                    # Rescale to proper domain when using squashing
+                    actions = self.unscale_action(actions)  # type: ignore[assignment, arg-type]
+                else:
+                    # Actions could be on arbitrary scale, so clip the actions to avoid
+                    # out of bound error (e.g. if sampling from a Gaussian distribution)
+                    actions = np.clip(actions, self.action_space.low, self.action_space.high)  # type: ignore[assignment, arg-type]
 
-        return actions, state  # type: ignore[return-value]
+            # Remove batch dimension if needed
+            if not vectorized_env:
+                assert isinstance(actions, np.ndarray)
+                actions = actions.squeeze(axis=0)
+
+            return actions, state  # type: ignore[return-value]
 
     def scale_action(self, action: np.ndarray) -> np.ndarray:
         """
@@ -401,6 +427,20 @@ class BasePolicy(BaseModel, ABC):
         low, high = self.action_space.low, self.action_space.high
         return 2.0 * ((action - low) / (high - low)) - 1.0
 
+    def scale_dstb_action(self, action: np.ndarray) -> np.ndarray:
+        """
+        Rescale the action from [low, high] to [-1, 1]
+        (no need for symmetric action space)
+
+        :param action: Action to scale
+        :return: Scaled action
+        """
+        assert isinstance(
+            self.dstb_action_space, spaces.Box
+        ), f"Trying to scale an action using an action space that is not a Box(): {self.action_space}"
+        low, high = self.dstb_action_space.low, self.dstb_action_space.high
+        return 2.0 * ((action - low) / (high - low)) - 1.0
+
     def unscale_action(self, scaled_action: np.ndarray) -> np.ndarray:
         """
         Rescale the action from [-1, 1] to [low, high]
@@ -413,7 +453,18 @@ class BasePolicy(BaseModel, ABC):
         ), f"Trying to unscale an action using an action space that is not a Box(): {self.action_space}"
         low, high = self.action_space.low, self.action_space.high
         return low + (0.5 * (scaled_action + 1.0) * (high - low))
+    def unscale_dstb_action(self, scaled_action: np.ndarray) -> np.ndarray:
+        """
+        Rescale the action from [-1, 1] to [low, high]
+        (no need for symmetric action space)
 
+        :param scaled_action: Action to un-scale
+        """
+        assert isinstance(
+            self.dstb_action_space, spaces.Box
+        ), f"Trying to unscale an action using an action space that is not a Box(): {self.dstb_action_space}"
+        low, high = self.dstb_action_space.low, self.dstb_action_space.high
+        return low + (0.5 * (scaled_action + 1.0) * (high - low))
 
 class ActorCriticPolicy(BasePolicy):
     """

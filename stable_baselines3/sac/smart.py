@@ -11,7 +11,7 @@ from stable_baselines3.common.off_policy_algorithm import OffPolicyAlgorithm
 from stable_baselines3.common.policies import BasePolicy, ContinuousCritic
 from stable_baselines3.common.type_aliases import GymEnv, MaybeCallback, Schedule
 from stable_baselines3.common.utils import get_parameters_by_name, polyak_update
-from stable_baselines3.sac.policies import Actor, CnnPolicy, MlpPolicy, MultiInputPolicy, SACPolicy
+from stable_baselines3.sac.policies import Actor, CnnPolicy, MlpPolicy, MultiInputPolicy, SACPolicy, MlPAACPolicy
 
 SelfSAC = TypeVar("SelfSAC", bound="SAC")
 
@@ -81,6 +81,7 @@ class SMART(OffPolicyAlgorithm):
         "MlpPolicy": MlpPolicy,
         "CnnPolicy": CnnPolicy,
         "MultiInputPolicy": MultiInputPolicy,
+        "MlPAACPolicy": MlPAACPolicy
     }
     policy: SACPolicy
     actor: Actor
@@ -91,7 +92,9 @@ class SMART(OffPolicyAlgorithm):
         self,
         policy: Union[str, Type[SACPolicy]],
         env: Union[GymEnv, str],
-        learning_rate: Union[float, Schedule] = 3e-4,
+        c_learning_rate: Union[float, Schedule] = 1e-4,
+        d_learning_rate: Union[float, Schedule] = 7e-4,
+        v_learning_rate: Union[float, Schedule] = 7e-4,
         buffer_size: int = 1_000_000,  # 1e6
         learning_starts: int = 100,
         batch_size: int = 256,
@@ -116,12 +119,13 @@ class SMART(OffPolicyAlgorithm):
         seed: Optional[int] = None,
         device: Union[th.device, str] = "auto",
         _init_setup_model: bool = True,
-        use_stackelberg: bool = True
+        use_stackelberg: bool = True,
+        dstb_action_space: spaces.Space = None
     ):
         super().__init__(
             policy,
             env,
-            learning_rate,
+            v_learning_rate,
             buffer_size,
             learning_starts,
             batch_size,
@@ -153,6 +157,16 @@ class SMART(OffPolicyAlgorithm):
         self.ent_coef = ent_coef
         self.target_update_interval = target_update_interval
         self.ent_coef_optimizer: Optional[th.optim.Adam] = None
+        self.c_learning_rate = c_learning_rate
+        self.v_learning_rate = v_learning_rate
+        self.d_learning_rate = d_learning_rate
+        self.learning_rate = [v_learning_rate, c_learning_rate, d_learning_rate]
+        self.smart = True
+        self.policy_kwargs['dstb_action_space'] = dstb_action_space
+        if dstb_action_space is None:
+            self.dstb_action_space = env.action_space
+        else:
+            self.dstb_action_space = dstb_action_space
 
         if _init_setup_model:
             self._setup_model()
@@ -194,6 +208,7 @@ class SMART(OffPolicyAlgorithm):
 
     def _create_aliases(self) -> None:
         self.actor = self.policy.actor
+        self.dstb_actor = self.policy.dstb_actor
         self.critic = self.policy.critic
         self.critic_target = self.policy.critic_target
 
@@ -201,7 +216,7 @@ class SMART(OffPolicyAlgorithm):
         # Switch to train mode (this affects batch norm / dropout)
         self.policy.set_training_mode(True)
         # Update optimizers learning rate
-        optimizers = [self.actor.optimizer, self.critic.optimizer]
+        optimizers = [self.critic.optimizer, self.actor.optimizer, self.dstb_actor.optimizer]
         if self.ent_coef_optimizer is not None:
             optimizers += [self.ent_coef_optimizer]
 
@@ -218,10 +233,13 @@ class SMART(OffPolicyAlgorithm):
             # We need to sample because `log_std` may have changed between two gradient steps
             if self.use_sde:
                 self.actor.reset_noise()
+                self.dstb_actor.reset_noise()
 
             # Action by the current actor for the sampled state
             actions_pi, log_prob = self.actor.action_log_prob(replay_data.observations)
+            dstb_actions_pi, dstb_log_prob = self.dstb_actor.action_log_prob(replay_data.observations)
             log_prob = log_prob.reshape(-1, 1)
+            dstb_log_prob = dstb_log_prob.reshape(-1, 1)
 
             ent_coef_loss = None
             if self.ent_coef_optimizer is not None and self.log_ent_coef is not None:
@@ -246,6 +264,7 @@ class SMART(OffPolicyAlgorithm):
             with th.no_grad():
                 # Select action according to policy
                 next_actions, next_log_prob = self.actor.action_log_prob(replay_data.next_observations)
+                next_dstb_actions, next_dstb_log_prob = self.dstb_actor.action_log_prob(replay_data.next_observations)
                 # Compute the next Q values: min over all critics targets
                 next_q_values = th.cat(self.critic_target(replay_data.next_observations, next_actions), dim=1)
                 next_q_values, _ = th.min(next_q_values, dim=1, keepdim=True)
