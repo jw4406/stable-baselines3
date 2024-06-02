@@ -273,12 +273,22 @@ class BaseAlgorithm(ABC):
     def _setup_lr_schedule(self) -> None:
         """Transform to callable if needed."""
         try:
-            self.lr_schedule = np.zeros((len(self.learning_rate),), dtype=object)
+            if hasattr(self, 'ent_coef') and self.ent_coef == 'auto':
+                self.lr_schedule = np.zeros((len(self.learning_rate)+1,), dtype=object)
+                temp = list(self.learning_rate)
+                temp.append(self.learning_rate[0])
+                self.learning_rate = np.asarray(temp)
+            else:
+
+                self.lr_schedule = np.zeros((len(self.learning_rate),), dtype=object)
         except TypeError:
-            self.lr_schedule = np.zeros((len([self.learning_rate]),), dtype=object)
+            if hasattr(self, 'ent_coef') and self.ent_coef == 'auto':
+                self.lr_schedule = np.zeros((len([self.learning_rate])+1,), dtype=object)
+            else:
+                self.lr_schedule = np.zeros((len([self.learning_rate]),), dtype=object)
             assert len([self.learning_rate]) == 1
             self.learning_rate = [self.learning_rate]
-        for i in range(len(self.learning_rate)):
+        for i in range(len(self.lr_schedule)):
             self.lr_schedule[i] = get_schedule_fn(self.learning_rate[i])
 
     def _update_current_progress_remaining(self, num_timesteps: int, total_timesteps: int) -> None:

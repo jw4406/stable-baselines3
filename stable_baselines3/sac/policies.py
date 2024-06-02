@@ -5,7 +5,7 @@ from gymnasium import spaces
 from torch import nn
 
 from stable_baselines3.common.distributions import SquashedDiagGaussianDistribution, StateDependentNoiseDistribution
-from stable_baselines3.common.policies import BasePolicy, ContinuousCritic
+from stable_baselines3.common.policies import BasePolicy, ContinuousCritic, ContinuousCriticAdv
 from stable_baselines3.common.preprocessing import get_action_dim
 from stable_baselines3.common.torch_layers import (
     BaseFeaturesExtractor,
@@ -395,8 +395,8 @@ class SAACPolicy(BasePolicy):
     """
 
     actor: Actor
-    critic: ContinuousCritic
-    critic_target: ContinuousCritic
+    critic: ContinuousCriticAdv
+    critic_target: ContinuousCriticAdv
 
     def __init__(
         self,
@@ -406,7 +406,7 @@ class SAACPolicy(BasePolicy):
         net_arch: Optional[Union[List[int], Dict[str, List[int]]]] = None,
         activation_fn: Type[nn.Module] = nn.ReLU,
         use_sde: bool = False,
-        log_std_init: float = -3,
+        log_std_init: float = -3.67,
         use_expln: bool = False,
         clip_mean: float = 2.0,
         features_extractor_class: Type[BaseFeaturesExtractor] = FlattenExtractor,
@@ -430,7 +430,7 @@ class SAACPolicy(BasePolicy):
         )
 
         if net_arch is None:
-            net_arch = [256, 256]
+            net_arch = [64,64]
 
         actor_arch, critic_arch = get_actor_critic_arch(net_arch)
         self.smart = True
@@ -554,9 +554,11 @@ class SAACPolicy(BasePolicy):
         dstb_actor_kwargs = self._update_features_extractor(self.dstb_actor_kwargs, features_extractor)
         return Actor(**dstb_actor_kwargs).to(self.device)
 
-    def make_critic(self, features_extractor: Optional[BaseFeaturesExtractor] = None) -> ContinuousCritic:
+    def make_critic(self, features_extractor: Optional[BaseFeaturesExtractor] = None) -> ContinuousCriticAdv:
+        self.critic_kwargs.update({"dstb_action_space":self.dstb_action_space})
         critic_kwargs = self._update_features_extractor(self.critic_kwargs, features_extractor)
-        return ContinuousCritic(**critic_kwargs).to(self.device)
+
+        return ContinuousCriticAdv(**critic_kwargs).to(self.device)
 
     def forward(self, obs: PyTorchObs, deterministic: bool = False) -> th.Tensor:
         return self._predict(obs, deterministic=deterministic)

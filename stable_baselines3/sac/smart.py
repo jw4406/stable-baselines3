@@ -149,7 +149,7 @@ class SMART(OffPolicyAlgorithm):
             supported_action_spaces=(spaces.Box,),
             support_multi_env=True,
         )
-
+        self.use_stackelberg = use_stackelberg
         self.target_entropy = target_entropy
         self.log_ent_coef = None  # type: Optional[th.Tensor]
         # Entropy coefficient / Entropy temperature
@@ -199,7 +199,7 @@ class SMART(OffPolicyAlgorithm):
             # Note: we optimize the log of the entropy coeff which is slightly different from the paper
             # as discussed in https://github.com/rail-berkeley/softlearning/issues/37
             self.log_ent_coef = th.log(th.ones(1, device=self.device) * init_value).requires_grad_(True)
-            self.ent_coef_optimizer = th.optim.Adam([self.log_ent_coef], lr=self.lr_schedule(1))
+            self.ent_coef_optimizer = th.optim.Adam([self.log_ent_coef], lr=self.lr_schedule[0](1))
         else:
             # Force conversion to float
             # this will throw an error if a malformed string (different from 'auto')
@@ -224,7 +224,7 @@ class SMART(OffPolicyAlgorithm):
         self._update_learning_rate(optimizers)
 
         ent_coef_losses, ent_coefs = [], []
-        actor_losses, critic_losses = [], []
+        actor_losses, critic_losses, dstb_actor_losses = [], [], []
 
         for gradient_step in range(gradient_steps):
             # Sample replay buffer
@@ -266,16 +266,16 @@ class SMART(OffPolicyAlgorithm):
                 next_actions, next_log_prob = self.actor.action_log_prob(replay_data.next_observations)
                 next_dstb_actions, next_dstb_log_prob = self.dstb_actor.action_log_prob(replay_data.next_observations)
                 # Compute the next Q values: min over all critics targets
-                next_q_values = th.cat(self.critic_target(replay_data.next_observations, next_actions), dim=1)
+                next_q_values = th.cat(self.critic_target(replay_data.next_observations, next_actions, next_dstb_actions), dim=1)
                 next_q_values, _ = th.min(next_q_values, dim=1, keepdim=True)
                 # add entropy term
-                next_q_values = next_q_values - ent_coef * next_log_prob.reshape(-1, 1)
+                next_q_values = next_q_values - ent_coef * next_log_prob.reshape(-1, 1) + ent_coef * next_dstb_log_prob.reshape(-1, 1)
                 # td error + entropy term
                 target_q_values = replay_data.rewards + (1 - replay_data.dones) * self.gamma * next_q_values
 
             # Get current Q-values estimates for each critic network
             # using action from the replay buffer
-            current_q_values = self.critic(replay_data.observations, replay_data.actions)
+            current_q_values = self.critic(replay_data.observations, replay_data.actions, replay_data.dstb_actions)
 
             # Compute critic loss
             critic_loss = 0.5 * sum(F.mse_loss(current_q, target_q_values) for current_q in current_q_values)
@@ -290,15 +290,23 @@ class SMART(OffPolicyAlgorithm):
             # Compute actor loss
             # Alternative: actor_loss = th.mean(log_prob - qf1_pi)
             # Min over all critic networks
-            q_values_pi = th.cat(self.critic(replay_data.observations, actions_pi), dim=1)
+            q_values_pi = th.cat(self.critic(replay_data.observations, actions_pi, dstb_actions_pi), dim=1)
             min_qf_pi, _ = th.min(q_values_pi, dim=1, keepdim=True)
             actor_loss = (ent_coef * log_prob - min_qf_pi).mean()
+            dstb_actor_loss = (ent_coef * dstb_log_prob + min_qf_pi).mean()
             actor_losses.append(actor_loss.item())
+            dstb_actor_losses.append(dstb_actor_loss.item())
 
             # Optimize the actor
             self.actor.optimizer.zero_grad()
-            actor_loss.backward()
+            actor_loss.backward(retain_graph=True)
+            self.dstb_actor.optimizer.zero_grad()
+            dstb_actor_loss.backward()
             self.actor.optimizer.step()
+            self.dstb_actor.optimizer.step()
+            #self.dstb_actor.optimizer.zero_grad()
+            #dstb_actor_loss.backward()
+
 
             # Update target networks
             if gradient_step % self.target_update_interval == 0:
@@ -344,3 +352,9 @@ class SMART(OffPolicyAlgorithm):
         else:
             saved_pytorch_variables = ["ent_coef_tensor"]
         return state_dicts, saved_pytorch_variables
+
+    def prep_grad_theta_J(self, curr_q_values, ctrl_log_prob, dstb_log_prob):
+        return (- curr_q_values + self.ent_coef_tensor * ctrl_log_prob).mean()
+
+    def prep_grad_psi_J(self, curr_q_values, ctrl_log_prob, dstb_log_prob):
+        return (curr_q_values + self.ent_coef_tensor * dstb_log_prob).mean()
