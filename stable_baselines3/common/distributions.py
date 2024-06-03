@@ -582,7 +582,7 @@ class StateDependentNoiseDistribution(Distribution):
         actions = self.distribution.mean + noise
         if self.bijector is not None:
             return self.bijector.forward(actions)
-        return actions
+        return self.distribution.mean
 
     def mode(self) -> th.Tensor:
         actions = self.distribution.mean

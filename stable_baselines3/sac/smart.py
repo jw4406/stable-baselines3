@@ -200,6 +200,8 @@ class SMART(OffPolicyAlgorithm):
             # as discussed in https://github.com/rail-berkeley/softlearning/issues/37
             self.log_ent_coef = th.log(th.ones(1, device=self.device) * init_value).requires_grad_(True)
             self.ent_coef_optimizer = th.optim.Adam([self.log_ent_coef], lr=self.lr_schedule[0](1))
+            self.dstb_log_ent_coef = th.log(th.ones(1, device=self.device) * init_value).requires_grad_(True)
+            self.dstb_ent_coef_optimizer = th.optim.Adam([self.dstb_log_ent_coef],lr=self.lr_schedule[0](1))
         else:
             # Force conversion to float
             # this will throw an error if a malformed string (different from 'auto')
@@ -219,6 +221,7 @@ class SMART(OffPolicyAlgorithm):
         optimizers = [self.critic.optimizer, self.actor.optimizer, self.dstb_actor.optimizer]
         if self.ent_coef_optimizer is not None:
             optimizers += [self.ent_coef_optimizer]
+            optimizers += [self.dstb_ent_coef_optimizer]
 
         # Update learning rate according to lr schedule
         self._update_learning_rate(optimizers)
@@ -248,6 +251,8 @@ class SMART(OffPolicyAlgorithm):
                 # see https://github.com/rail-berkeley/softlearning/issues/60
                 ent_coef = th.exp(self.log_ent_coef.detach())
                 ent_coef_loss = -(self.log_ent_coef * (log_prob + self.target_entropy).detach()).mean()
+                dstb_ent_coef = th.exp(self.dstb_log_ent_coef.detach())
+                dstb_ent_coef_loss = -(self.dstb_log_ent_coef * (dstb_log_prob + self.target_entropy).detach()).mean()
                 ent_coef_losses.append(ent_coef_loss.item())
             else:
                 ent_coef = self.ent_coef_tensor
@@ -260,6 +265,9 @@ class SMART(OffPolicyAlgorithm):
                 self.ent_coef_optimizer.zero_grad()
                 ent_coef_loss.backward()
                 self.ent_coef_optimizer.step()
+                self.dstb_ent_coef_optimizer.zero_grad()
+                dstb_ent_coef_loss.backward()
+                self.dstb_ent_coef_optimizer.step()
 
             with th.no_grad():
                 # Select action according to policy
@@ -269,7 +277,7 @@ class SMART(OffPolicyAlgorithm):
                 next_q_values = th.cat(self.critic_target(replay_data.next_observations, next_actions, next_dstb_actions), dim=1)
                 next_q_values, _ = th.min(next_q_values, dim=1, keepdim=True)
                 # add entropy term
-                next_q_values = next_q_values - ent_coef * next_log_prob.reshape(-1, 1) + ent_coef * next_dstb_log_prob.reshape(-1, 1)
+                next_q_values = next_q_values - ent_coef * next_log_prob.reshape(-1, 1)# + dstb_ent_coef * next_dstb_log_prob.reshape(-1, 1)
                 # td error + entropy term
                 target_q_values = replay_data.rewards + (1 - replay_data.dones) * self.gamma * next_q_values
 
@@ -293,7 +301,7 @@ class SMART(OffPolicyAlgorithm):
             q_values_pi = th.cat(self.critic(replay_data.observations, actions_pi, dstb_actions_pi), dim=1)
             min_qf_pi, _ = th.min(q_values_pi, dim=1, keepdim=True)
             actor_loss = (ent_coef * log_prob - min_qf_pi).mean()
-            dstb_actor_loss = (ent_coef * dstb_log_prob + min_qf_pi).mean()
+            dstb_actor_loss = (dstb_ent_coef * dstb_log_prob + min_qf_pi).mean()
             actor_losses.append(actor_loss.item())
             dstb_actor_losses.append(dstb_actor_loss.item())
 

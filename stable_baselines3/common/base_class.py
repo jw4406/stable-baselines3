@@ -274,8 +274,9 @@ class BaseAlgorithm(ABC):
         """Transform to callable if needed."""
         try:
             if hasattr(self, 'ent_coef') and self.ent_coef == 'auto':
-                self.lr_schedule = np.zeros((len(self.learning_rate)+1,), dtype=object)
+                self.lr_schedule = np.zeros((len(self.learning_rate)+2,), dtype=object)
                 temp = list(self.learning_rate)
+                temp.append(self.learning_rate[0])
                 temp.append(self.learning_rate[0])
                 self.learning_rate = np.asarray(temp)
             else:
