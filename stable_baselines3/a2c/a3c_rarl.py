@@ -189,7 +189,7 @@ class A3C_rarl(OnPolicyAlgorithm):
                     self.rollout_buffer.next_traj_begin = None
                     if np.argwhere(self.rollout_buffer.episode_starts).shape[0] > 1:
                         self.rollout_buffer.has_multi_start = True
-                        raise ValueError("bro what the fuck")
+
                     loc = np.argwhere(self.rollout_buffer.episode_starts)
                     self.rollout_buffer.next_traj_begin = loc[0, 0]
                     index_0 = np.argwhere(self.rollout_buffer.indices == loc[0, 0])
