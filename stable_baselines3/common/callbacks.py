@@ -519,6 +519,7 @@ class EvalCallback(EventCallback):
             self.last_std.append(std_reward)
             fig, ax = plt.subplots(1,1)
             tsplot(ax, self.episode_returns, self.last_std)
+
             with open("means_smart_ablation.csv", 'a') as f:
                 f.write(str(self.episode_returns))
                 f.writelines("\n")
@@ -526,6 +527,7 @@ class EvalCallback(EventCallback):
                 f.write(str(self.last_std))
                 f.writelines("\n")
             pic_name = "shaded_smart_ablation_%d.png" % len(self.episode_returns)
+
             plt.savefig(pic_name)
             plt.close()
             if len(self.episode_returns) % 10 == 0 and self.jobid is not None:

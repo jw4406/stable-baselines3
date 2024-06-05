@@ -8,6 +8,8 @@ from stable_baselines3.a2c.my_half_cheetah import my_HalfCheetahEnv
 from stable_baselines3 import SAC, SMART
 from stable_baselines3.common.callbacks import EvalCallback, StopTrainingOnRewardThreshold, CheckpointCallback, CallbackList
 import argparse
+from multiprocessing import Pool
+import os
 from gymnasium.spaces import Box
 import numpy as np
 parser = argparse.ArgumentParser()
@@ -76,66 +78,39 @@ from stable_baselines3 import SAC
 #env = gym.make("MountainCarContinuous-v0")
 #env = gym.make("my_half_cheetah", render_mode='human')
 env = gym.make("my_pendulum")
+v_learning_rate = 1e-5
+
+tau_v_c = 10
+tau_c_d = 20
 
 #model = A3C_rarl("MlPAACPolicy", use_stackelberg=False, env=env, verbose=2, n_steps=8, normalize_advantage=False,gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,vf_coef=.4,gamma=.9,v_learning_rate=5e-4, c_learning_rate=5e-4,d_learning_rate=5e-4, use_sde=True,use_rms_prop=False, device='cpu')
 
+#model = lambda tau1, tau2: A3C_rarl("MlPAACPolicy", use_stackelberg=False, env=env, verbose=2, n_steps=8, normalize_advantage=False,gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,vf_coef=.4,gamma=.9,v_learning_rate=v_learning_rate, c_learning_rate=v_learning_rate * tau1,d_learning_rate=v_learning_rate * tau1 * tau2, use_sde=True,use_rms_prop=False, device='cpu')
+def f(tau2):
+    model = A3C_rarl("MlPAACPolicy", use_stackelberg=True, env=env, verbose=2, n_steps=8, normalize_advantage=False,gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,vf_coef=.4,gamma=.9,v_learning_rate=linear_schedule(v_learning_rate), c_learning_rate=linear_schedule(v_learning_rate * 10),d_learning_rate=linear_schedule(v_learning_rate * 10 * tau2), use_sde=True,use_rms_prop=False, device='cpu')
+    callback_on_best = StopTrainingOnRewardThreshold(reward_threshold=-300, verbose=1)
+    eval_callback = EvalCallback(env, verbose=1, callback_on_new_best=callback_on_best,n_eval_episodes=10, jobid=args.jobid)
+    checkpoint_callback = CheckpointCallback(
+        save_freq=100,
+        save_path="./",
+        name_prefix="TEST_TEST_TEST_%f" % tau2,
+        save_replay_buffer=True,
+        save_vecnormalize=True,
+        jobid=args.jobid
+    )
+    callback_list = CallbackList([eval_callback, checkpoint_callback])  # , checkpoint_callback])
+    # model.learn(total_timesteps=1_000_000, callback=callback_list)
+    model.learn(total_timesteps=10, callback=callback_list)
+    model.save("stac_pend_FINISHED_%f.zip" % tau2)
+    print("HI IM DONE")
+if __name__ == '__main__':
+    with Pool(os.cpu_count()) as p:
+        p.map(f, np.logspace(-5, 5, num=20))
 
-#model = A3C_rarl("MlPAACPolicy", use_stackelberg=True, env=env, verbose=2, n_steps=8, normalize_advantage=False,gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,vf_coef=.4,gamma=.9,v_learning_rate=linear_schedule(5e-4), c_learning_rate=linear_schedule(1e-3),d_learning_rate=linear_schedule(5e-3), use_sde=True,use_rms_prop=False, device='auto')
-
-model = A3C_rarl("MlPAACPolicy", use_stackelberg=True, env=env, verbose=2, n_steps=100, normalize_advantage=False,v_learning_rate=linear_schedule(1e-5), c_learning_rate=linear_schedule(5e-5),d_learning_rate=linear_schedule(1e-4), use_sde=True,use_rms_prop=False, device='auto')
-
+'''
 #model = A3C_rarl("MlPAACPolicy", dstb_action_space=Box(-.3, .3, (2,), dtype=np.float32), use_stackelberg=True, env=env, verbose=2, n_steps=512, normalize_advantage=False,gae_lambda=.92,ent_coef=0.0,max_grad_norm=.8,vf_coef=.4,gamma=.98,v_learning_rate=5e-4, c_learning_rate=1e-3,d_learning_rate=5e-3, use_sde=True,use_rms_prop=False)
 model=A2C("MlpPolicy", normalize_advantage=True, verbose=2, env=env, n_steps=100, learning_rate=linear_schedule(3e-4), use_sde=True, use_rms_prop=False)
 #model = A3C_rarl("MlPAACPolicy", dstb_action_space=Box(-.3, .3, (2,), dtype=np.float32), use_stackelberg=True, env=env, verbose=2, n_steps=512, normalize_advantage=False,gae_lambda=.92,ent_coef=0.0,max_grad_norm=.8,vf_coef=.4,gamma=.98,v_learning_rate=5e-3, c_learning_rate=1e-2,d_learning_rate=5e-2, use_sde=True,use_rms_prop=False)
-#model = SAC("MlpPolicy", env=env, verbose=2, learning_rate=3e-4,buffer_size=50000, batch_size=512, ent_coef=0.1, train_freq=32, gradient_steps=32, gamma=0.9999, tau=0.01, use_sde=True)
+#model = SAC("MlpPolicy", env=env, verbose=2, learning_rate=3e-4,buffer_size=
 
-#model = SMART("MlPAACPolicy", learning_starts=0, dstb_action_space=Box(-.3, .3, (9,), dtype=np.float32), env=env, verbose=2, v_learning_rate=1e-4, c_learning_rate=3e-4, d_learning_rate=6e-4,buffer_size=50000, batch_size=512, ent_coef=0.1, train_freq=32, gradient_steps=32, gamma=0.9999, tau=0.01, use_sde=True)
-
-
-#model = A3C_rarl("MlPAACPolicy", use_stackelberg=False,env=env, verbose=1, normalize_advantage=True, n_steps=100, v_learning_rate=5e-4, c_learning_rate=1e-3,d_learning_rate=5e-3, use_sde=True, use_rms_prop=False)
-
-
-model = A3C_rarl.load("./models/pend_smart_388000_steps.zip", env=env)
-model = A3C_rarl("MlPAACPolicy", use_stackelberg=False,env=env, verbose=2, normalize_advantage=False, n_steps=100,v_learning_rate=linear_schedule(3e-4), c_learning_rate=linear_schedule(6e-4),d_learning_rate=linear_schedule(1.2e-3), use_sde=True, use_rms_prop=False)
-
-
-model = A3C_rarl.load("./pend_smart_410400_steps.zip", env=env)
-#model = A3C_rarl.load("./stac_pend_FINISHED_0.000010.zip", env=env)
-#model = A2C.load("mcc_0.zip", env=env)
-#model = A3C_rarl.load("adv_pendulum_split_0.zip", env=env)
-#model.v_learning_rate = linear_schedule(1e-4)
-#model.c_learning_rate = linear_schedule(5e-4)
-#model.d_learning_rate = linear_schedule(1e-3)
-model.lr_schedule = [linear_schedule(1e-5), linear_schedule(5e-5), linear_schedule(1e-4)]
-model.policy.value_optimizer.param_groups[0]['lr'] =1e-5
-model.policy.ctrl_optimizer.param_groups[0]['lr'] = 5e-4
-model.policy.dstb_optimizer.param_groups[0]['lr'] = 1e-4
-#model.n_steps = 7
-#model.use_stackelberg=True
-
-
-callback_on_best = StopTrainingOnRewardThreshold(reward_threshold=-300, verbose=1)
-eval_callback = EvalCallback(env, callback_on_new_best=callback_on_best, verbose=1, n_eval_episodes=10, jobid=args.jobid)
-checkpoint_callback = CheckpointCallback(
-  save_freq=10,
-  save_path="./logs/",
-  name_prefix="smart_ablation",
-)
-
-callback_list = CallbackList([eval_callback, checkpoint_callback])
-model.learn(total_timesteps=100_000_000, callback=callback_list)
-
-#callback_on_best = StopTrainingOnRewardThreshold(reward_threshold=-200, verbose=1)
-#eval_callback = EvalCallback(env, callback_on_new_best=callback_on_best, verbose=1)
-model.save("true_baseline_pend.zip")
-vec_env = model.get_env()
-obs = vec_env.reset()
-for i in range(10000):
-    action, dstb_action, _states = model.predict(obs, deterministic=True)
-    obs, reward, done, info = vec_env.step([[action, dstb_action, i]])
-    vec_env.render()
-    # VecEnv resets automatically
-    # if done:
-    #   obs = env.reset()
-
-env.close()
+'''
