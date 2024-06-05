@@ -123,6 +123,9 @@ class my_PendulumEnv(gym.Env):
         self.action_space = spaces.Box(
             low=-self.max_torque, high=self.max_torque, shape=(1,), dtype=np.float32
         )
+        # Additional variables for failure detection
+        self.upright_threshold = np.deg2rad(10)  # 10 degrees in radians
+        self.angular_velocity_threshold = 2.0  # Threshold angular velocity
         self.observation_space = spaces.Box(low=-high, high=high, dtype=np.float32)
 
     def step(self, joint_action):
@@ -154,10 +157,12 @@ class my_PendulumEnv(gym.Env):
 
         self.state = np.array([newth, newthdot])
 
+        failure = self.check_failure()
+
         if self.render_mode == "human":
             self.render()
         # truncation=False as the time limit is handled by the `TimeLimit` wrapper added during `make`
-        return self._get_obs(), -costs, False, False, {}
+        return self._get_obs(), -costs, failure, False, {}
 
     def reset(self, *, seed: Optional[int] = None, options: Optional[dict] = None):
         super().reset(seed=seed)
@@ -175,6 +180,8 @@ class my_PendulumEnv(gym.Env):
         self.state = self.np_random.uniform(low=low, high=high)
         self.last_u = None
         self.last_d = None
+
+        self.upright_crossings = 0
         if self.render_mode == "human":
             self.render()
         return self._get_obs(), {}
@@ -286,6 +293,18 @@ class my_PendulumEnv(gym.Env):
             pygame.display.quit()
             pygame.quit()
             self.isopen = False
+
+    def check_failure(self):
+        theta, thetadot = self.state
+
+        # Check if the pendulum is close to the upright position
+        if np.abs(theta) < self.upright_threshold:
+            if np.abs(thetadot) > self.angular_velocity_threshold:
+                self.upright_crossings += 1
+                if self.upright_crossings > 1:
+                    # The pendulum has crossed the upright position more than once with high angular velocity
+                    return True
+        return False
 
 
 def angle_normalize(x):
