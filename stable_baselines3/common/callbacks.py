@@ -519,7 +519,13 @@ class EvalCallback(EventCallback):
             self.last_std.append(std_reward)
             fig, ax = plt.subplots(1,1)
             tsplot(ax, self.episode_returns, self.last_std)
-            pic_name = "shaded_boi_%d.png" % len(self.episode_returns)
+            with open("means_pend_smart.csv", 'a') as f:
+                f.write(str(self.episode_returns))
+                f.writelines("\n")
+            with open("stds_pend_smart.csv", 'a') as f:
+                f.write(str(self.last_std))
+                f.writelines("\n")
+            pic_name = "shaded_pend_smart_%d.png" % len(self.episode_returns)
             plt.savefig(pic_name)
             plt.close()
             if len(self.episode_returns) % 10 == 0 and self.jobid is not None:

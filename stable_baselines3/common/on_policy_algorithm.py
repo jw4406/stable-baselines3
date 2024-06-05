@@ -384,10 +384,10 @@ class OnPolicyAlgorithm(BaseAlgorithm):
         callback: MaybeCallback = None,
         log_interval: int = 1,
         tb_log_name: str = "OnPolicyAlgorithm",
-        reset_num_timesteps: bool = True,
+        reset_num_timesteps: bool = False,
         progress_bar: bool = False,
     ) -> SelfOnPolicyAlgorithm:
-        iteration = 0
+        iteration = self.num_timesteps
 
         total_timesteps, callback = self._setup_learn(
             total_timesteps,

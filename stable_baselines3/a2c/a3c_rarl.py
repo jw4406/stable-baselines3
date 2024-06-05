@@ -298,8 +298,8 @@ class A3C_rarl(OnPolicyAlgorithm):
                 #                 dim=1).t().chunk(2)
                 #H = torch.cat((x, y), dim=1).t()
                 H = torch.cat((upper_rows, lower_rows), dim=0)
-                reg_param = 0
-                #H = H + torch.eye(H.shape[0], device=self.device) * reg_param
+                reg_param = 10
+                H = H + torch.eye(H.shape[0], device=self.device) * reg_param
                 #assert torch.allclose(H, H_test)
                 #assert torch.equal(H, H_test)
                 ivp_H_h2 = torch.linalg.solve(H, h2)
@@ -374,7 +374,7 @@ class A3C_rarl(OnPolicyAlgorithm):
         callback: MaybeCallback = None,
         log_interval: int = 100,
         tb_log_name: str = "A2C",
-        reset_num_timesteps: bool = True,
+        reset_num_timesteps: bool = False,
         progress_bar: bool = False,
     ) -> SelfA2C:
         return super().learn(
