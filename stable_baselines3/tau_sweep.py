@@ -87,25 +87,25 @@ tau_c_d = 20
 
 #model = lambda tau1, tau2: A3C_rarl("MlPAACPolicy", use_stackelberg=False, env=env, verbose=2, n_steps=8, normalize_advantage=False,gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,vf_coef=.4,gamma=.9,v_learning_rate=v_learning_rate, c_learning_rate=v_learning_rate * tau1,d_learning_rate=v_learning_rate * tau1 * tau2, use_sde=True,use_rms_prop=False, device='cpu')
 def f(tau2):
-    model = A3C_rarl("MlPAACPolicy", use_stackelberg=True, env=env, verbose=2, n_steps=8, normalize_advantage=False,gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,vf_coef=.4,gamma=.9,v_learning_rate=linear_schedule(v_learning_rate), c_learning_rate=linear_schedule(v_learning_rate * 10),d_learning_rate=linear_schedule(v_learning_rate * 10 * tau2), use_sde=True,use_rms_prop=False, device='cpu')
+    model = A3C_rarl("MlPAACPolicy", use_stackelberg=True, env=env, verbose=2, n_steps=8, normalize_advantage=False,gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,vf_coef=.4,gamma=.9,v_learning_rate=linear_schedule(v_learning_rate), c_learning_rate=linear_schedule(v_learning_rate * 10),d_learning_rate=linear_schedule(v_learning_rate * 10 * tau2), use_sde=True,use_rms_prop=False, device='auto')
     callback_on_best = StopTrainingOnRewardThreshold(reward_threshold=-300, verbose=1)
     eval_callback = EvalCallback(env, verbose=1, callback_on_new_best=callback_on_best,n_eval_episodes=10, jobid=args.jobid)
     checkpoint_callback = CheckpointCallback(
-        save_freq=100,
+        save_freq=1000,
         save_path="./",
-        name_prefix="TEST_TEST_TEST_%f" % tau2,
+        name_prefix="stac_tau_sweep_%f" % tau2,
         save_replay_buffer=True,
         save_vecnormalize=True,
         jobid=args.jobid
     )
     callback_list = CallbackList([eval_callback, checkpoint_callback])  # , checkpoint_callback])
     # model.learn(total_timesteps=1_000_000, callback=callback_list)
-    model.learn(total_timesteps=10, callback=callback_list)
+    model.learn(total_timesteps=1_000_000, callback=callback_list)
     model.save("stac_pend_FINISHED_%f.zip" % tau2)
     print("HI IM DONE")
 if __name__ == '__main__':
     with Pool(os.cpu_count()) as p:
-        p.map(f, np.logspace(-5, 5, num=20))
+        p.map(f, np.logspace(-5, 5, num=50))
 
 '''
 #model = A3C_rarl("MlPAACPolicy", dstb_action_space=Box(-.3, .3, (2,), dtype=np.float32), use_stackelberg=True, env=env, verbose=2, n_steps=512, normalize_advantage=False,gae_lambda=.92,ent_coef=0.0,max_grad_norm=.8,vf_coef=.4,gamma=.98,v_learning_rate=5e-4, c_learning_rate=1e-3,d_learning_rate=5e-3, use_sde=True,use_rms_prop=False)
