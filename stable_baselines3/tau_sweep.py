@@ -78,7 +78,7 @@ from stable_baselines3 import SAC
 #env = gym.make("MountainCarContinuous-v0")
 #env = gym.make("my_half_cheetah", render_mode='human')
 env = gym.make("my_pendulum")
-v_learning_rate = 1e-5
+v_learning_rate = 1e-4
 
 tau_v_c = 10
 tau_c_d = 20
@@ -104,8 +104,10 @@ def f(tau2):
     model.save("stac_pend_FINISHED_%f.zip" % tau2)
     print("HI IM DONE")
 if __name__ == '__main__':
+
     with Pool(os.cpu_count()//2) as p:
         p.map(f, np.logspace(-5, 5, num=64))
+
 
 '''
 #model = A3C_rarl("MlPAACPolicy", dstb_action_space=Box(-.3, .3, (2,), dtype=np.float32), use_stackelberg=True, env=env, verbose=2, n_steps=512, normalize_advantage=False,gae_lambda=.92,ent_coef=0.0,max_grad_norm=.8,vf_coef=.4,gamma=.98,v_learning_rate=5e-4, c_learning_rate=1e-3,d_learning_rate=5e-3, use_sde=True,use_rms_prop=False)

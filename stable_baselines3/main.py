@@ -89,46 +89,48 @@ model=A2C("MlpPolicy", normalize_advantage=True, verbose=2, env=env, n_steps=100
 #model = A3C_rarl("MlPAACPolicy", dstb_action_space=Box(-.3, .3, (2,), dtype=np.float32), use_stackelberg=True, env=env, verbose=2, n_steps=512, normalize_advantage=False,gae_lambda=.92,ent_coef=0.0,max_grad_norm=.8,vf_coef=.4,gamma=.98,v_learning_rate=5e-3, c_learning_rate=1e-2,d_learning_rate=5e-2, use_sde=True,use_rms_prop=False)
 #model = SAC("MlpPolicy", env=env, verbose=2, learning_rate=3e-4,buffer_size=50000, batch_size=512, ent_coef=0.1, train_freq=32, gradient_steps=32, gamma=0.9999, tau=0.01, use_sde=True)
 
-#model = SMART("MlPAACPolicy", learning_starts=0, dstb_action_space=Box(-.3, .3, (9,), dtype=np.float32), env=env, verbose=2, v_learning_rate=1e-4, c_learning_rate=3e-4, d_learning_rate=6e-4,buffer_size=50000, batch_size=512, ent_coef=0.1, train_freq=32, gradient_steps=32, gamma=0.9999, tau=0.01, use_sde=True)
+#model = SMART("MlPAACPolicy", dstb_action_space=Box(-.3, .3, (1,), dtype=np.float32), learning_starts=0, env=env, verbose=2, v_learning_rate=5e-4, c_learning_rate=1e-3, d_learning_rate=5e-3,buffer_size=25000, batch_size=128, train_freq=32, gradient_steps=32, gamma=0.9999, tau=0.01, use_sde=True)
 
 
 #model = A3C_rarl("MlPAACPolicy", use_stackelberg=False,env=env, verbose=1, normalize_advantage=True, n_steps=100, v_learning_rate=5e-4, c_learning_rate=1e-3,d_learning_rate=5e-3, use_sde=True, use_rms_prop=False)
 
 
-model = A3C_rarl.load("./models/pend_smart_388000_steps.zip", env=env)
-model = A3C_rarl("MlPAACPolicy", use_stackelberg=False,env=env, verbose=2, normalize_advantage=False, n_steps=100,v_learning_rate=linear_schedule(3e-4), c_learning_rate=linear_schedule(6e-4),d_learning_rate=linear_schedule(1.2e-3), use_sde=True, use_rms_prop=False)
+#model = A3C_rarl.load("./models/pend_smart_388000_steps.zip", env=env)
+#model = A3C_rarl("MlPAACPolicy", use_stackelberg=False,env=env, verbose=2, normalize_advantage=False, n_steps=100,v_learning_rate=linear_schedule(3e-4), c_learning_rate=linear_schedule(6e-4),d_learning_rate=linear_schedule(1.2e-3), use_sde=True, use_rms_prop=False)
 
 
 #model = A3C_rarl.load("./pend_smart_410400_steps.zip", env=env)
-model = A3C_rarl.load("./logs/ours_pend_model_vis_393940_steps.zip", env=env)
-#model = A3C_rarl.load("./stac_pend_FINISHED_0.000010.zip", env=env)
+model = A3C_rarl.load("./conf_stac_pend_ft.zip", env=env)
+
 #model = A2C.load("mcc_0.zip", env=env)
 #model = A3C_rarl.load("adv_pendulum_split_0.zip", env=env)
 #model.v_learning_rate = linear_schedule(1e-4)
 #model.c_learning_rate = linear_schedule(5e-4)
 #model.d_learning_rate = linear_schedule(1e-3)
-model.lr_schedule = [linear_schedule(1e-5), linear_schedule(5e-5), linear_schedule(1e-4)]
-model.policy.value_optimizer.param_groups[0]['lr'] =1e-5
-model.policy.ctrl_optimizer.param_groups[0]['lr'] = 5e-4
-model.policy.dstb_optimizer.param_groups[0]['lr'] = 1e-4
+model.lr_schedule = [linear_schedule(1e-6), linear_schedule(5e-6), linear_schedule(1e-5)]
+model.policy.value_optimizer.param_groups[0]['lr'] =1e-6
+model.policy.ctrl_optimizer.param_groups[0]['lr'] = 5e-6
+model.policy.dstb_optimizer.param_groups[0]['lr'] = 1e-5
 #model.n_steps = 7
 #model.use_stackelberg=True
 
 
-callback_on_best = StopTrainingOnRewardThreshold(reward_threshold=-300, verbose=1)
+callback_on_best = StopTrainingOnRewardThreshold(reward_threshold=-200, verbose=1)
 eval_callback = EvalCallback(env, callback_on_new_best=callback_on_best, verbose=1, n_eval_episodes=10, jobid=args.jobid)
 checkpoint_callback = CheckpointCallback(
   save_freq=10,
   save_path="./logs/",
-  name_prefix="smart_ablation",
+  name_prefix='conf_stac_pend',
 )
 
 callback_list = CallbackList([eval_callback, checkpoint_callback])
-#model.learn(total_timesteps=100_000_000, callback=callback_list)
+
+model.learn(total_timesteps=70_000, callback=callback_list)
 
 #callback_on_best = StopTrainingOnRewardThreshold(reward_threshold=-200, verbose=1)
 #eval_callback = EvalCallback(env, callback_on_new_best=callback_on_best, verbose=1)
-#model.save("true_baseline_pend.zip")
+model.save("conf_stac_pend_ft_2.zip")
+
 vec_env = model.get_env()
 obs = vec_env.reset()
 for i in range(10000):

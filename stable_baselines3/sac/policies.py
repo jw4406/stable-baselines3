@@ -430,7 +430,7 @@ class SAACPolicy(BasePolicy):
         )
 
         if net_arch is None:
-            net_arch = [64,64]
+            net_arch = {'pi':[32,32], 'qf':[64,64]}
 
         actor_arch, critic_arch = get_actor_critic_arch(net_arch)
         self.smart = True
