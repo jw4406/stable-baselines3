@@ -521,7 +521,7 @@ class EvalCallback(EventCallback):
             self.last_std.append(std_reward)
             fig, ax = plt.subplots(1,1)
             tsplot(ax, self.episode_returns, self.last_std)
-
+            '''
             with open("means_baseline_half_cheetah.csv", 'a') as f:
                 f.write(str(self.episode_returns))
                 f.writelines("\n")
@@ -532,7 +532,7 @@ class EvalCallback(EventCallback):
 
             plt.savefig(pic_name)
             plt.close()
-
+            '''
             if len(self.episode_returns) % 10 == 0 and self.jobid is not None:
                 command = "cp -r %s /u/jw4406/run_pics/%d" % (pic_name, int(self.jobid))
                 os.system(command)
