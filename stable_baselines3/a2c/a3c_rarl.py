@@ -367,7 +367,9 @@ class A3C_rarl(OnPolicyAlgorithm):
             u_norm = u_norm + torch.linalg.norm(self.policy.ctrl_optimizer.param_groups[0]['params'][i].grad)
         for i in range(len(self.policy.dstb_optimizer.param_groups[0]['params'])):
             d_norm = d_norm + torch.linalg.norm(self.policy.dstb_optimizer.param_groups[0]['params'][i].grad)
-
+        self.v_norm = v_norm
+        self.d_norm = d_norm
+        self.u_norm = u_norm
         self._n_updates += 1
         self.logger.record("train/n_updates", self._n_updates, exclude="tensorboard")
         self.logger.record("train/explained_variance", explained_var)
