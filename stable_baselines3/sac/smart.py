@@ -1,10 +1,11 @@
 from typing import Any, ClassVar, Dict, List, Optional, Tuple, Type, TypeVar, Union
 
 import numpy as np
+import torch
 import torch as th
 from gymnasium import spaces
 from torch.nn import functional as F
-
+import torch.autograd as autograd
 from stable_baselines3.common.buffers import ReplayBuffer
 from stable_baselines3.common.noise import ActionNoise
 from stable_baselines3.common.off_policy_algorithm import OffPolicyAlgorithm
@@ -290,9 +291,97 @@ class SMART(OffPolicyAlgorithm):
             assert isinstance(critic_loss, th.Tensor)  # for type checker
             critic_losses.append(critic_loss.item())  # type: ignore[union-attr]
 
+            if self.use_stackelberg is True:
+                critic_pred = self.critic(replay_data.observations, actions_pi, dstb_actions_pi)
+                surr_q_values = ((critic_pred[0] + critic_pred[1]) / 2).mean()
+                #critic_pred = self.critic(replay_data.observations, actions_pi, dstb_actions_pi)
+                #h1_upper_grad_batched = autograd.grad(surr_q_values, self.critic.parameters(), create_graph=True, retain_graph=True)
+                #h1_upper_grad = torch.hstack([t.flatten() for t in h1_upper_grad_batched])
+                #h1_upper_theta = autograd.grad(h1_upper_grad, self.actor.parameters(), torch.eye(9218), is_grads_batched=True, create_graph=True, retain_graph=True)
+                h1_upper_grad_batched = autograd.grad(surr_q_values, self.policy.actor.optimizer.param_groups[0]['params'],
+                                                      create_graph=True, retain_graph=True)
+                h1_upper = torch.hstack([t.flatten() for t in h1_upper_grad_batched])
+                autograd.grad(h1_upper, self.critic.parameters(), torch.eye(4545), is_grads_batched=True, create_graph=True, retain_graph=True)
+                h1_lower_grad_batched = autograd.grad(surr_q_values, self.policy.dstb_actor.optimizer.param_groups[0]['params'],
+                                                      create_graph=True, retain_graph=True)
+                h1_lower = torch.hstack([t.flatten() for t in h1_lower_grad_batched])
+
+                h1_pre_omega = torch.hstack((h1_upper, h1_lower))
+
+                h2_grad_theta_batched = autograd.grad(
+                    surr_critic_loss, self.policy.actor.optimizer.param_groups[0]['params'], create_graph=True, retain_graph=True
+                )
+                h2_upper = torch.hstack([t.flatten() for t in h2_grad_theta_batched])
+                h2_grad_psi_batched = torch.autograd.grad(
+                    surr_critic_loss, self.policy.dstb_actor.optimizer.param_groups[0]['params'], create_graph=True, retain_graph=True
+                )
+                h2_lower = torch.hstack([t.flatten() for t in h2_grad_psi_batched])
+                h2 = torch.hstack((h2_upper, h2_lower))
+
+                # Build big H matrix
+                # H is a 2x2 block matrix. The diagonals are hessians -- H_\theta (J) and H_\psi (J). The off diagonal terms are
+                # cross gradients -- \grad_{\theta\psi} J and \grad_{\psi\theta} J.
+                # We assemble it block by block.
+
+                # Diagonal terms (Hessians) first
+                hess_theta_J_batched = autograd.grad(h1_upper, self.policy.actor.optimizer.param_groups[0]['params'],
+                                                     torch.eye(h1_upper.shape[0], device=self.device),
+                                                     is_grads_batched=True, create_graph=True, retain_graph=True)
+                hess_psi_J_batched = autograd.grad(h1_lower, self.policy.dstb_actor.optimizer.param_groups[0]['params'],
+                                                   torch.eye(h1_lower.shape[0], device=self.device),
+                                                   is_grads_batched=True, create_graph=True, retain_graph=True)
+                num_ctrl_params = 0
+                for ele in self.policy.actor.optimizer.param_groups[0]['params']:
+                    num_ctrl_params = num_ctrl_params + torch.numel(ele)
+                num_dstb_params = 0
+                for ele in self.policy.dstb_actor.optimizer.param_groups[0]['params']:
+                    num_dstb_params = num_dstb_params + torch.numel(ele)
+
+                hess_theta_J = self.matrix_unbatch(hess_theta_J_batched,
+                                                   num_ctrl_params)  # this is the 1,1 position
+                hess_psi_J = self.matrix_unbatch(hess_psi_J_batched, num_dstb_params)  # this is the 2,2 position
+
+                # Cross terms next. This is the harder part
+                #cross_pre = self.prep_grad_theta_psi_J(advantages, ctrl_log_prob, dstb_log_prob)
+                #grad_theta_J_batched = autograd.grad(cross_pre,
+                #                                     self.policy.ctrl_optimizer.param_groups[0]['params'],
+                #                                     create_graph=True, retain_graph=True)
+                #grad_theta_J = torch.hstack([t.flatten() for t in grad_theta_J_batched])
+                grad_theta_psi_J_batched = autograd.grad(h1_upper,
+                                                         self.policy.dstb_actor.optimizer.param_groups[0]['params'],
+                                                         torch.eye(num_ctrl_params, device=self.device),
+                                                         is_grads_batched=True, create_graph=True,
+                                                         retain_graph=True)
+
+                grad_theta_psi_J = self.matrix_unbatch(grad_theta_psi_J_batched,
+                                                       num_ctrl_params,
+                                                       size2=num_dstb_params)  # this is the 1,2 position
+
+                grad_theta_psi_J_t = torch.transpose(grad_theta_psi_J, 0, 1)  # this is the 2,1 position
+                upper_rows = torch.cat((hess_theta_J, grad_theta_psi_J), dim=1)
+                lower_rows = torch.cat((grad_theta_psi_J_t, hess_psi_J), dim=1)
+                # x, y = torch.cat((hess_theta_J, grad_theta_psi_J, grad_theta_psi_J_t, hess_psi_J),
+                #                 dim=1).t().chunk(2)
+                # H = torch.cat((x, y), dim=1).t()
+                H = torch.cat((upper_rows, lower_rows), dim=0)
+                reg_param = 10
+                H = H + torch.eye(H.shape[0], device=self.device) * reg_param
+                # assert torch.allclose(H, H_test)
+                # assert torch.equal(H, H_test)
+                ivp_H_h2 = torch.linalg.solve(H, h2)
+
+                imp = autograd.grad(h1_pre_omega, self.critic.parameters(), ivp_H_h2,
+                                    create_graph=True, retain_graph=True)
+                # imp is the stackelberg part of the total derivative
+
             # Optimize the critic
             self.critic.optimizer.zero_grad()
             critic_loss.backward()
+            if self.use_stackelberg is True:
+                for i in range(len(self.policy.value_optimizer.param_groups[0]['params'])):
+                    self.policy.value_optimizer.param_groups[0]['params'][i].grad = \
+                    self.policy.value_optimizer.param_groups[0]['params'][i].grad - imp[i]
+            del imp
             self.critic.optimizer.step()
 
             # Compute actor loss
@@ -300,6 +389,7 @@ class SMART(OffPolicyAlgorithm):
             # Min over all critic networks
             q_values_pi = th.cat(self.critic(replay_data.observations, actions_pi, dstb_actions_pi), dim=1)
             min_qf_pi, _ = th.min(q_values_pi, dim=1, keepdim=True)
+            #min_qf_pi = min_qf_pi.detach()
             actor_loss = (ent_coef * log_prob - min_qf_pi).mean()
             dstb_actor_loss = (dstb_ent_coef * dstb_log_prob + min_qf_pi).mean()
             actor_losses.append(actor_loss.item())
@@ -366,3 +456,18 @@ class SMART(OffPolicyAlgorithm):
 
     def prep_grad_psi_J(self, curr_q_values, ctrl_log_prob, dstb_log_prob):
         return (curr_q_values + self.ent_coef_tensor * dstb_log_prob).mean()
+
+    def matrix_unbatch(self, to_be_unbatched, size1, size2=None):
+        if size2 is None:
+            size2 = size1
+        unbatched = torch.zeros((size1,size2), device=self.device)
+        for jac_row_count in range(size1):
+            curr = 0
+            for count in range(len(to_be_unbatched)):
+                unbatched[jac_row_count,
+                curr:curr + len(
+                    torch.flatten(to_be_unbatched[count][jac_row_count, :]))] = torch.flatten(
+                    to_be_unbatched[count][jac_row_count, :])
+                curr = curr + len(torch.flatten(to_be_unbatched[count][jac_row_count, :]))
+        return unbatched
+

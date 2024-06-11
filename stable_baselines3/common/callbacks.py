@@ -331,6 +331,8 @@ class CheckpointCallback(BaseCallback):
                 self.model.get_vec_normalize_env().save(vec_normalize_path)  # type: ignore[union-attr]
                 if self.verbose >= 2:
                     print(f"Saving model VecNormalize to {vec_normalize_path}")
+            if self.logger.name_to_value['train/v_grad_norm'] < .1 and self.logger.name_to_value['train/u_grad_norm'] < .01 and self.logger.name_to_value['train/d_grad_norm'] < .01:
+                return False
 
         return True
 

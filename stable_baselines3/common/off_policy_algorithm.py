@@ -653,7 +653,7 @@ class OffPolicyAlgorithm(BaseAlgorithm):
             # Select action randomly or according to policy
             if hasattr(self, "smart") and self.smart == True:
                 actions, dstb_actions, buffer_actions, buffer_dstb_actions = self._sample_action(learning_starts, action_noise, env.num_envs)
-                new_obs, rewards, dones, infos = env.step([[actions, dstb_actions, num_collected_steps]])
+                new_obs, rewards, dones, infos = env.step([[actions, dstb_actions*0, num_collected_steps]])
                 self.num_timesteps += env.num_envs
                 num_collected_steps += 1
 

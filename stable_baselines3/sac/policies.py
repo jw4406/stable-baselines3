@@ -404,9 +404,9 @@ class SAACPolicy(BasePolicy):
         action_space: spaces.Box,
         lr_schedule : Schedule,
         net_arch: Optional[Union[List[int], Dict[str, List[int]]]] = None,
-        activation_fn: Type[nn.Module] = nn.ReLU,
+        activation_fn: Type[nn.Module] = nn.LeakyReLU,
         use_sde: bool = False,
-        log_std_init: float = -3.67,
+        log_std_init: float = 0,
         use_expln: bool = False,
         clip_mean: float = 2.0,
         features_extractor_class: Type[BaseFeaturesExtractor] = FlattenExtractor,
@@ -430,7 +430,7 @@ class SAACPolicy(BasePolicy):
         )
 
         if net_arch is None:
-            net_arch = {'pi':[32,32], 'qf':[64,64]}
+            net_arch = {'pi':[64,64], 'qf':[64,64]}
 
         actor_arch, critic_arch = get_actor_critic_arch(net_arch)
         self.smart = True

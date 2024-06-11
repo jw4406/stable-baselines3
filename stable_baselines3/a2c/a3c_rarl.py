@@ -358,6 +358,15 @@ class A3C_rarl(OnPolicyAlgorithm):
             self.policy.dstb_optimizer.step()
 
         explained_var = explained_variance(self.rollout_buffer.values.flatten(), self.rollout_buffer.returns.flatten())
+        v_norm = 0
+        u_norm = 0
+        d_norm = 0
+        for i in range(len(self.policy.value_optimizer.param_groups[0]['params'])):
+            v_norm = v_norm + torch.linalg.norm(self.policy.value_optimizer.param_groups[0]['params'][i].grad)
+        for i in range(len(self.policy.ctrl_optimizer.param_groups[0]['params'])):
+            u_norm = u_norm + torch.linalg.norm(self.policy.ctrl_optimizer.param_groups[0]['params'][i].grad)
+        for i in range(len(self.policy.dstb_optimizer.param_groups[0]['params'])):
+            d_norm = d_norm + torch.linalg.norm(self.policy.dstb_optimizer.param_groups[0]['params'][i].grad)
 
         self._n_updates += 1
         self.logger.record("train/n_updates", self._n_updates, exclude="tensorboard")
@@ -365,6 +374,10 @@ class A3C_rarl(OnPolicyAlgorithm):
         self.logger.record("train/entropy_loss", entropy_loss.item())
         self.logger.record("train/policy_loss", policy_loss.item())
         self.logger.record("train/value_loss", value_loss.item())
+        self.logger.record("train/v_grad_norm", v_norm.item())
+        self.logger.record("train/u_grad_norm", u_norm.item())
+        self.logger.record("train/d_grad_norm",
+                           d_norm.item())
         if hasattr(self.policy, "log_std"):
             self.logger.record("train/std", th.exp(self.policy.log_std).mean().item())
 
