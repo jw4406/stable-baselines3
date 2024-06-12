@@ -1526,7 +1526,7 @@ class ContinuousCritic(BaseModel):
         net_arch: List[int],
         features_extractor: BaseFeaturesExtractor,
         features_dim: int,
-        activation_fn: Type[nn.Module] = nn.ReLU,
+        activation_fn: Type[nn.Module] = nn.LeakyReLU,
         normalize_images: bool = True,
         n_critics: int = 2,
         share_features_extractor: bool = True,
@@ -1604,10 +1604,10 @@ class ContinuousCriticAdv(BaseModel):
         net_arch: List[int],
         features_extractor: BaseFeaturesExtractor,
         features_dim: int,
-        activation_fn: Type[nn.Module] = nn.ReLU,
+        activation_fn: Type[nn.Module] = nn.LeakyReLU,
         normalize_images: bool = True,
         n_critics: int = 2,
-        share_features_extractor: bool = True,
+        share_features_extractor: bool = False,
     ):
         super().__init__(
             observation_space,
@@ -1644,3 +1644,12 @@ class ContinuousCriticAdv(BaseModel):
         with th.no_grad():
             features = self.extract_features(obs, self.features_extractor)
         return self.q_networks[0](th.cat([features, actions, dstb_actions], dim=1))
+
+    def gpt_forward(self, obs: th.Tensor, actions: th.Tensor, dstb_actions: th.Tensor) -> th.Tensor:
+        with th.set_grad_enabled(not self.share_features_extractor):
+            features = self.extract_features(obs, self.features_extractor)
+        qvalue_input = th.cat([features, actions, dstb_actions], dim=1)
+        q_values = [q_net(qvalue_input) for q_net in self.q_networks]
+        # Aggregate Q-values in a way that involves both networks
+        combined_q_value = sum(q_values) / len(q_values)
+        return combined_q_value.mean()

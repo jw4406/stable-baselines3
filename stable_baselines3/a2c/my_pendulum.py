@@ -157,12 +157,12 @@ class my_PendulumEnv(gym.Env):
 
         self.state = np.array([newth, newthdot])
 
-        #failure = self.check_failure()
+        failure = self.check_failure()
 
         if self.render_mode == "human":
             self.render()
         # truncation=False as the time limit is handled by the `TimeLimit` wrapper added during `make`
-        return self._get_obs(), -costs, False, False, {}
+        return self._get_obs(), -costs, failure, False, {}
 
     def reset(self, *, seed: Optional[int] = None, options: Optional[dict] = None):
         super().reset(seed=seed)

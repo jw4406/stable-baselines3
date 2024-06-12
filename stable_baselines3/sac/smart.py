@@ -292,22 +292,34 @@ class SMART(OffPolicyAlgorithm):
             critic_losses.append(critic_loss.item())  # type: ignore[union-attr]
 
             if self.use_stackelberg is True:
+                actions_pi, log_prob = self.actor.action_log_prob(replay_data.observations)
+                dstb_actions_pi, dstb_log_prob = self.dstb_actor.action_log_prob(replay_data.observations)
                 critic_pred = self.critic(replay_data.observations, actions_pi, dstb_actions_pi)
-                surr_q_values = ((critic_pred[0] + critic_pred[1]) / 2).mean()
+                #tmp1 = autograd.grad(critic_pred[0][0], self.actor.optimizer.param_groups[0]['params'], create_graph=True, retain_graph=True)
+                #tmp2 = autograd.grad(tmp1[0][0][0], self.critic.parameters()[:6], create_graph=True, retain_graph=True)
+
+                #critic_pred_sum = torch.add(critic_pred[0], critic_pred[1])
+                #surr_q_value_pre_mean = torch.div(critic_pred_sum, 2)
+
+                surr_q_values = torch.mean(torch.sum(torch.hstack((critic_pred[0], critic_pred[1])), dim=1))
+                #surr_q_values = self.critic.gpt_forward(replay_data.observations, actions_pi, dstb_actions_pi)
+                surr_q_values = self.critic.q1_forward(replay_data.observations, actions_pi, dstb_actions_pi).mean()
+                #surr_q_values = torch.min(critic_pred, dim=0)
+                #surr_q_values = torch.div(torch.add(critic_pred[0], critic_pred[1]), 2).mean()
                 #critic_pred = self.critic(replay_data.observations, actions_pi, dstb_actions_pi)
                 #h1_upper_grad_batched = autograd.grad(surr_q_values, self.critic.parameters(), create_graph=True, retain_graph=True)
                 #h1_upper_grad = torch.hstack([t.flatten() for t in h1_upper_grad_batched])
                 #h1_upper_theta = autograd.grad(h1_upper_grad, self.actor.parameters(), torch.eye(9218), is_grads_batched=True, create_graph=True, retain_graph=True)
-                h1_upper_grad_batched = autograd.grad(surr_q_values, self.policy.actor.optimizer.param_groups[0]['params'],
+                h1_upper_grad_batched = autograd.grad(surr_q_values, list(self.actor.parameters()),
                                                       create_graph=True, retain_graph=True)
                 h1_upper = torch.hstack([t.flatten() for t in h1_upper_grad_batched])
-                autograd.grad(h1_upper, self.critic.parameters(), torch.eye(4545), is_grads_batched=True, create_graph=True, retain_graph=True)
-                h1_lower_grad_batched = autograd.grad(surr_q_values, self.policy.dstb_actor.optimizer.param_groups[0]['params'],
+                #autograd.grad(h1_upper, self.critic.parameters(), torch.eye(4545), is_grads_batched=True, create_graph=True, retain_graph=True)
+                h1_lower_grad_batched = autograd.grad(surr_q_values, list(self.dstb_actor.parameters()),
                                                       create_graph=True, retain_graph=True)
                 h1_lower = torch.hstack([t.flatten() for t in h1_lower_grad_batched])
 
                 h1_pre_omega = torch.hstack((h1_upper, h1_lower))
-
+                surr_critic_loss = 0.5 * sum(F.mse_loss(current_q, target_q_values) for current_q in critic_pred)
                 h2_grad_theta_batched = autograd.grad(
                     surr_critic_loss, self.policy.actor.optimizer.param_groups[0]['params'], create_graph=True, retain_graph=True
                 )
@@ -370,8 +382,9 @@ class SMART(OffPolicyAlgorithm):
                 # assert torch.equal(H, H_test)
                 ivp_H_h2 = torch.linalg.solve(H, h2)
 
-                imp = autograd.grad(h1_pre_omega, self.critic.parameters(), ivp_H_h2,
-                                    create_graph=True, retain_graph=True)
+                #imp = autograd.grad(h1_pre_omega, list(self.critic.parameters()), ivp_H_h2,
+                #                    create_graph=True, retain_graph=True)
+                test_imp = autograd.grad(h1_pre_omega, self.critic.parameters(), torch.eye(h1_pre_omega.shape[0], device=self.device), is_grads_batched=True, create_graph=True, retain_graph=True)
                 # imp is the stackelberg part of the total derivative
 
             # Optimize the critic
@@ -470,4 +483,3 @@ class SMART(OffPolicyAlgorithm):
                     to_be_unbatched[count][jac_row_count, :])
                 curr = curr + len(torch.flatten(to_be_unbatched[count][jac_row_count, :]))
         return unbatched
-

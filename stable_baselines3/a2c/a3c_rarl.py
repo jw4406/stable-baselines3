@@ -233,6 +233,7 @@ class A3C_rarl(OnPolicyAlgorithm):
                                                       self.policy.ctrl_optimizer.param_groups[0]['params'],
                                                       create_graph=True, retain_graph=True)
                 h1_upper = torch.hstack([t.flatten() for t in h1_upper_grad_batched])
+
                 h1_lower_pre = self.prep_grad_psi_omega_J(x1_values, dstb_log_prob)
                 h1_lower_grad_batched = autograd.grad(h1_lower_pre,
                                                       self.policy.dstb_optimizer.param_groups[0]['params'],
