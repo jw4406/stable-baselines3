@@ -331,7 +331,7 @@ class CheckpointCallback(BaseCallback):
                 self.model.get_vec_normalize_env().save(vec_normalize_path)  # type: ignore[union-attr]
                 if self.verbose >= 2:
                     print(f"Saving model VecNormalize to {vec_normalize_path}")
-            if self.model.v_norm < .1 and self.model.u_norm < .01 and self.model.d_norm < .01:
+            if (self.model.v_norm / self.model.max_v_grad_norm < .1) and (self.model.u_norm / self.model.max_u_grad_norm < .05) and (self.model.d_norm / self.model.max_d_grad_norm < .05):
                 return False
 
         return True
@@ -521,18 +521,18 @@ class EvalCallback(EventCallback):
             self.last_std.append(std_reward)
             fig, ax = plt.subplots(1,1)
             tsplot(ax, self.episode_returns, self.last_std)
-            """
-            with open("means_smart_ablation.csv", 'a') as f:
+
+            with open("means_baseline_cheetah.csv", 'a') as f:
                 f.write(str(self.episode_returns))
                 f.writelines("\n")
-            with open("stds_smart_ablation.csv", 'a') as f:
+            with open("stds_baseline_cheetah.csv", 'a') as f:
                 f.write(str(self.last_std))
                 f.writelines("\n")
-            pic_name = "shaded_smart_ablation_%d.png" % len(self.episode_returns)
+            pic_name = "shaded_baseline_cheetah_%d.png" % len(self.episode_returns)
 
             plt.savefig(pic_name)
             plt.close()
-            """
+
             if len(self.episode_returns) % 10 == 0 and self.jobid is not None:
                 command = "cp -r %s /u/jw4406/run_pics/%d" % (pic_name, int(self.jobid))
                 os.system(command)

@@ -199,7 +199,13 @@ class OnPolicyAlgorithm(BaseAlgorithm):
                         #print(actions)
                         clipped_actions = np.clip(actions, self.action_space.low, self.action_space.high)
                         clipped_dstb_actions = np.clip(clipped_dstb_actions, self.dstb_action_space.low, self.dstb_action_space.high)
-                new_obs, rewards, dones, infos = env.step([[clipped_actions, clipped_dstb_actions, n_steps]])
+                if self.spirit is False:
+
+                    new_obs, rewards, dones, infos = env.step([[clipped_actions, clipped_dstb_actions, n_steps]])
+                else:
+                    a = []
+                    a.append({'ctrl': clipped_actions.flatten(), 'dstb': clipped_dstb_actions.flatten()})
+                    new_obs, rewards, dones, infos = env.step(a)
 
                 self.num_timesteps += env.num_envs
 

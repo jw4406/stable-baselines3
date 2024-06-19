@@ -95,8 +95,14 @@ class A3C_rarl(OnPolicyAlgorithm):
         _init_setup_model: bool = True,
         adversarial=True,
         use_stackelberg=False,
-        dstb_action_space: spaces.Space = None
+        dstb_action_space: spaces.Space = None,
+        spirit=False,
+        fix=False
     ):
+        self.spirit = spirit
+        self.fix = fix
+        if self.spirit is True:
+            env.action_space = env.action_space['ctrl']
         super().__init__(
             policy,
             env,
@@ -133,6 +139,9 @@ class A3C_rarl(OnPolicyAlgorithm):
         self.d_learning_rate = d_learning_rate
         self.learning_rate = [v_learning_rate, c_learning_rate, d_learning_rate]
         self.policy_kwargs['dstb_action_space'] = dstb_action_space
+        self.max_v_grad_norm = 0
+        self.max_u_grad_norm = 0
+        self.max_d_grad_norm = 0
         if dstb_action_space is None:
             self.dstb_action_space = env.action_space
         else:
@@ -371,6 +380,12 @@ class A3C_rarl(OnPolicyAlgorithm):
         self.v_norm = v_norm
         self.d_norm = d_norm
         self.u_norm = u_norm
+        if self.v_norm > self.max_v_grad_norm:
+            self.max_v_grad_norm = self.v_norm
+        if self.u_norm > self.max_u_grad_norm:
+            self.max_u_grad_norm = self.u_norm
+        if self.d_norm > self.max_d_grad_norm:
+            self.max_d_grad_norm = self.d_norm
         self._n_updates += 1
         self.logger.record("train/n_updates", self._n_updates, exclude="tensorboard")
         self.logger.record("train/explained_variance", explained_var)

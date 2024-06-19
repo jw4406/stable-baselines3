@@ -124,8 +124,8 @@ class my_PendulumEnv(gym.Env):
             low=-self.max_torque, high=self.max_torque, shape=(1,), dtype=np.float32
         )
         # Additional variables for failure detection
-        self.upright_threshold = np.deg2rad(10)  # 10 degrees in radians
-        self.angular_velocity_threshold = 2.0  # Threshold angular velocity
+        self.upright_threshold = 10  # 10 degrees in radians
+        self.angular_velocity_threshold = 1.5  # Threshold angular velocity
         self.observation_space = spaces.Box(low=-high, high=high, dtype=np.float32)
 
     def step(self, joint_action):
@@ -162,7 +162,7 @@ class my_PendulumEnv(gym.Env):
         if self.render_mode == "human":
             self.render()
         # truncation=False as the time limit is handled by the `TimeLimit` wrapper added during `make`
-        return self._get_obs(), -costs, failure, False, {}
+        return self._get_obs(), -costs, False, False, {}
 
     def reset(self, *, seed: Optional[int] = None, options: Optional[dict] = None):
         super().reset(seed=seed)
@@ -263,7 +263,7 @@ class my_PendulumEnv(gym.Env):
         fname_disturbance = path.join(path.dirname(__file__), "assets/dstb_arrow.png")
         img_disturbance = pygame.image.load(fname_disturbance)
         if self.last_d is not None:
-            img_size_disturbance = int(scale * np.abs(self.last_d) / 2)
+            img_size_disturbance = int(scale* np.abs(self.last_d))
             scale_img_disturbance = pygame.transform.smoothscale(img_disturbance, (img_size_disturbance, img_size_disturbance))
             if self.last_d < 0:
                 scale_img_disturbance = pygame.transform.flip(scale_img_disturbance, True, False)
@@ -296,9 +296,12 @@ class my_PendulumEnv(gym.Env):
 
     def check_failure(self):
         theta, thetadot = self.state
-
+        curr_obs = self._get_obs()
+        x = curr_obs[0]
+        y = curr_obs[1]
+        ang = np.arctan2(y, x) * 180 / np.pi
         # Check if the pendulum is close to the upright position
-        if np.abs(theta) < self.upright_threshold:
+        if np.abs(ang) < self.upright_threshold:
             if np.abs(thetadot) > self.angular_velocity_threshold:
                 self.upright_crossings += 1
                 if self.upright_crossings > 1:

@@ -487,6 +487,8 @@ class Logger:
         self.level = INFO
         self.dir = folder
         self.output_formats = output_formats
+        self.rew_list = []
+        self.count_list =[]
 
     @staticmethod
     def to_tuple(string_or_tuple: Optional[Union[str, Tuple[str, ...]]]) -> Tuple[str, ...]:
@@ -536,7 +538,14 @@ class Logger:
         for _format in self.output_formats:
             if isinstance(_format, KVWriter):
                 _format.write(self.name_to_value, self.name_to_excluded, step)
-
+        self.rew_list.append(self.name_to_value['rollout/ep_rew_mean'])
+        self.count_list.append(self.name_to_value['time/total_timesteps'])
+        with open("ep_rew_means_ablation_3_cheetah.csv", 'a') as f:
+            f.write(str(self.rew_list))
+            f.writelines("\n")
+        with open("ep_len_counts_ablation_3_cheetah.csv", 'a') as f:
+            f.write(str(self.count_list))
+            f.writelines("\n")
         self.name_to_value.clear()
         self.name_to_count.clear()
         self.name_to_excluded.clear()
