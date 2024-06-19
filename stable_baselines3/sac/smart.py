@@ -13,7 +13,7 @@ from stable_baselines3.common.policies import BasePolicy, ContinuousCritic
 from stable_baselines3.common.type_aliases import GymEnv, MaybeCallback, Schedule
 from stable_baselines3.common.utils import get_parameters_by_name, polyak_update
 from stable_baselines3.sac.policies import Actor, CnnPolicy, MlpPolicy, MultiInputPolicy, SACPolicy, MlPAACPolicy
-
+from functorch import make_functional_with_buffers, make_functional, vmap, grad, jacrev, hessian
 SelfSAC = TypeVar("SelfSAC", bound="SAC")
 
 
@@ -306,6 +306,25 @@ class SMART(OffPolicyAlgorithm):
                 surr_q_values = self.critic.q1_forward(replay_data.observations, actions_pi, dstb_actions_pi).mean()
                 #surr_q_values = torch.min(critic_pred, dim=0)
                 #surr_q_values = torch.div(torch.add(critic_pred[0], critic_pred[1]), 2).mean()
+
+                # MAKE STATELESS MODELS
+
+                #ctrl_model_mu, ctrl_model_mu_params = make_functional(self.actor.mu)
+                #ctrl_model_log_std, ctrl_model_log_std_params, ctrl_log_std_buffers = make_functional_with_buffers(self.actor.log_std)
+                #ctrl_model_latent_pi, ctrl_model_latent_pi_params = make_functional(self.actor.latent_pi)
+
+                #dstb_model_mu, dstb_model_mu_params = make_functional(self.dstb_actor.mu)
+                #dstb_model_log_std, dstb_model_log_std_params = make_functional(self.dstb_actor.log_std)
+                #dstb_model_latent_pi, dstb_model_latent_pi_params = make_functional(self.dstb_actor.latent_pi)
+
+                #f_model_dstb, dstb_params, dstb_buffers = make_functional_with_buffers(self.dstb_actor)
+                #f_model_critic, critic_params, critic_buffers = make_functional_with_buffers(self.critic)
+
+                #stateless_q_values = self.compute_stateless_q_surr(f_model_critic, critic_params, critic_buffers, replay_data.observations)
+
+                critic_pred = self.critic(replay_data.observations, actions_pi, dstb_actions_pi)
+                surr_q_values = torch.mean(torch.sum(torch.hstack((critic_pred[0], critic_pred[1])), dim=1))
+                #surr_q_values = ((critic_pred[0] + critic_pred[1]) / 2).mean()
                 #critic_pred = self.critic(replay_data.observations, actions_pi, dstb_actions_pi)
                 #h1_upper_grad_batched = autograd.grad(surr_q_values, self.critic.parameters(), create_graph=True, retain_graph=True)
                 #h1_upper_grad = torch.hstack([t.flatten() for t in h1_upper_grad_batched])
@@ -314,7 +333,7 @@ class SMART(OffPolicyAlgorithm):
                                                       create_graph=True, retain_graph=True)
                 h1_upper = torch.hstack([t.flatten() for t in h1_upper_grad_batched])
                 #autograd.grad(h1_upper, self.critic.parameters(), torch.eye(4545), is_grads_batched=True, create_graph=True, retain_graph=True)
-                h1_lower_grad_batched = autograd.grad(surr_q_values, list(self.dstb_actor.parameters()),
+                h1_lower_grad_batched = autograd.grad(surr_q_values, self.policy.dstb_actor.optimizer.param_groups[0]['params'],
                                                       create_graph=True, retain_graph=True)
                 h1_lower = torch.hstack([t.flatten() for t in h1_lower_grad_batched])
 
@@ -394,7 +413,7 @@ class SMART(OffPolicyAlgorithm):
                 for i in range(len(self.policy.value_optimizer.param_groups[0]['params'])):
                     self.policy.value_optimizer.param_groups[0]['params'][i].grad = \
                     self.policy.value_optimizer.param_groups[0]['params'][i].grad - imp[i]
-            del imp
+            del test_imp
             self.critic.optimizer.step()
 
             # Compute actor loss
@@ -482,4 +501,28 @@ class SMART(OffPolicyAlgorithm):
                     torch.flatten(to_be_unbatched[count][jac_row_count, :]))] = torch.flatten(
                     to_be_unbatched[count][jac_row_count, :])
                 curr = curr + len(torch.flatten(to_be_unbatched[count][jac_row_count, :]))
+<<<<<<< Updated upstream
         return unbatched
+=======
+        return unbatched
+
+    def compute_stateless_q_surr(self, ctrl_model_mu, ctrl_model_log_std, ctrl_model_latent_pi, dstb_model_mu, dstb_model_log_std,
+                                 dstb_model_latent_pi, critic_model, ctrl_model_mu_params, ctrl_model_log_std_params, ctrl_model_latent_pi_params,
+                                 dstb_model_mu_params, dstb_model_log_std_params, dstb_model_latent_pi_params, critic_params, critic_buffers, obs):
+        #actions_pi, log_prob = self.actor.action_log_prob(obs)
+        #dstb_actions_pi, dstb_log_prob = self.dstb_actor.action_log_prob(obs)
+
+        ctrl_latent_pi = ctrl_model_latent_pi(ctrl_model_latent_pi_params, obs)
+        ctrl_mu = ctrl_model_mu(ctrl_model_mu_params, ctrl_latent_pi)
+        ctrl_log_std = ctrl_model_log_std(ctrl_model_log_std_params, ctrl_latent_pi)
+        ctrl_std = ctrl_log_std.exp()
+        ctrl_action = ctrl_mu + ctrl_std
+        dstb_latent_pi = dstb_model_latent_pi(dstb_model_latent_pi_params, obs)
+        dstb_mu = dstb_model_mu(dstb_model_mu_params, dstb_latent_pi)
+        dstb_log_std = dstb_model_log_std(dstb_model_log_std_params, dstb_latent_pi)
+        dstb_std = dstb_log_std.exp()
+        dstb_action = dstb_mu + dstb_std
+
+        q_values = critic_model(critic_params, critic_buffers, obs, ctrl_action, dstb_action)
+        return q_values
+>>>>>>> Stashed changes

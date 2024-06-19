@@ -521,18 +521,18 @@ class EvalCallback(EventCallback):
             self.last_std.append(std_reward)
             fig, ax = plt.subplots(1,1)
             tsplot(ax, self.episode_returns, self.last_std)
-            '''
-            with open("means_baseline_half_cheetah.csv", 'a') as f:
+
+            with open("stac_slow_pend.csv", 'a') as f:
                 f.write(str(self.episode_returns))
                 f.writelines("\n")
-            with open("stds_baseline_half_cheetah.csv", 'a') as f:
+            with open("stac_slow_pend.csv", 'a') as f:
                 f.write(str(self.last_std))
                 f.writelines("\n")
-            pic_name = "shaded_baseline_half_cheetah_%d.png" % len(self.episode_returns)
+            pic_name = "shaded_stac_training_curve_slow_%d.png" % len(self.episode_returns)
 
             plt.savefig(pic_name)
             plt.close()
-            '''
+
             if len(self.episode_returns) % 10 == 0 and self.jobid is not None:
                 command = "cp -r %s /u/jw4406/run_pics/%d" % (pic_name, int(self.jobid))
                 os.system(command)

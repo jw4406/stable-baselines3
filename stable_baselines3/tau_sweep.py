@@ -95,13 +95,11 @@ def f(tau2):
                      #max_grad_norm=.7, vf_coef=.4, gamma=.95, v_learning_rate=linear_schedule(5e-4),
                      #c_learning_rate=linear_schedule(1e-3), d_learning_rate=linear_schedule(5e-3), use_sde=True,
                      #use_rms_prop=False)
-    #callback_on_best = StopTrainingOnRewardThreshold(reward_threshold=-200, verbose=1)
-    #callback_on_best = StopTrainingOnRewardThreshold(reward_threshold=2000, verbose=1)
     eval_callback = EvalCallback(env, verbose=1, callback_on_new_best=callback_on_best,n_eval_episodes=10, jobid=args.jobid)
     checkpoint_callback = CheckpointCallback(
         save_freq=1000,
-        save_path="./",
-        name_prefix="stac_tau_sweep_pend_gradcheck_t2_%f" % tau2,
+        save_path="./gradcheck_models/",
+        name_prefix="stac_tau_sweep_pend_gradcheck_t1_%f" % tau2,
         save_replay_buffer=True,
         save_vecnormalize=True,
         jobid=args.jobid
@@ -109,11 +107,11 @@ def f(tau2):
     callback_list = CallbackList([eval_callback, checkpoint_callback])  # , checkpoint_callback])
     # model.learn(total_timesteps=1_000_000, callback=callback_list)
     model.learn(total_timesteps=5_000_000, callback=callback_list)
-    model.save("stac_pend_FINISHED_gradcheck_t2_%f.zip" % tau2)
+    model.save("stac_pend_FINISHED_gradcheck_t1_%f.zip" % tau2)
     print("HI IM DONE")
 if __name__ == '__main__':
 
-    with Pool(os.cpu_count()) as p:
+    with Pool(29) as p:
         p.map(f, [1/1.5, 1/2., 1/3., 1/4., 1/5., 1/6., 1/7., 1/8., 1/9., 1/10., 1/15., 1/20.,1/50., 1/100.,  1, 1.5, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 50, 100])
 
 
