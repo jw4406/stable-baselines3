@@ -115,9 +115,6 @@ if __name__ == '__main__':
 
     with Pool(os.cpu_count()) as p:
         p.map(f, [1/1.5, 1/2., 1/3., 1/4., 1/5., 1/6., 1/7., 1/8., 1/9., 1/10., 1/15., 1/20.,1/50., 1/100.,  1, 1.5, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 50, 100])
-    model.learn(total_timesteps=10_000_000, callback=callback_list)
-    model.save("stac_pend_FINISHED_nf_t2%f.zip" % tau2)
-    print("HI IM DONE")
 
 
 '''
