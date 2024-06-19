@@ -89,6 +89,14 @@ tau_c_d = 20
 def f(tau2):
     model = A3C_rarl("MlPAACPolicy", use_stackelberg=True, env=env, verbose=2, n_steps=8, normalize_advantage=False,gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,vf_coef=.4,gamma=.9,v_learning_rate=linear_schedule(v_learning_rate), c_learning_rate=linear_schedule(v_learning_rate * 2),d_learning_rate=linear_schedule(v_learning_rate * 2 * tau2), use_sde=True,use_rms_prop=False, device='auto')
     callback_on_best = StopTrainingOnRewardThreshold(reward_threshold=-10, verbose=1)
+
+    #model = A3C_rarl("MlPAACPolicy", dstb_action_space=Box(-.3, .3, (2,), dtype=np.float32), use_stackelberg=True,
+                     #env=env, verbose=2, n_steps=32, normalize_advantage=False, gae_lambda=.95, ent_coef=0.0,
+                     #max_grad_norm=.7, vf_coef=.4, gamma=.95, v_learning_rate=linear_schedule(5e-4),
+                     #c_learning_rate=linear_schedule(1e-3), d_learning_rate=linear_schedule(5e-3), use_sde=True,
+                     #use_rms_prop=False)
+    #callback_on_best = StopTrainingOnRewardThreshold(reward_threshold=-200, verbose=1)
+    #callback_on_best = StopTrainingOnRewardThreshold(reward_threshold=2000, verbose=1)
     eval_callback = EvalCallback(env, verbose=1, callback_on_new_best=callback_on_best,n_eval_episodes=10, jobid=args.jobid)
     checkpoint_callback = CheckpointCallback(
         save_freq=1000,
@@ -107,6 +115,9 @@ if __name__ == '__main__':
 
     with Pool(os.cpu_count()) as p:
         p.map(f, [1/1.5, 1/2., 1/3., 1/4., 1/5., 1/6., 1/7., 1/8., 1/9., 1/10., 1/15., 1/20.,1/50., 1/100.,  1, 1.5, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 50, 100])
+    model.learn(total_timesteps=10_000_000, callback=callback_list)
+    model.save("stac_pend_FINISHED_nf_t2%f.zip" % tau2)
+    print("HI IM DONE")
 
 
 '''
