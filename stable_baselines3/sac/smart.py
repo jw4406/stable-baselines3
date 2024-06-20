@@ -501,10 +501,9 @@ class SMART(OffPolicyAlgorithm):
                     torch.flatten(to_be_unbatched[count][jac_row_count, :]))] = torch.flatten(
                     to_be_unbatched[count][jac_row_count, :])
                 curr = curr + len(torch.flatten(to_be_unbatched[count][jac_row_count, :]))
-<<<<<<< Updated upstream
+
         return unbatched
-=======
-        return unbatched
+
 
     def compute_stateless_q_surr(self, ctrl_model_mu, ctrl_model_log_std, ctrl_model_latent_pi, dstb_model_mu, dstb_model_log_std,
                                  dstb_model_latent_pi, critic_model, ctrl_model_mu_params, ctrl_model_log_std_params, ctrl_model_latent_pi_params,
@@ -525,4 +524,4 @@ class SMART(OffPolicyAlgorithm):
 
         q_values = critic_model(critic_params, critic_buffers, obs, ctrl_action, dstb_action)
         return q_values
->>>>>>> Stashed changes
+

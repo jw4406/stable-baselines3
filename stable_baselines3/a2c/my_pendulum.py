@@ -164,7 +164,7 @@ class my_PendulumEnv(gym.Env):
         # truncation=False as the time limit is handled by the `TimeLimit` wrapper added during `make`
         return self._get_obs(), -costs, False, False, {}
 
-    def reset(self, *, seed: Optional[int] = None, options: Optional[dict] = None):
+    def reset(self, *, seed: Optional[int] = 3721, options: Optional[dict] = None):
         super().reset(seed=seed)
         if options is None:
             high = np.array([DEFAULT_X, DEFAULT_Y])

@@ -75,7 +75,7 @@ from stable_baselines3 import SAC
 
 #env = gym.make("MountainCarContinuous-v0")
 #env = gym.make("my_half_cheetah", render_mode='human')
-env = gym.make("my_half_cheetah")
+env = gym.make("my_pendulum")
 
 #model = A3C_rarl("MlPAACPolicy", use_stackelberg=False, env=env, verbose=2, n_steps=8, normalize_advantage=False,gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,vf_coef=.4,gamma=.9,v_learning_rate=5e-4, c_learning_rate=5e-4,d_learning_rate=5e-4, use_sde=True,use_rms_prop=False, device='cpu')
 
@@ -87,16 +87,16 @@ model = A3C_rarl("MlPAACPolicy", use_stackelberg=True, env=env, verbose=2, n_ste
 
 
 #model = A3C_rarl("MlPAACPolicy", use_stackelberg=True, env=env, verbose=2, n_steps=100, normalize_advantage=False,v_learning_rate=linear_schedule(5e-4), c_learning_rate=linear_schedule(1e-3),d_learning_rate=linear_schedule(5e-3), use_sde=True,use_rms_prop=False, device='auto')
-#model = A3C_rarl("MlPAACPolicy", dstb_action_space=Box(-.3, .3, (2,), dtype=np.float32), use_stackelberg=False,
+#model = A3C_rarl("MlPAACPolicy", dstb_action_space=Box(-.4, .4, (2,), dtype=np.float32), use_stackelberg=False,
 #                     env=env, verbose=2, n_steps=32, normalize_advantage=False, gae_lambda=.95, ent_coef=0.0,
 #                     max_grad_norm=.7, vf_coef=.4, gamma=.95, v_learning_rate=linear_schedule(5e-4),
 #                     c_learning_rate=linear_schedule(5e-3), d_learning_rate=linear_schedule(9e-3), use_sde=True,
 #                     use_rms_prop=False)
-model = A3C_rarl("MlPAACPolicy", dstb_action_space=Box(-.3, .3, (2,), dtype=np.float32), use_stackelberg=False,
-                     env=env, verbose=2, n_steps=32, normalize_advantage=False, gae_lambda=.95, ent_coef=0.0,
-                     max_grad_norm=.7, vf_coef=.4, gamma=.95, v_learning_rate=linear_schedule(5e-4),
-                     c_learning_rate=linear_schedule(5e-4), d_learning_rate=linear_schedule(5e-4), use_sde=True,
-                     use_rms_prop=False)
+#model = A3C_rarl("MlPAACPolicy", dstb_action_space=Box(-.4, .4, (2,), dtype=np.float32), use_stackelberg=False,
+                     #env=env, verbose=2, n_steps=32, normalize_advantage=False, gae_lambda=.95, ent_coef=0.0,
+                     #max_grad_norm=.7, vf_coef=.4, gamma=.95, v_learning_rate=linear_schedule(5e-4),
+                     #c_learning_rate=linear_schedule(5e-4), d_learning_rate=linear_schedule(5e-4), use_sde=True,
+                     #use_rms_prop=False)
 #model = A3C_rarl("MlPAACPolicy", dstb_action_space=Box(-.3, .3, (2,), dtype=np.float32), use_stackelberg=True, env=env, verbose=2, n_steps=512, normalize_advantage=False,gae_lambda=.92,ent_coef=0.0,max_grad_norm=.8,vf_coef=.4,gamma=.98,v_learning_rate=5e-4, c_learning_rate=1e-3,d_learning_rate=5e-3, use_sde=True,use_rms_prop=False)
 #model=A2C("MlpPolicy", normalize_advantage=True, verbose=2, env=env, n_steps=100, learning_rate=linear_schedule(3e-4), use_sde=True, use_rms_prop=False)
 #model = A3C_rarl("MlPAACPolicy", dstb_action_space=Box(-.3, .3, (2,), dtype=np.float32), use_stackelberg=True, env=env, verbose=2, n_steps=512, normalize_advantage=False,gae_lambda=.92,ent_coef=0.0,max_grad_norm=.8,vf_coef=.4,gamma=.98,v_learning_rate=5e-3, c_learning_rate=1e-2,d_learning_rate=5e-2, use_sde=True,use_rms_prop=False)
@@ -145,7 +145,7 @@ model.spirit=False
 #model.use_stackelberg=True
 
 
-<<<<<<< Updated upstream
+
 
 callback_on_best = StopTrainingOnRewardThreshold(reward_threshold=-100, verbose=1)
 eval_callback = EvalCallback(env, callback_on_new_best=callback_on_best, verbose=1, n_eval_episodes=10, jobid=args.jobid)
