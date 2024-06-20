@@ -12,7 +12,7 @@ DEFAULT_CAMERA_CONFIG = {
 }
 
 
-class my_HalfCheetahEnv(MujocoEnv, utils.EzPickle): 
+class my_HalfCheetahEnv(MujocoEnv, utils.EzPickle):
     metadata = {
         "render_modes": [
             "human",
