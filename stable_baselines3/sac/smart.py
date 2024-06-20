@@ -501,7 +501,6 @@ class SMART(OffPolicyAlgorithm):
                     torch.flatten(to_be_unbatched[count][jac_row_count, :]))] = torch.flatten(
                     to_be_unbatched[count][jac_row_count, :])
                 curr = curr + len(torch.flatten(to_be_unbatched[count][jac_row_count, :]))
-
         return unbatched
 
 

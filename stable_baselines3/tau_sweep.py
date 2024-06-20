@@ -72,7 +72,7 @@ register(# unique identifier for the env `name-version`
 import stable_baselines3.a2c
 from stable_baselines3 import A2C
 from stable_baselines3 import A3C_rarl
-from stable_baselines3 import SAC
+#from stable_baselines3 import SAC
 
 
 #env = gym.make("MountainCarContinuous-v0")
@@ -99,7 +99,7 @@ def f(tau2):
     checkpoint_callback = CheckpointCallback(
         save_freq=1000,
         save_path="./gradcheck_models/",
-        name_prefix="stac_tau_sweep_pend_gradcheck_t1_%f" % tau2,
+        name_prefix="stac_tau_sweep_pend_gradcheck_t9_%f" % tau2,
         save_replay_buffer=True,
         save_vecnormalize=True,
         jobid=args.jobid
@@ -107,7 +107,7 @@ def f(tau2):
     callback_list = CallbackList([eval_callback, checkpoint_callback])  # , checkpoint_callback])
     # model.learn(total_timesteps=1_000_000, callback=callback_list)
     model.learn(total_timesteps=5_000_000, callback=callback_list)
-    model.save("stac_pend_FINISHED_gradcheck_t1_%f.zip" % tau2)
+    model.save("stac_pend_FINISHED_gradcheck_t9_%f.zip" % tau2)
     print("HI IM DONE")
 if __name__ == '__main__':
 
