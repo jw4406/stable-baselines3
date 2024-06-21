@@ -75,7 +75,7 @@ from stable_baselines3 import SAC
 
 #env = gym.make("MountainCarContinuous-v0")
 #env = gym.make("my_half_cheetah", render_mode='human')
-env = gym.make("my_pendulum")
+env = gym.make("my_pendulum", render_mode='human')
 
 #model = A3C_rarl("MlPAACPolicy", use_stackelberg=False, env=env, verbose=2, n_steps=8, normalize_advantage=False,gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,vf_coef=.4,gamma=.9,v_learning_rate=5e-4, c_learning_rate=5e-4,d_learning_rate=5e-4, use_sde=True,use_rms_prop=False, device='cpu')
 
@@ -83,7 +83,7 @@ env = gym.make("my_pendulum")
 
 #model = A3C_rarl("MlPAACPolicy", use_stackelberg=False, env=env, verbose=2, n_steps=8, normalize_advantage=False,gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,vf_coef=.4,gamma=.9,v_learning_rate=linear_schedule(5e-4), c_learning_rate=linear_schedule(5e-4),d_learning_rate=linear_schedule(5e-4), use_sde=True,use_rms_prop=False, device='auto')
 
-model = A3C_rarl("MlPAACPolicy", use_stackelberg=True, env=env, verbose=2, n_steps=8, normalize_advantage=False,gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,vf_coef=.4,gamma=.9,v_learning_rate=linear_schedule(5e-4), c_learning_rate=linear_schedule(1e-3),d_learning_rate=linear_schedule(10e-3), use_sde=True,use_rms_prop=False, device='auto')
+model = A3C_rarl("MlPAACPolicy", use_stackelberg=True, env=env, verbose=2, n_steps=8, normalize_advantage=False,gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,vf_coef=.4,gamma=.9,v_learning_rate=linear_schedule(5e-4), c_learning_rate=linear_schedule(2e-3),d_learning_rate=linear_schedule(9e-3), use_sde=True,use_rms_prop=False, device='auto')
 
 
 #model = A3C_rarl("MlPAACPolicy", use_stackelberg=True, env=env, verbose=2, n_steps=100, normalize_advantage=False,v_learning_rate=linear_schedule(5e-4), c_learning_rate=linear_schedule(1e-3),d_learning_rate=linear_schedule(5e-3), use_sde=True,use_rms_prop=False, device='auto')
@@ -122,10 +122,11 @@ model = A3C_rarl("MlPAACPolicy", use_stackelberg=True, env=env, verbose=2, n_ste
 #model = A3C_rarl.load("./confusion_models/stac_pend_model_vis_1000000_steps.zip", env=env)
 #model = A3C_rarl.load("./confusion_models/stac_confusion_ablation.zip", env=env)
 #model = A3C_rarl.load("./stac_tau_sweep_cheetah_rew_1500_take1_5.000000_1049000_steps.zip", env=env)
+#model = A3C_rarl.load("./logs/stac_heavy_280000_steps.zip", env=env)
 model.spirit=False
 #model = SMART.load("./sac_pend_t2_330000_steps.zip", env=env)
 #model = A3C_rarl.load("./pend_smart_410400_steps.zip", env=env)
-#model = A3C_rarl.load("./conf_stac_pend_ft_2.zip", env=env)
+#model = A3C_rarl.load("./stac_pend_training_curve.zip", env=env)
 #A3C_rarl.load("./mcc_sac_test_newres")
 #model = A3C_rarl.load("./mcc_sac_test_newrew_159100_steps.zip", env=env)
 #model = A3C_rarl.load("./mcc_sac_test_newrew_300000_steps.zip", env=env)
@@ -147,22 +148,22 @@ model.spirit=False
 
 
 
-callback_on_best = StopTrainingOnRewardThreshold(reward_threshold=-100, verbose=1)
+callback_on_best = StopTrainingOnRewardThreshold(reward_threshold=-150, verbose=1)
 eval_callback = EvalCallback(env, callback_on_new_best=callback_on_best, verbose=1, n_eval_episodes=10, jobid=args.jobid)
 
 checkpoint_callback = CheckpointCallback(
   save_freq=1000,
   save_path="./logs/",
-  name_prefix='stac_training_curve_slow',
+  name_prefix='stac_pend_heavy_1',
 )
 
 callback_list = CallbackList([eval_callback, checkpoint_callback])
 
-model.learn(total_timesteps=5_000_000, callback=checkpoint_callback)
+model.learn(total_timesteps=5_000_000, callback=callback_list)
 
 #callback_on_best = StopTrainingOnRewardThreshold(reward_threshold=-200, verbose=1)
 #eval_callback = EvalCallback(env, callback_on_new_best=callback_on_best, verbose=1)
-model.save("stac_pend_training_curve.zip")
+#model.save("stac_pend_heavy_1.zip")
 #model.learn(total_timesteps=10_000_000, callback=callback_list)
 
 #callback_on_best = StopTrainingOnRewardThreshold(reward_threshold=-200, verbose=1)

@@ -138,8 +138,8 @@ class my_PendulumEnv(gym.Env):
         dt = self.dt
 
         #u = np.clip(u, -self.max_torque, self.max_torque)[0]
-        u = np.clip(u, -1.5, 1.5)[0]
-        d = np.clip(d, -.5, .5)[0]
+        u = np.clip(u, -1.3, 1.3)[0]
+        d = np.clip(d, -.7, .7)[0]
         #d = 0
         try:
             len(d)
@@ -164,7 +164,7 @@ class my_PendulumEnv(gym.Env):
         # truncation=False as the time limit is handled by the `TimeLimit` wrapper added during `make`
         return self._get_obs(), -costs, False, False, {}
 
-    def reset(self, *, seed: Optional[int] = 3721, options: Optional[dict] = None):
+    def reset(self, *, seed: Optional[int] = None, options: Optional[dict] = None):
         super().reset(seed=seed)
         if options is None:
             high = np.array([DEFAULT_X, DEFAULT_Y])
