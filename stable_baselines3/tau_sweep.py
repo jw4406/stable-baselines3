@@ -99,7 +99,7 @@ def f(tau2):
     checkpoint_callback = CheckpointCallback(
         save_freq=1000,
         save_path="./gradcheck_models/",
-        name_prefix="stac_tau_sweep_pend_gradcheck_seeded_t1_%f" % tau2,
+        name_prefix="stac_tau_sweep_pend_gradcheck_seeded_t3_%f" % tau2,
         save_replay_buffer=True,
         save_vecnormalize=True,
         jobid=args.jobid
@@ -107,13 +107,13 @@ def f(tau2):
     callback_list = CallbackList([eval_callback, checkpoint_callback])  # , checkpoint_callback])
     # model.learn(total_timesteps=1_000_000, callback=callback_list)
     model.learn(total_timesteps=5_000_000, callback=callback_list)
-    model.save("stac_pend_FINISHED_gradcheck_seeded_t1_%f.zip" % tau2)
+    model.save("stac_pend_FINISHED_gradcheck_seeded_t3_%f.zip" % tau2)
     print("HI IM DONE")
+
 if __name__ == '__main__':
 
     with Pool(os.cpu_count()) as p:
         p.map(f, np.logspace(-3,3,num=100))
-
 
 '''
 #model = A3C_rarl("MlPAACPolicy", dstb_action_space=Box(-.3, .3, (2,), dtype=np.float32), use_stackelberg=True, env=env, verbose=2, n_steps=512, normalize_advantage=False,gae_lambda=.92,ent_coef=0.0,max_grad_norm=.8,vf_coef=.4,gamma=.98,v_learning_rate=5e-4, c_learning_rate=1e-3,d_learning_rate=5e-3, use_sde=True,use_rms_prop=False)
