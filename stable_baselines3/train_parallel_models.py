@@ -87,7 +87,13 @@ tau_c_d = 5
 
 #model = lambda tau1, tau2: A3C_rarl("MlPAACPolicy", use_stackelberg=False, env=env, verbose=2, n_steps=8, normalize_advantage=False,gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,vf_coef=.4,gamma=.9,v_learning_rate=v_learning_rate, c_learning_rate=v_learning_rate * tau1,d_learning_rate=v_learning_rate * tau1 * tau2, use_sde=True,use_rms_prop=False, device='cpu')
 def f(tau2):
-    model = A3C_rarl("MlPAACPolicy", use_stackelberg=True, env=env, verbose=2, n_steps=8, normalize_advantage=False,gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,vf_coef=.4,gamma=.9,v_learning_rate=linear_schedule(v_learning_rate), c_learning_rate=linear_schedule(v_learning_rate * tau_v_c),d_learning_rate=linear_schedule(v_learning_rate * tau_v_c * tau_c_d), use_sde=True,use_rms_prop=False, device='auto')
+    seeds = [3721, 1234785, 834981, 9274, 42069, 92048, 109475, 373095, 738892, 92038]
+    model = A3C_rarl("MlPAACPolicy", use_stackelberg=True, env=env, verbose=2, n_steps=8, normalize_advantage=False,
+                     gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,vf_coef=.4,gamma=.9,
+                     v_learning_rate=linear_schedule(v_learning_rate),
+                     c_learning_rate=linear_schedule(v_learning_rate * tau_v_c),
+                     d_learning_rate=linear_schedule(v_learning_rate * tau_v_c * tau_c_d),
+                     use_sde=True,use_rms_prop=False, device='auto', seed=seeds[int(tau2)])
     callback_on_best = StopTrainingOnRewardThreshold(reward_threshold=-150, verbose=1)
 
     #model = A3C_rarl("MlPAACPolicy", dstb_action_space=Box(-.3, .3, (2,), dtype=np.float32), use_stackelberg=True,
@@ -108,7 +114,7 @@ def f(tau2):
     callback_list = CallbackList([eval_callback, checkpoint_callback])  # , checkpoint_callback])
     # model.learn(total_timesteps=1_000_000, callback=callback_list)
     model.learn(total_timesteps=5_000_000, callback=callback_list)
-    model.save("stac_pend_FINISHED_competitive_sweep_seeded_%d.zip" % int(tau2))
+    model.save("./competitive_models/stac_pend_FINISHED_competitive_sweep_seeded_%d.zip" % int(tau2))
     print("HI IM DONE")
 if __name__ == '__main__':
 

@@ -128,6 +128,7 @@ model = A3C_rarl("MlPAACPolicy", dstb_action_space=Box(-.3, .3, (2,), dtype=np.f
 #model = A3C_rarl.load("./confusion_models/stac_confusion_ablation.zip", env=env)
 #model = A3C_rarl.load("./stac_tau_sweep_cheetah_rew_1500_take1_5.000000_1049000_steps.zip", env=env)
 #model = A3C_rarl.load("./logs/stac_heavy_280000_steps.zip", env=env)
+model = A3C_rarl.load("./logs/stac_pend_heavy_1_863000_steps.zip", env=env)
 model.spirit=False
 #model = SMART.load("./sac_pend_t2_330000_steps.zip", env=env)
 #model = A3C_rarl.load("./pend_smart_410400_steps.zip", env=env)
@@ -164,7 +165,7 @@ checkpoint_callback = CheckpointCallback(
 
 callback_list = CallbackList([eval_callback, checkpoint_callback])
 
-model.learn(total_timesteps=5_000_000, callback=callback_list)
+#model.learn(total_timesteps=5_000_000, callback=callback_list)
 
 #callback_on_best = StopTrainingOnRewardThreshold(reward_threshold=-200, verbose=1)
 #eval_callback = EvalCallback(env, callback_on_new_best=callback_on_best, verbose=1)
