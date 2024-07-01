@@ -331,9 +331,9 @@ class CheckpointCallback(BaseCallback):
                 self.model.get_vec_normalize_env().save(vec_normalize_path)  # type: ignore[union-attr]
                 if self.verbose >= 2:
                     print(f"Saving model VecNormalize to {vec_normalize_path}")
-            if (self.model.v_norm / self.model.max_v_grad_norm < .005) and (self.model.u_norm / self.model.max_u_grad_norm < .005) and (self.model.d_norm / self.model.max_d_grad_norm < .005):
+            if (self.model.v_norm / self.model.max_v_grad_norm < .005) and (self.model.u_norm / self.model.max_u_grad_norm < .01) and (self.model.d_norm / self.model.max_d_grad_norm < .01):
                 print("Stopping because gradient norm condition is fulfilled")
-                return True
+                return False
 
         return True
 
