@@ -90,7 +90,7 @@ class A3C_rarl(OnPolicyAlgorithm):
         tensorboard_log: Optional[str] = None,
         policy_kwargs: Optional[Dict[str, Any]] = None,
         verbose: int = 0,
-        seed: Optional[int] = 3,
+        seed: Optional[int] = 3721,
         device: Union[th.device, str] = "auto",
         _init_setup_model: bool = True,
         adversarial=True,

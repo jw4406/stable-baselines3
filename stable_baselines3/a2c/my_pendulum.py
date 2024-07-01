@@ -125,7 +125,7 @@ class my_PendulumEnv(gym.Env):
         )
         # Additional variables for failure detection
         self.upright_threshold = 10  # 10 degrees in radians
-        self.angular_velocity_threshold = 1.5  # Threshold angular velocity
+        self.angular_velocity_threshold = 4  # Threshold angular velocity
         self.observation_space = spaces.Box(low=-high, high=high, dtype=np.float32)
 
     def step(self, joint_action):
@@ -138,8 +138,8 @@ class my_PendulumEnv(gym.Env):
         dt = self.dt
 
         #u = np.clip(u, -self.max_torque, self.max_torque)[0]
-        u = np.clip(u, -1.3, 1.3)[0]
-        d = np.clip(d, -.7, .7)[0]
+        u = np.clip(u, -1.2, 1.2)[0]
+        d = np.clip(d, -.8, .8)[0]
         #d = 0
         try:
             len(d)
@@ -162,7 +162,7 @@ class my_PendulumEnv(gym.Env):
         if self.render_mode == "human":
             self.render()
         # truncation=False as the time limit is handled by the `TimeLimit` wrapper added during `make`
-        return self._get_obs(), -costs, False, False, {}
+        return self._get_obs(), -costs, failure, False, {}
 
     def reset(self, *, seed: Optional[int] = None, options: Optional[dict] = None):
         super().reset(seed=seed)
@@ -263,7 +263,7 @@ class my_PendulumEnv(gym.Env):
         fname_disturbance = path.join(path.dirname(__file__), "assets/dstb_arrow.png")
         img_disturbance = pygame.image.load(fname_disturbance)
         if self.last_d is not None:
-            img_size_disturbance = int(scale* np.abs(self.last_d))
+            img_size_disturbance = int(scale * np.abs(self.last_d * 1.1)/2)
             scale_img_disturbance = pygame.transform.smoothscale(img_disturbance, (img_size_disturbance, img_size_disturbance))
             if self.last_d < 0:
                 scale_img_disturbance = pygame.transform.flip(scale_img_disturbance, True, False)

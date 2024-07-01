@@ -2,7 +2,7 @@ import os
 import warnings
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
-
+from datetime import datetime
 import gymnasium as gym
 import numpy as np
 import matplotlib.pyplot as plt
@@ -331,8 +331,9 @@ class CheckpointCallback(BaseCallback):
                 self.model.get_vec_normalize_env().save(vec_normalize_path)  # type: ignore[union-attr]
                 if self.verbose >= 2:
                     print(f"Saving model VecNormalize to {vec_normalize_path}")
-            if (self.model.v_norm / self.model.max_v_grad_norm < .1) and (self.model.u_norm / self.model.max_u_grad_norm < .05) and (self.model.d_norm / self.model.max_d_grad_norm < .05):
-                return False
+            if (self.model.v_norm / self.model.max_v_grad_norm < .005) and (self.model.u_norm / self.model.max_u_grad_norm < .005) and (self.model.d_norm / self.model.max_d_grad_norm < .005):
+                print("Stopping because gradient norm condition is fulfilled")
+                return True
 
         return True
 
@@ -519,8 +520,8 @@ class EvalCallback(EventCallback):
             self.last_mean_reward = float(mean_reward)
             self.episode_returns.append(mean_reward)
             self.last_std.append(std_reward)
-            fig, ax = plt.subplots(1,1)
-            tsplot(ax, self.episode_returns, self.last_std)
+            #fig, ax = plt.subplots(1,1)
+            #tsplot(ax, self.episode_returns, self.last_std)
             
             with open("means_strong_dstb_pend.csv", 'a') as f:
                 f.write(str(self.episode_returns))
@@ -528,9 +529,17 @@ class EvalCallback(EventCallback):
             with open("stds_strong_dstb_pend.csv", 'a') as f:
                 f.write(str(self.last_std))
                 f.writelines("\n")
-            pic_name = "shaded_strong_pend_%d.png" % len(self.episode_returns)
+            pic_name = "shaded_strong_pend_baseline_%d.png" % len(self.episode_returns)
 
-            plt.savefig(pic_name)
+            #today = datetime.now()
+
+            #if today.hour < 12:
+            #    h = "00"
+            #else:
+            #    h = "12"
+
+            #os.mkdir("./" + today.strftime('%Y%m%d%H%M'), )
+            #plt.savefig("./" + today.strftime('%Y%m%d') + h + pic_name)
             plt.close()
             
             if len(self.episode_returns) % 10 == 0 and self.jobid is not None:
@@ -606,6 +615,8 @@ class StopTrainingOnRewardThreshold(BaseCallback):
                 f"Stopping training because the mean reward {self.parent.best_mean_reward:.2f} "
                 f" is above the threshold {self.reward_threshold}"
             )
+        if continue_training is False:
+            print("what")
         return continue_training
 
 

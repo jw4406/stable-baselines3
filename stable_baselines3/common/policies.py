@@ -937,7 +937,7 @@ class ActorActorCriticPolicy(BasePolicy):
         features_extractor_kwargs: Optional[Dict[str, Any]] = None,
         share_features_extractor: bool = True,
         normalize_images: bool = True,
-        optimizer_class: Type[th.optim.Optimizer] = th.optim.Adam,
+        optimizer_class: Type[th.optim.Optimizer] = th.optim.AdamW,
         optimizer_kwargs: Optional[Dict[str, Any]] = None,
         adversarial=True,
         dstb_action_space: spaces.Space = None
@@ -945,8 +945,9 @@ class ActorActorCriticPolicy(BasePolicy):
         if optimizer_kwargs is None:
             optimizer_kwargs = {}
             # Small values to avoid NaN in Adam optimizer
-            if optimizer_class == th.optim.Adam:
+            if optimizer_class == th.optim.Adam or optimizer_class == th.optim.AdamW:
                 optimizer_kwargs["eps"] = 1e-5
+                optimizer_kwargs["weight_decay"] = 5e-3
 
         super().__init__(
             observation_space,

@@ -11,7 +11,7 @@ register(
     # Note: entry_point also accept a class as input (and not only a string)
     entry_point=my_PendulumEnv,
     # Max number of steps per episode, using a `TimeLimitWrapper`
-    max_episode_steps=200,
+    max_episode_steps=500,
 )
 
 register(# unique identifier for the env `name-version`
@@ -23,7 +23,7 @@ register(# unique identifier for the env `name-version`
     max_episode_steps=1000,
 )
 
-def duel_models(model1, model2, env, num_episodes=10, angle_thresh=20, hold_thresh=100, degrees=True, model_class='pendulum'):
+def duel_models(model1, model2, env, num_episodes=10, angle_thresh=20, hold_thresh=150, degrees=True, model_class='pendulum'):
     """
     Simulate matches between two models in the environment.
 
@@ -49,6 +49,7 @@ def duel_models(model1, model2, env, num_episodes=10, angle_thresh=20, hold_thre
             obs_vec = []
             vec_env = model1.get_env()
             obs = vec_env.reset()
+            obs_vec.append(obs)
             time_up = 0
             #angle_thresh = 10
             while not done:
@@ -76,7 +77,7 @@ def duel_models(model1, model2, env, num_episodes=10, angle_thresh=20, hold_thre
                 #obs, reward, done, info = env.step(action)
                 obs_vec.append(obs)
 
-            if len(obs_vec) < 200:
+            if len(obs_vec) < 500:
                 # CONTROLLER FAILURE
                 # we terminated early because of the swing-failure case
                 model2_wins = model2_wins + 1
@@ -118,22 +119,24 @@ def duel_models(model1, model2, env, num_episodes=10, angle_thresh=20, hold_thre
                 model1_wins = model1_wins + 1
             else:
                 model2_wins = model2_wins + 1
-    return rew, model2_wins
+    return model1_wins, model2_wins
 
 
 #env = gym.make("my_pendulum", render_mode='human')
-model_class = 'cheetah'
+model_class = 'pend'
 
 if model_class == 'pend':
     env = gym.make("my_pendulum", render_mode='human')
-    folder = "/Users/jw4406/Data/Justin/532/dissipativity/stable-baselines3/stable_baselines3/confusion_models/"
-    smart_model_path = 'stac_confusion_smart.zip'
+    folder = "/Users/jw4406/Data/Justin/532/dissipativity/stable-baselines3/stable_baselines3/logs/"
+    smart_model_path = '1616_8and2_stac_2142000_steps.zip'
     smart = A3C_rarl.load(folder + smart_model_path, env=env)
     smart.spirit = False
-    smart_ablation_model_path = 'stac_confusion_ablation.zip'
+    folder = "/Users/jw4406/Data/Justin/532/dissipativity/stable-baselines3/stable_baselines3/"
+    smart_ablation_model_path = 'ablation_weightdecay_2_25_split.zip'
     smart_ablation = A3C_rarl.load(folder + smart_ablation_model_path, env=env)
     smart_ablation.spirit = False
-    baseline_model_path = 'true_pend_baseline_230000_steps.zip'
+    folder = "/Users/jw4406/Data/Justin/532/dissipativity/stable-baselines3/stable_baselines3/logs/"
+    baseline_model_path = '1616_8and2_baseline_7500000_steps.zip'
     baseline = A3C_rarl.load(folder + baseline_model_path, env=env)
     baseline.spirit = False
 elif model_class == 'cheetah':
@@ -157,7 +160,7 @@ rounds=20 # change later
 s_b, s_a, s_s, a_b, a_a, a_s, b_b, b_a, b_s = [], [], [], [], [], [], [], [], []
 
 for i in range(2):
-    smartc_baselined_win, baselined_smartc_win = duel_models(smart, baseline, smart.get_env(), num_episodes=rounds, model_class=model_class)
+    smartc_baselined_win, baselined_smartc_win = duel_models(smart, smart, smart.get_env(), num_episodes=rounds, model_class=model_class)
     s_b.append(smartc_baselined_win)
     smartc_ablationd_win, ablationd_smartc_win = duel_models(smart, smart_ablation, smart.get_env(), num_episodes=rounds, model_class=model_class)
     s_a.append(smartc_ablationd_win)
