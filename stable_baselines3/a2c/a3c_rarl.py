@@ -97,9 +97,16 @@ class A3C_rarl(OnPolicyAlgorithm):
         use_stackelberg=False,
         dstb_action_space: spaces.Space = None,
         spirit=False,
-        fix=False
+        fix=False,
+        use_leaderboard=True,
+        policy_memory_size: Optional[int] = 10,
     ):
         self.spirit = spirit
+        self.use_leaderboard = use_leaderboard
+        if self.use_leaderboard is True:
+            self.policy_memory_size = policy_memory_size
+        else:
+            self.policy_memory_size = None
         self.fix = fix
         if self.spirit is True:
             env.action_space = env.action_space['ctrl']
@@ -151,7 +158,7 @@ class A3C_rarl(OnPolicyAlgorithm):
         if use_rms_prop and "optimizer_class" not in self.policy_kwargs:
             self.policy_kwargs["optimizer_class"] = th.optim.RMSprop
             self.policy_kwargs["optimizer_kwargs"] = dict(alpha=0.99, eps=rms_prop_eps, weight_decay=0)
-
+        #self.policy_kwargs['policy_memory_size'] = policy_memory_size
         if _init_setup_model:
             self._setup_model()
 
@@ -168,6 +175,9 @@ class A3C_rarl(OnPolicyAlgorithm):
         # Update optimizer learning rate
         self._update_learning_rate(self.policy.ctrl_optimizer)
         self._update_learning_rate(self.policy.dstb_optimizer)
+        if self.use_leaderboard is True:
+            for i in range(self.policy_memory_size):
+                self._update_learning_rate(self.policy.policy_memory[i].dstb_optimizer)
         self._update_learning_rate(self.policy.value_optimizer)
         #self._update_learning_rate(self.policy.optimizer)
         # This will only loop once (get all data in one go)
@@ -179,6 +189,8 @@ class A3C_rarl(OnPolicyAlgorithm):
                 actions = actions.long().flatten()
 
             values, ctrl_log_prob, ctrl_entropy, dstb_log_prob, dstb_entropy = self.policy.evaluate_actions(rollout_data.observations, actions, dstb_actions)
+            if self.use_leaderboard is True:
+                _, _, _, dstb_log_prob, dstb_entropy = self.policy.policy_memory[self.dstb_model_choice].evaluate_actions(rollout_data.observations, actions, dstb_actions)
             if self.use_stackelberg is True: # need to get V^\pi (x0) and V_\omega (x0) from the scrambled data
                 if self.rollout_buffer.split_trajectories is True:
                     # we need to discard the previous trajectory and set V_\omega (x_0) and V^\pi (x_0) to the correct values
@@ -244,9 +256,15 @@ class A3C_rarl(OnPolicyAlgorithm):
                 h1_upper = torch.hstack([t.flatten() for t in h1_upper_grad_batched])
 
                 h1_lower_pre = self.prep_grad_psi_omega_J(x1_values, dstb_log_prob)
-                h1_lower_grad_batched = autograd.grad(h1_lower_pre,
-                                                      self.policy.dstb_optimizer.param_groups[0]['params'],
-                                                      create_graph=True, retain_graph=True)
+                if self.use_leaderboard is True:
+                    h1_lower_grad_batched = autograd.grad(h1_lower_pre,
+                                                          self.policy.policy_memory[self.dstb_model_choice].dstb_optimizer.param_groups[0]['params'],
+                                                          create_graph=True, retain_graph=True)
+                else:
+
+                    h1_lower_grad_batched = autograd.grad(h1_lower_pre,
+                                                          self.policy.dstb_optimizer.param_groups[0]['params'],
+                                                          create_graph=True, retain_graph=True)
                 h1_lower = torch.hstack([t.flatten() for t in h1_lower_grad_batched])
                 h1_pre_omega = torch.hstack((h1_upper, h1_lower))
                 # TODO: jvp with h1
@@ -258,9 +276,14 @@ class A3C_rarl(OnPolicyAlgorithm):
                                                       create_graph=True, retain_graph=True)
                 h2_upper = torch.hstack([t.flatten() for t in h2_upper_grad_batched])
                 h2_lower_pre = self.prep_grad_psi_L(advantages, dstb_log_prob, x0_values)
-                h2_lower_grad_batched = autograd.grad(h2_lower_pre,
-                                                      self.policy.dstb_optimizer.param_groups[0]['params'],
-                                                      create_graph=True, retain_graph=True)
+                if self.use_leaderboard is True:
+                    h2_lower_grad_batched = autograd.grad(h2_lower_pre,
+                                                          self.policy.policy_memory[self.dstb_model_choice].dstb_optimizer.param_groups[0]['params'],
+                                                          create_graph=True, retain_graph=True)
+                else:
+                    h2_lower_grad_batched = autograd.grad(h2_lower_pre,
+                                                          self.policy.dstb_optimizer.param_groups[0]['params'],
+                                                          create_graph=True, retain_graph=True)
                 h2_lower = torch.hstack([t.flatten() for t in h2_lower_grad_batched])
                 h2 = torch.hstack((h2_upper, h2_lower))
 
@@ -273,9 +296,14 @@ class A3C_rarl(OnPolicyAlgorithm):
                 hess_theta_J_batched = autograd.grad(h1_upper, self.policy.ctrl_optimizer.param_groups[0]['params'],
                                                      torch.eye(h1_upper.shape[0], device=self.device),
                                                      is_grads_batched=True, create_graph=True, retain_graph=True)
-                hess_psi_J_batched = autograd.grad(h1_lower, self.policy.dstb_optimizer.param_groups[0]['params'],
-                                                   torch.eye(h1_lower.shape[0], device=self.device),
-                                                   is_grads_batched=True, create_graph=True, retain_graph=True)
+                if self.use_leaderboard is True:
+                    hess_psi_J_batched = autograd.grad(h1_lower, self.policy.policy_memory[self.dstb_model_choice].dstb_optimizer.param_groups[0]['params'],
+                                                       torch.eye(h1_lower.shape[0], device=self.device),
+                                                       is_grads_batched=True, create_graph=True, retain_graph=True)
+                else:
+                    hess_psi_J_batched = autograd.grad(h1_lower, self.policy.dstb_optimizer.param_groups[0]['params'],
+                                                       torch.eye(h1_lower.shape[0], device=self.device),
+                                                       is_grads_batched=True, create_graph=True, retain_graph=True)
                 num_ctrl_params = 0
                 for ele in self.policy.ctrl_optimizer.param_groups[0]['params']:
                     num_ctrl_params = num_ctrl_params + torch.numel(ele)
@@ -292,11 +320,18 @@ class A3C_rarl(OnPolicyAlgorithm):
                                                      self.policy.ctrl_optimizer.param_groups[0]['params'],
                                                      create_graph=True, retain_graph=True)
                 grad_theta_J = torch.hstack([t.flatten() for t in grad_theta_J_batched])
-                grad_theta_psi_J_batched = autograd.grad(grad_theta_J,
-                                                         self.policy.dstb_optimizer.param_groups[0]['params'],
-                                                         torch.eye(num_ctrl_params, device=self.device),
-                                                         is_grads_batched=True, create_graph=True,
-                                                         retain_graph=True)
+                if self.use_leaderboard is True:
+                    grad_theta_psi_J_batched = autograd.grad(grad_theta_J, 
+                                                             self.policy.policy_memory[self.dstb_model_choice].dstb_optimizer.param_groups[0]['params'],
+                                                             torch.eye(num_ctrl_params, device=self.device),
+                                                             is_grads_batched=True, create_graph=True,
+                                                             retain_graph=True)
+                else:
+                    grad_theta_psi_J_batched = autograd.grad(grad_theta_J,
+                                                             self.policy.dstb_optimizer.param_groups[0]['params'],
+                                                             torch.eye(num_ctrl_params, device=self.device),
+                                                             is_grads_batched=True, create_graph=True,
+                                                             retain_graph=True)
 
                 grad_theta_psi_J = self.matrix_unbatch(grad_theta_psi_J_batched,
                                                        num_ctrl_params, size2=num_dstb_params)  # this is the 1,2 position
@@ -358,14 +393,20 @@ class A3C_rarl(OnPolicyAlgorithm):
             self.policy.ctrl_optimizer.zero_grad()
             policy_loss.backward()
             self.policy.dstb_optimizer.zero_grad()
+            if self.use_leaderboard is True:
+                self.policy.policy_memory[self.dstb_model_choice].dstb_optimizer.zero_grad()
             dstb_policy_loss.backward()
             # Clip grad norm
             th.nn.utils.clip_grad_norm_(self.policy.parameters(), self.max_grad_norm)
+            th.nn.utils.clip_grad_norm_(self.policy.policy_memory[self.dstb_model_choice].parameters(),self.max_grad_norm)
             #th.nn.utils.clip_grad_norm_(self.policy.advantages.parameters(), self.max_grad_norm)
             #self.policy.optimizer.step()
             self.policy.value_optimizer.step()
             self.policy.ctrl_optimizer.step()
-            self.policy.dstb_optimizer.step()
+            if self.use_leaderboard is True:
+                self.policy.policy_memory[self.dstb_model_choice].dstb_optimizer.step()
+            else:
+                self.policy.dstb_optimizer.step()
 
         explained_var = explained_variance(self.rollout_buffer.values.flatten(), self.rollout_buffer.returns.flatten())
         v_norm = 0
@@ -375,8 +416,12 @@ class A3C_rarl(OnPolicyAlgorithm):
             v_norm = v_norm + torch.linalg.norm(self.policy.value_optimizer.param_groups[0]['params'][i].grad)
         for i in range(len(self.policy.ctrl_optimizer.param_groups[0]['params'])):
             u_norm = u_norm + torch.linalg.norm(self.policy.ctrl_optimizer.param_groups[0]['params'][i].grad)
-        for i in range(len(self.policy.dstb_optimizer.param_groups[0]['params'])):
-            d_norm = d_norm + torch.linalg.norm(self.policy.dstb_optimizer.param_groups[0]['params'][i].grad)
+        if self.use_leaderboard is True:
+            for i in range(len(self.policy.policy_memory[self.dstb_model_choice].dstb_optimizer.param_groups[0]['params'])):
+                d_norm = d_norm + torch.linalg.norm(self.policy.policy_memory[self.dstb_model_choice].dstb_optimizer.param_groups[0]['params'][i].grad)
+        else:
+            for i in range(len(self.policy.dstb_optimizer.param_groups[0]['params'])):
+                d_norm = d_norm + torch.linalg.norm(self.policy.dstb_optimizer.param_groups[0]['params'][i].grad)
         self.v_norm = v_norm
         self.d_norm = d_norm
         self.u_norm = u_norm

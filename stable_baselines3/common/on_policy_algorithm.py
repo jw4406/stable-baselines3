@@ -3,6 +3,7 @@ import time
 from typing import Any, Dict, List, Optional, Tuple, Type, TypeVar, Union
 
 import numpy as np
+from scipy.special import softmax as softy
 import torch as th
 from gymnasium import spaces
 
@@ -13,7 +14,7 @@ from stable_baselines3.common.policies import ActorCriticPolicy
 from stable_baselines3.common.type_aliases import GymEnv, MaybeCallback, Schedule
 from stable_baselines3.common.utils import obs_as_tensor, safe_mean
 from stable_baselines3.common.vec_env import VecEnv
-
+#from stable_baselines3.confusion_matrices import duel_models
 SelfOnPolicyAlgorithm = TypeVar("SelfOnPolicyAlgorithm", bound="OnPolicyAlgorithm")
 
 
@@ -134,7 +135,8 @@ class OnPolicyAlgorithm(BaseAlgorithm):
             n_envs=self.n_envs,
             **self.rollout_buffer_kwargs,
         )
-
+        if self.use_leaderboard is True:
+            self.policy_kwargs.update({'policy_memory_size': self.policy_memory_size})
         self.policy = self.policy_class(  # type: ignore[assignment]
             self.observation_space, self.action_space, self.lr_schedule, use_sde=self.use_sde, **self.policy_kwargs
         )
@@ -181,6 +183,8 @@ class OnPolicyAlgorithm(BaseAlgorithm):
                     # Convert to pytorch tensor or to TensorDict
                     obs_tensor = obs_as_tensor(self._last_obs, self.device)
                     actions, log_probs, values, dstb_actions, dstb_log_probs = self.policy(obs_tensor)
+                    if self.use_leaderboard is True:
+                        _, _, _, dstb_actions, dstb_log_probs = self.policy.policy_memory[self.dstb_model_choice](obs_tensor)
                 actions = actions.cpu().numpy()
                 dstb_actions = dstb_actions.cpu().numpy()
 
@@ -408,6 +412,12 @@ class OnPolicyAlgorithm(BaseAlgorithm):
         assert self.env is not None
 
         while self.num_timesteps < total_timesteps:
+            if self.num_timesteps % self.env.envs[0].spec.max_episode_steps == 0:
+                # we need to pick a disturbance policy here
+                dstb_win_count = self.duel_models(self, self.policy.policy_memory, self.env)
+                probs = softy(dstb_win_count)
+                dstb_model_choice = np.random.choice(self.policy_memory_size, p=probs)
+                self.dstb_model_choice = dstb_model_choice
             continue_training = self.collect_rollouts(self.env, callback, self.rollout_buffer, n_rollout_steps=self.n_steps)
 
             if not continue_training:
@@ -435,3 +445,108 @@ class OnPolicyAlgorithm(BaseAlgorithm):
             state_dicts = ["policy", "policy.optimizer"]
 
         return state_dicts, []
+
+    def duel_models(self, model1, model2, env, num_episodes=10, angle_thresh=20, hold_thresh=150, degrees=True,
+                    model_class='pendulum'):
+
+        """
+        Simulate matches between two models in the environment.
+
+        Args:
+        - model1: First RL model
+        - model2: Second RL model
+        - env: Custom Gym environment
+        - num_episodes: Number of episodes for each match
+
+        Returns:
+        - result: A tuple containing the number of wins for model1 and model2
+        """
+        model1_wins = 0
+        model2_wins = 0
+        if model_class == "pendulum" or model_class == "pend":
+            if degrees is False:
+                angle_thresh = angle_thresh * np.pi / 180
+            dstb_wins = []
+            for k in range(1):
+                for l in range(len(model2)):
+                    model1_wins = 0
+                    model2_wins = 0
+                    my_env = model1.get_env()
+                    for _ in range(num_episodes):
+                        # obs = env.reset()
+                        # obs_for_env = obs[0]
+                        # obs_for_env = obs_for_env[None, :]
+                        done = False
+                        obs_vec = []
+                        obs = my_env.reset()
+                        time_up = 0
+                        # angle_thresh = 10
+                        while not done:
+
+                            action, _, _ = model1.predict(obs, deterministic=True)
+                            _, dstb_action, _ = model2[l].predict(obs, deterministic=True)
+                            obs, reward, done, info = my_env.step([[action, dstb_action, 1]])
+                            #my_env.render()
+                            # print(reward, action, dstb_action, action + dstb_action, dstb_action)
+                            x = obs[0, 0]
+                            y = obs[0, 1]
+                            ang = np.arctan2(y, x) * 180 / np.pi
+                            if np.abs(ang) < angle_thresh:
+                                if len(obs_vec) == 0:
+                                    continue
+                                if np.abs(np.arctan2(np.array(obs_vec[-1][0, 1]),
+                                                     np.array(obs_vec[-1][0, 0])) * 180 / np.pi) < angle_thresh:
+                                    time_up = time_up + 1
+                                # VecEnv resets automatically
+                                # if done:
+                                #   obs = env.reset()
+                            # Combine actions or decide how to handle multiple actions
+                            # action = (action1, action2)  # Example; modify based on your env's requirements
+
+                            # obs, reward, done, info = env.step(action)
+                            obs_vec.append(obs)
+
+                        if len(obs_vec) < self.env.envs[0].spec.max_episode_steps:
+                            # CONTROLLER FAILURE
+                            # we terminated early because of the swing-failure case
+                            model2_wins = model2_wins + 1
+                        elif time_up < hold_thresh:
+                            # CONTROLLER FAILURE
+                            # Either:
+                            # we got up there but didnt get there fast enough
+                            # or we never got up there.
+                            # Regardless, this is a controller failure
+                            model2_wins = model2_wins + 1
+                        elif time_up >= hold_thresh:
+                            # CONTROLLER VICTORY
+                            # We got up there quickly and stayed there!
+                            model1_wins = model1_wins + 1
+                    dstb_wins.append(model2_wins)
+        elif model_class == "cheetah" or model_class == "half_cheetah" or model_class == "my_half_cheetah":
+            for _ in range(num_episodes):
+                rew = 0
+                obs = env.reset()
+                obs_for_env = obs[0]
+                obs_for_env = obs_for_env[None, :]
+                done = False
+                obs_vec = []
+                vec_env = model1.get_env()
+                obs = vec_env.reset()
+                time_up = 0
+                # angle_thresh = 10
+                counter = 0
+                while not done:
+                    action, _, _ = model1.predict(obs, deterministic=True)
+                    _, dstb_action, _ = model2.predict(obs, deterministic=True)
+                    obs, reward, done, info = vec_env.step([[action, dstb_action, 1]])
+                    vec_env.render()
+                    rew = rew + reward
+                    if counter == 500:
+                        done = True
+                    else:
+                        counter = counter + 1
+                if rew > 450:
+                    model1_wins = model1_wins + 1
+                else:
+                    model2_wins = model2_wins + 1
+        return dstb_wins

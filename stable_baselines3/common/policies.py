@@ -940,7 +940,8 @@ class ActorActorCriticPolicy(BasePolicy):
         optimizer_class: Type[th.optim.Optimizer] = th.optim.AdamW,
         optimizer_kwargs: Optional[Dict[str, Any]] = None,
         adversarial=True,
-        dstb_action_space: spaces.Space = None
+        dstb_action_space: spaces.Space = None,
+        policy_memory_size: Optional[int] = None,
     ):
         if optimizer_kwargs is None:
             optimizer_kwargs = {}
@@ -976,7 +977,7 @@ class ActorActorCriticPolicy(BasePolicy):
                 net_arch = []
             else:
 
-                net_arch = dict(pi=[16,16], vf=[64,64])
+                net_arch = dict(pi=[6,6], vf=[32,32])
 
         self.net_arch = net_arch
         self.activation_fn = activation_fn
@@ -994,7 +995,9 @@ class ActorActorCriticPolicy(BasePolicy):
 
         self.log_std_init = log_std_init
         dist_kwargs = None
-
+        self.policy_memory_size = policy_memory_size
+        if self.policy_memory_size is not None:
+            self.policy_memory = np.zeros((self.policy_memory_size,), dtype=object)
         assert not (squash_output and not use_sde), "squash_output=True is only available when using gSDE (use_sde=True)"
         # Keyword arguments for gSDE distribution
         if use_sde:
@@ -1137,9 +1140,24 @@ class ActorActorCriticPolicy(BasePolicy):
         #itertools.chain([self.log_std], self.mlp_extractor.policy_net.parameters(), self.action_net.parameters())
         #itertools.chain(self.mlp_extractor.value_net.parameters(), self.value_net.parameters())
         #self.optimizer = self.optimizer_class(self.parameters(), joint_schedule[0](1), **self.optimizer_kwargs)
+        #if self.policy_memory_size is not None:
+        #    for i in range(self.policy_memory_size):
+        #        torch.save(self, "weights.pt")
+        #        self.policy_memory[i] = torch.load("weights.pt")
         self.ctrl_optimizer = self.optimizer_class(itertools.chain([self.log_std], self.mlp_extractor.policy_net.parameters(), self.action_net.parameters()), joint_schedule[1](1),maximize=False)
+        assert len(self.policy_memory) == self.policy_memory_size
         self.dstb_optimizer = self.optimizer_class(itertools.chain([self.dstb_log_std], self.mlp_extractor.dstb_net.parameters(), self.dstb_action_net.parameters()), joint_schedule[2](1), maximize=False)
-        self.value_optimizer = self.optimizer_class(itertools.chain(self.mlp_extractor.value_net.parameters(), self.value_net.parameters()), joint_schedule[0](1), **self.optimizer_kwargs)
+        self.value_optimizer = self.optimizer_class(
+            itertools.chain(self.mlp_extractor.value_net.parameters(), self.value_net.parameters()),
+            joint_schedule[0](1), **self.optimizer_kwargs)
+        if self.policy_memory_size is not None:
+            for i in range(self.policy_memory_size):
+                torch.save(self, "weights.pt")
+                self.policy_memory[i] = torch.load("weights.pt")
+
+        #self.policy_memory_optimizers = np.zeros((self.policy_memory_size,), dtype=object)
+        #for i in range(self.policy_memory_size):
+        #    self.policy_memory_optimizers[i] = self.optimizer_class(itertools.chain([self.policy_memory[i].dstb_log_std], self.policy_memory[i].mlp_extractor.dstb_net.parameters(), self.policy_memory[i].dstb_action_net.parameters()), joint_schedule[2](1), maximize=False)
         #TODO: ReduceLROnPlateau
     def forward(self, obs: th.Tensor, deterministic: bool = False) -> Tuple[th.Tensor, th.Tensor, th.Tensor, th.Tensor, th.Tensor]:
         """
