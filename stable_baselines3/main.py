@@ -39,7 +39,7 @@ register(
     # Note: entry_point also accept a class as input (and not only a string)
     entry_point=my_PendulumEnv,
     # Max number of steps per episode, using a `TimeLimitWrapper`
-    max_episode_steps=500,
+    max_episode_steps=200,
 )
 register(# unique identifier for the env `name-version`
     id="my_walker2d_v4",

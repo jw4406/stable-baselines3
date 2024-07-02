@@ -83,6 +83,9 @@ v_learning_rate = 5e-4
 tau_v_c = 2
 tau_c_d = 5
 
+USE_LEADERBOARD = True
+LEADERBOARD_SIZE = 10
+
 #model = A3C_rarl("MlPAACPolicy", use_stackelberg=False, env=env, verbose=2, n_steps=8, normalize_advantage=False,gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,vf_coef=.4,gamma=.9,v_learning_rate=5e-4, c_learning_rate=5e-4,d_learning_rate=5e-4, use_sde=True,use_rms_prop=False, device='cpu')
 
 #model = lambda tau1, tau2: A3C_rarl("MlPAACPolicy", use_stackelberg=False, env=env, verbose=2, n_steps=8, normalize_advantage=False,gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,vf_coef=.4,gamma=.9,v_learning_rate=v_learning_rate, c_learning_rate=v_learning_rate * tau1,d_learning_rate=v_learning_rate * tau1 * tau2, use_sde=True,use_rms_prop=False, device='cpu')
@@ -93,7 +96,19 @@ def f(tau2):
                      v_learning_rate=linear_schedule(v_learning_rate),
                      c_learning_rate=linear_schedule(v_learning_rate * tau_v_c),
                      d_learning_rate=linear_schedule(v_learning_rate * tau_v_c * tau_c_d),
-                     use_sde=True,use_rms_prop=False, device='auto', seed=seeds[int(tau2)])
+                     use_sde=True,use_rms_prop=False, device='auto', seed=seeds[int(tau2)], policy_memory_size=LEADERBOARD_SIZE)
+
+    if USE_LEADERBOARD is True:
+        for i in range(LEADERBOARD_SIZE):
+            clone = A3C_rarl("MlPAACPolicy", use_stackelberg=True, env=env, verbose=2, n_steps=8, normalize_advantage=False,
+                     gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,vf_coef=.4,gamma=.9,
+                     v_learning_rate=linear_schedule(v_learning_rate),
+                     c_learning_rate=linear_schedule(v_learning_rate * tau_v_c),
+                     d_learning_rate=linear_schedule(v_learning_rate * tau_v_c * tau_c_d),
+                     use_sde=True,use_rms_prop=False, device='auto', seed=seeds[int(tau2)]+i+1)
+            model.policy.policy_memory[i] = clone.policy
+            del clone
+
     callback_on_best = StopTrainingOnRewardThreshold(reward_threshold=-150, verbose=1)
 
     #model = A3C_rarl("MlPAACPolicy", dstb_action_space=Box(-.3, .3, (2,), dtype=np.float32), use_stackelberg=True,
