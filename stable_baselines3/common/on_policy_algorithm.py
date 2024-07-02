@@ -141,7 +141,7 @@ class OnPolicyAlgorithm(BaseAlgorithm):
             self.observation_space, self.action_space, self.lr_schedule, use_sde=self.use_sde, **self.policy_kwargs
         )
         self.policy = self.policy.to(self.device)
-
+        '''
         if self.use_leaderboard is True:
             for i in range(self.policy_memory_size):
                 self.policy.policy_memory[i] = self.policy.policy_memory[i].to(self.device)
@@ -151,7 +151,7 @@ class OnPolicyAlgorithm(BaseAlgorithm):
                     i].action_dist.exploration_mat.to(self.device)
                 self.policy.policy_memory[0].action_dist.exploration_matrices = self.policy.policy_memory[
                     i].action_dist.exploration_matrices.to(self.device)
-
+        '''
 
     def collect_rollouts(
         self,
