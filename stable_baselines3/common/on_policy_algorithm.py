@@ -142,6 +142,17 @@ class OnPolicyAlgorithm(BaseAlgorithm):
         )
         self.policy = self.policy.to(self.device)
 
+        if self.use_leaderboard is True:
+            for i in range(self.policy_memory_size):
+                self.policy.policy_memory[i] = self.policy.policy_memory[i].to(self.device)
+                self.policy.policy_memory[i].dstb_action_dist.exploration_mat = self.policy.policy_memory[i].dstb_action_dist.exploration_mat.to(self.device)
+                self.policy.policy_memory[0].dstb_action_dist.exploration_matrices = self.policy.policy_memory[i].dstb_action_dist.exploration_matrices.to(self.device)
+                self.policy.policy_memory[i].action_dist.exploration_mat = self.policy.policy_memory[
+                    i].action_dist.exploration_mat.to(self.device)
+                self.policy.policy_memory[0].action_dist.exploration_matrices = self.policy.policy_memory[
+                    i].action_dist.exploration_matrices.to(self.device)
+
+
     def collect_rollouts(
         self,
         env: VecEnv,

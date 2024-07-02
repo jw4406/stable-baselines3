@@ -99,7 +99,7 @@ class A3C_rarl(OnPolicyAlgorithm):
         spirit=False,
         fix=False,
         use_leaderboard=True,
-        policy_memory_size: Optional[int] = 10,
+        policy_memory_size: Optional[int] = 2,
     ):
         self.spirit = spirit
         self.use_leaderboard = use_leaderboard

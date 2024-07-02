@@ -1,0 +1,838 @@
+[1mdiff --git a/stable_baselines3/stac_25_ud_28.out b/stable_baselines3/stac_25_ud_28.out[m
+[1mindex 563c7d5..ae74473 100644[m
+[1m--- a/stable_baselines3/stac_25_ud_28.out[m
+[1m+++ b/stable_baselines3/stac_25_ud_28.out[m
+[36m@@ -40767,3 +40767,66 @@[m [mEpisode length: 500.00 +/- 0.00[m
+ |    v_grad_norm        | 1         |[m
+ |    value_loss         | 0.0345    |[m
+ -------------------------------------[m
+[32m+[m[32m-------------------------------------[m
+[32m+[m[32m| rollout/              |           |[m
+[32m+[m[32m|    ep_len_mean        | 500       |[m
+[32m+[m[32m|    ep_rew_mean        | -2.43e+03 |[m
+[32m+[m[32m| time/                 |           |[m
+[32m+[m[32m|    fps                | 10        |[m
+[32m+[m[32m|    iterations         | 184000    |[m
+[32m+[m[32m|    time_elapsed       | 146398    |[m
+[32m+[m[32m|    total_timesteps    | 1472000   |[m
+[32m+[m[32m| train/                |           |[m
+[32m+[m[32m|    d_grad_norm        | 0.0981    |[m
+[32m+[m[32m|    entropy_loss       | -0.878    |[m
+[32m+[m[32m|    explained_variance | 1         |[m
+[32m+[m[32m|    learning_rate      | 0.00353   |[m
+[32m+[m[32m|    n_updates          | 183999    |[m
+[32m+[m[32m|    policy_loss        | 0.112     |[m
+[32m+[m[32m|    std                | 0.197     |[m
+[32m+[m[32m|    u_grad_norm        | 0.153     |[m
+[32m+[m[32m|    v_grad_norm        | 0.927     |[m
+[32m+[m[32m|    value_loss         | 0.0261    |[m
+[32m+[m[32m-------------------------------------[m
+[32m+[m[32m-------------------------------------[m
+[32m+[m[32m| rollout/              |           |[m
+[32m+[m[32m|    ep_len_mean        | 500       |[m
+[32m+[m[32m|    ep_rew_mean        | -2.43e+03 |[m
+[32m+[m[32m| time/                 |           |[m
+[32m+[m[32m|    fps                | 10        |[m
+[32m+[m[32m|    iterations         | 184100    |[m
+[32m+[m[32m|    time_elapsed       | 146457    |[m
+[32m+[m[32m|    total_timesteps    | 1472800   |[m
+[32m+[m[32m| train/                |           |[m
+[32m+[m[32m|    d_grad_norm        | 0.0456    |[m
+[32m+[m[32m|    entropy_loss       | -0.55     |[m
+[32m+[m[32m|    explained_variance | 1         |[m
+[32m+[m[32m|    learning_rate      | 0.00353   |[m
+[32m+[m[32m|    n_updates          | 184099    |[m
+[32m+[m[32m|    policy_loss        | -0.159    |[m
+[32m+[m[32m|    std                | 0.197     |[m
+[32m+[m[32m|    u_grad_norm        | 0.0347    |[m
+[32m+[m[32m|    v_grad_norm        | 0.766     |[m
+[32m+[m[32m|    value_loss         | 3.45      |[m
+[32m+[m[32m-------------------------------------[m
+[32m+[m[32m-------------------------------------[m
+[32m+[m[32m| rollout/              |           |[m
+[32m+[m[32m|    ep_len_mean        | 500       |[m
+[32m+[m[32m|    ep_rew_mean        | -2.44e+03 |[m
+[32m+[m[32m| time/                 |           |[m
+[32m+[m[32m|    fps                | 10        |[m
+[32m+[m[32m|    iterations         | 184200    |[m
+[32m+[m[32m|    time_elapsed       | 146514    |[m
+[32m+[m[32m|    total_timesteps    | 1473600   |[m
+[32m+[m[32m| train/                |           |[m
+[32m+[m[32m|    d_grad_norm        | 0.0383    |[m
+[32m+[m[32m|    entropy_loss       | -0.0731   |[m
+[32m+[m[32m|    explained_variance | 0.81      |[m
+[32m+[m[32m|    learning_rate      | 0.00353   |[m
+[32m+[m[32m|    n_updates          | 184199    |[m
+[32m+[m[32m|    policy_loss        | 0.669     |[m
+[32m+[m[32m|    std                | 0.196     |[m
+[32m+[m[32m|    u_grad_norm        | 0.327     |[m
+[32m+[m[32m|    v_grad_norm        | 0.719     |[m
+[32m+[m[32m|    value_loss         | 5.82      |[m
+[32m+[m[32m-------------------------------------[m
+[1mdiff --git a/stable_baselines3/stac_parallel_10_wd_53_ud_37.out b/stable_baselines3/stac_parallel_10_wd_53_ud_37.out[m
+[1mindex 18fa5e5..06c02f4 100644[m
+[1m--- a/stable_baselines3/stac_parallel_10_wd_53_ud_37.out[m
+[1m+++ b/stable_baselines3/stac_parallel_10_wd_53_ud_37.out[m
+[36m@@ -490049,3 +490049,360 @@[m [mEpisode length: 200.00 +/- 0.00[m
+ |    v_grad_norm        | 0.831    |[m
+ |    value_loss         | 0.000787 |[m
+ ------------------------------------[m
+[32m+[m[32m------------------------------------[m
+[32m+[m[32m| rollout/              |          |[m
+[32m+[m[32m|    ep_len_mean        | 200      |[m
+[32m+[m[32m|    ep_rew_mean        | -837     |[m
+[32m+[m[32m| time/                 |          |[m
+[32m+[m[32m|    fps                | 8        |[m
+[32m+[m[32m|    iterations         | 230300   |[m
+[32m+[m[32m|    time_elapsed       | 217921   |[m
+[32m+[m[32m|    total_timesteps    | 1842400  |[m
+[32m+[m[32m| train/                |          |[m
+[32m+[m[32m|    d_grad_norm        | 0.0548   |[m
+[32m+[m[32m|    entropy_loss       | -0.83    |[m
+[32m+[m[32m|    explained_variance | 0.993    |[m
+[32m+[m[32m|    learning_rate      | 0.00377  |[m
+[32m+[m[32m|    n_updates          | 230299   |[m
+[32m+[m[32m|    policy_loss        | -0.846   |[m
+[32m+[m[32m|    std                | 0.222    |[m
+[32m+[m[32m|    u_grad_norm        | 0.103    |[m
+[32m+[m[32m|    v_grad_norm        | 0.708    |[m
+[32m+[m[32m|    value_loss         | 3.98     |[m
+[32m+[m[32m------------------------------------[m
+[32m+[m[32m------------------------------------[m
+[32m+[m[32m| rollout/              |          |[m
+[32m+[m[32m|    ep_len_mean        | 200      |[m
+[32m+[m[32m|    ep_rew_mean        | -776     |[m
+[32m+[m[32m| time/                 |          |[m
+[32m+[m[32m|    fps                | 8        |[m
+[32m+[m[32m|    iterations         | 230200   |[m
+[32m+[m[32m|    time_elapsed       | 217927   |[m
+[32m+[m[32m|    total_timesteps    | 1841600  |[m
+[32m+[m[32m| train/                |          |[m
+[32m+[m[32m|    d_grad_norm        | 0.0366   |[m
+[32m+[m[32m|    entropy_loss       | -0.973   |[m
+[32m+[m[32m|    explained_variance | 0.995    |[m
+[32m+[m[32m|    learning_rate      | 0.00377  |[m
+[32m+[m[32m|    n_updates          | 230199   |[m
+[32m+[m[32m|    policy_loss        | 0.646    |[m
+[32m+[m[32m|    std                | 0.202    |[m
+[32m+[m[32m|    u_grad_norm        | 0.194    |[m
+[32m+[m[32m|    v_grad_norm        | 0.8      |[m
+[32m+[m[32m|    value_loss         | 0.634    |[m
+[32m+[m[32m------------------------------------[m
+[32m+[m[32m------------------------------------[m
+[32m+[m[32m| rollout/              |          |[m
+[32m+[m[32m|    ep_len_mean        | 200      |[m
+[32m+[m[32m|    ep_rew_mean        | -689     |[m
+[32m+[m[32m| time/                 |          |[m
+[32m+[m[32m|    fps                | 8        |[m
+[32m+[m[32m|    iterations         | 230100   |[m
+[32m+[m[32m|    time_elapsed       | 217940   |[m
+[32m+[m[32m|    total_timesteps    | 1840800  |[m
+[32m+[m[32m| train/                |          |[m
+[32m+[m[32m|    d_grad_norm        | 0.199    |[m
+[32m+[m[32m|    entropy_loss       | -0.326   |[m
+[32m+[m[32m|    explained_variance | 0.912    |[m
+[32m+[m[32m|    learning_rate      | 0.00377  |[m
+[32m+[m[32m|    n_updates          | 230099   |[m
+[32m+[m[32m|    policy_loss        | -0.00091 |[m
+[32m+[m[32m|    std                | 0.229    |[m
+[32m+[m[32m|    u_grad_norm        | 0.228    |[m
+[32m+[m[32m|    v_grad_norm        | 0.895    |[m
+[32m+[m[32m|    value_loss         | 0.121    |[m
+[32m+[m[32m------------------------------------[m
+[32m+[m[32m------------------------------------[m
+[32m+[m[32m| rollout/              |          |[m
+[32m+[m[32m|    ep_len_mean        | 200      |[m
+[32m+[m[32m|    ep_rew_mean        | -926     |[m
+[32m+[m[32m| time/                 |          |[m
+[32m+[m[32m|    fps                | 8        |[m
+[32m+[m[32m|    iterations         | 230100   |[m
+[32m+[m[32m|    time_elapsed       | 217948   |[m
+[32m+[m[32m|    total_timesteps    | 1840800  |[m
+[32m+[m[32m| train/                |          |[m
+[32m+[m[32m|    d_grad_norm        | 0.196    |[m
+[32m+[m[32m|    entropy_loss       | -0.89    |[m
+[32m+[m[32m|    explained_variance | 0.999    |[m
+[32m+[m[32m|    learning_rate      | 0.00377  |[m
+[32m+[m[32m|    n_updates          | 230099   |[m
+[32m+[m[32m|    policy_loss        | -0.0373  |[m
+[32m+[m[32m|    std                | 0.188    |[m
+[32m+[m[32m|    u_grad_norm        | 0.113    |[m
+[32m+[m[32m|    v_grad_norm        | 0.889    |[m
+[32m+[m[32m|    value_loss         | 0.0367   |[m
+[32m+[m[32m------------------------------------[m
+[32m+[m[32m------------------------------------[m
+[32m+[m[32m| rollout/              |          |[m
+[32m+[m[32m|    ep_len_mean        | 200      |[m
+[32m+[m[32m|    ep_rew_mean        | -864     |[m
+[32m+[m[32m| time/                 |          |[m
+[32m+[m[32m|    fps                | 8        |[m
+[32m+[m[32m|    iterations         | 230200   |[m
+[32m+[m[32m|    time_elapsed       | 217959   |[m
+[32m+[m[32m|    total_timesteps    | 1841600  |[m
+[32m+[m[32m| train/                |          |[m
+[32m+[m[32m|    d_grad_norm        | 0.0227   |[m
+[32m+[m[32m|    entropy_loss       | -1       |[m
+[32m+[m[32m|    explained_variance | 0.998    |[m
+[32m+[m[32m|    learning_rate      | 0.00377  |[m
+[32m+[m[32m|    n_updates          | 230199   |[m
+[32m+[m[32m|    policy_loss        | -0.0175  |[m
+[32m+[m[32m|    std                | 0.228    |[m
+[32m+[m[32m|    u_grad_norm        | 0.0679   |[m
+[32m+[m[32m|    v_grad_norm        | 0.79     |[m
+[32m+[m[32m|    value_loss         | 0.103    |[m
+[32m+[m[32m------------------------------------[m
+[32m+[m[32m------------------------------------[m
+[32m+[m[32m| rollout/              |          |[m
+[32m+[m[32m|    ep_len_mean        | 200      |[m
+[32m+[m[32m|    ep_rew_mean        | -688     |[m
+[32m+[m[32m| time/                 |          |[m
+[32m+[m[32m|    fps                | 8        |[m
+[32m+[m[32m|    iterations         | 230100   |[m
+[32m+[m[32m|    time_elapsed       | 217961   |[m
+[32m+[m[32m|    total_timesteps    | 1840800  |[m
+[32m+[m[32m| train/                |          |[m
+[32m+[m[32m|    d_grad_norm        | 0.0182   |[m
+[32m+[m[32m|    entropy_loss       | -1.23    |[m
+[32m+[m[32m|    explained_variance | 0.978    |[m
+[32m+[m[32m|    learning_rate      | 0.00377  |[m
+[32m+[m[32m|    n_updates          | 230099   |[m
+[32m+[m[32m|    policy_loss        | 1.79     |[m
+[32m+[m[32m|    std                | 0.143    |[m
+[32m+[m[32m|    u_grad_norm        | 0.0334   |[m
+[32m+[m[32m|    v_grad_norm        | 0.976    |[m
+[32m+[m[32m|    value_loss         | 4.66     |[m
+[32m+[m[32m------------------------------------[m
+[32m+[m[32m------------------------------------[m
+[32m+[m[32m| rollout/              |          |[m
+[32m+[m[32m|    ep_len_mean        | 200      |[m
+[32m+[m[32m|    ep_rew_mean        | -732     |[m
+[32m+[m[32m| time/                 |          |[m
+[32m+[m[32m|    fps                | 8        |[m
+[32m+[m[32m|    iterations         | 230600   |[m
+[32m+[m[32m|    time_elapsed       | 217966   |[m
+[32m+[m[32m|    total_timesteps    | 1844800  |[m
+[32m+[m[32m| train/                |          |[m
+[32m+[m[32m|    d_grad_norm        | 0.219    |[m
+[32m+[m[32m|    entropy_loss       | -0.108   |[m
+[32m+[m[32m|    explained_variance | 0.972    |[m
+[32m+[m[32m|    learning_rate      | 0.00377  |[m
+[32m+[m[32m|    n_updates          | 230599   |[m
+[32m+[m[32m|    policy_loss        | 0.196    |[m
+[32m+[m[32m|    std                | 0.214    |[m
+[32m+[m[32m|    u_grad_norm        | 0.345    |[m
+[32m+[m[32m|    v_grad_norm        | 0.625    |[m
+[32m+[m[32m|    value_loss         | 0.577    |[m
+[32m+[m[32m------------------------------------[m
+[32m+[m[32m------------------------------------[m
+[32m+[m[32m| rollout/              |          |[m
+[32m+[m[32m|    ep_len_mean        | 200      |[m
+[32m+[m[32m|    ep_rew_mean        | -830     |[m
+[32m+[m[32m| time/                 |          |[m
+[32m+[m[32m|    fps                | 8        |[m
+[32m+[m[32m|    iterations         | 230400   |[m
+[32m+[m[32m|    time_elapsed       | 217980   |[m
+[32m+[m[32m|    total_timesteps    | 1843200  |[m
+[32m+[m[32m| train/                |          |[m
+[32m+[m[32m|    d_grad_norm        | 0.0045   |[m
+[32m+[m[32m|    entropy_loss       | -1.37    |[m
+[32m+[m[32m|    explained_variance | 1        |[m
+[32m+[m[32m|    learning_rate      | 0.00377  |[m
+[32m+[m[32m|    n_updates          | 230399   |[m
+[32m+[m[32m|    policy_loss        | -0.512   |[m
+[32m+[m[32m|    std                | 0.222    |[m
+[32m+[m[32m|    u_grad_norm        | 0.171    |[m
+[32m+[m[32m|    v_grad_norm        | 0.91     |[m
+[32m+[m[32m|    value_loss         | 0.0815   |[m
+[32m+[m[32m------------------------------------[m
+[32m+[m[32m------------------------------------[m
+[32m+[m[32m| rollout/              |          |[m
+[32m+[m[32m|    ep_len_mean        | 200      |[m
+[32m+[m[32m|    ep_rew_mean        | -769     |[m
+[32m+[m[32m| time/                 |          |[m
+[32m+[m[32m|    fps                | 8        |[m
+[32m+[m[32m|    iterations         | 230300   |[m
+[32m+[m[32m|    time_elapsed       | 217986   |[m
+[32m+[m[32m|    total_timesteps    | 1842400  |[m
+[32m+[m[32m| train/                |          |[m
+[32m+[m[32m|    d_grad_norm        | 0.0792   |[m
+[32m+[m[32m|    entropy_loss       | 0.327    |[m
+[32m+[m[32m|    explained_variance | -0.0476  |[m
+[32m+[m[32m|    learning_rate      | 0.00377  |[m
+[32m+[m[32m|    n_updates          | 230299   |[m
+[32m+[m[32m|    policy_loss        | 0.0768   |[m
+[32m+[m[32m|    std                | 0.203    |[m
+[32m+[m[32m|    u_grad_norm        | 0.478    |[m
+[32m+[m[32m|    v_grad_norm        | 0.916    |[m
+[32m+[m[32m|    value_loss         | 0.0116   |[m
+[32m+[m[32m------------------------------------[m
+[32m+[m[32m------------------------------------[m
+[32m+[m[32m| rollout/              |          |[m
+[32m+[m[32m|    ep_len_mean        | 200      |[m
+[32m+[m[32m|    ep_rew_mean        | -688     |[m
+[32m+[m[32m| time/                 |          |[m
+[32m+[m[32m|    fps                | 8        |[m
+[32m+[m[32m|    iterations         | 230200   |[m
+[32m+[m[32m|    time_elapsed       | 217998   |[m
+[32m+[m[32m|    total_timesteps    | 1841600  |[m
+[32m+[m[32m| train/                |          |[m
+[32m+[m[32m|    d_grad_norm        | 0.0755   |[m
+[32m+[m[32m|    entropy_loss       | 0.433    |[m
+[32m+[m[32m|    explained_variance | -0.585   |[m
+[32m+[m[32m|    learning_rate      | 0.00377  |[m
+[32m+[m[32m|    n_updates          | 230199   |[m
+[32m+[m[32m|    policy_loss        | 0.0127   |[m
+[32m+[m[32m|    std                | 0.23     |[m
+[32m+[m[32m|    u_grad_norm        | 0.0262   |[m
+[32m+[m[32m|    v_grad_norm        | 1.07     |[m
+[32m+[m[32m|    value_loss         | 0.000219 |[m
+[32m+[m[32m------------------------------------[m
+[32m+[m[32m------------------------------------[m
+[32m+[m[32m| rollout/              |          |[m
+[32m+[m[32m|    ep_len_mean        | 200      |[m
+[32m+[m[32m|    ep_rew_mean        | -921     |[m
+[32m+[m[32m| time/                 |          |[m
+[32m+[m[32m|    fps                | 8        |[m
+[32m+[m[32m|    iterations         | 230200   |[m
+[32m+[m[32m|    time_elapsed       | 218006   |[m
+[32m+[m[32m|    total_timesteps    | 1841600  |[m
+[32m+[m[32m| train/                |          |[m
+[32m+[m[32m|    d_grad_norm        | 0.123    |[m
+[32m+[m[32m|    entropy_loss       | -0.0876  |[m
+[32m+[m[32m|    explained_variance | -17      |[m
+[32m+[m[32m|    learning_rate      | 0.00377  |[m
+[32m+[m[32m|    n_updates          | 230199   |[m
+[32m+[m[32m|    policy_loss        | -0.00281 |[m
+[32m+[m[32m|    std                | 0.187    |[m
+[32m+[m[32m|    u_grad_norm        | 0.522    |[m
+[32m+[m[32m|    v_grad_norm        | 0.8      |[m
+[32m+[m[32m|    value_loss         | 0.00578  |[m
+[32m+[m[32m------------------------------------[m
+[32m+[m[32m------------------------------------[m
+[32m+[m[32m| rollout/              |          |[m
+[32m+[m[32m|    ep_len_mean        | 200      |[m
+[32m+[m[32m|    ep_rew_mean        | -863     |[m
+[32m+[m[32m| time/                 |          |[m
+[32m+[m[32m|    fps                | 8        |[m
+[32m+[m[32m|    iterations         | 230300   |[m
+[32m+[m[32m|    time_elapsed       | 218017   |[m
+[32m+[m[32m|    total_timesteps    | 1842400  |[m
+[32m+[m[32m| train/                |          |[m
+[32m+[m[32m|    d_grad_norm        | 0.0407   |[m
+[32m+[m[32m|    entropy_loss       | -1.15    |[m
+[32m+[m[32m|    explained_variance | 1        |[m
+[32m+[m[32m|    learning_rate      | 0.00377  |[m
+[32m+[m[32m|    n_updates          | 230299   |[m
+[32m+[m[32m|    policy_loss        | 0.366    |[m
+[32m+[m[32m|    std                | 0.23     |[m
+[32m+[m[32m|    u_grad_norm        | 0.0816   |[m
+[32m+[m[32m|    v_grad_norm        | 0.935    |[m
+[32m+[m[32m|    value_loss         | 0.245    |[m
+[32m+[m[32m------------------------------------[m
+[32m+[m[32m------------------------------------[m
+[32m+[m[32m| rollout/              |          |[m
+[32m+[m[32m|    ep_len_mean        | 200      |[m
+[32m+[m[32m|    ep_rew_mean        | -706     |[m
+[32m+[m[32m| time/                 |          |[m
+[32m+[m[32m|    fps                | 8        |[m
+[32m+[m[32m|    iterations         | 230200   |[m
+[32m+[m[32m|    time_elapsed       | 218019   |[m
+[32m+[m[32m|    total_timesteps    | 1841600  |[m
+[32m+[m[32m| train/                |          |[m
+[32m+[m[32m|    d_grad_norm        | 0.0773   |[m
+[32m+[m[32m|    entropy_loss       | -1.08    |[m
+[32m+[m[32m|    explained_variance | 1        |[m
+[32m+[m[32m|    learning_rate      | 0.00377  |[m
+[32m+[m[32m|    n_updates          | 230199   |[m
+[32m+[m[32m|    policy_loss        | -0.0308  |[m
+[32m+[m[32m|    std                | 0.143    |[m
+[32m+[m[32m|    u_grad_norm        | 0.0731   |[m
+[32m+[m[32m|    v_grad_norm        | 0.811    |[m
+[32m+[m[32m|    value_loss         | 0.00902  |[m
+[32m+[m[32m------------------------------------[m
+[32m+[m[32m------------------------------------[m
+[32m+[m[32m| rollout/              |          |[m
+[32m+[m[32m|    ep_len_mean        | 200      |[m
+[32m+[m[32m|    ep_rew_mean        | -714     |[m
+[32m+[m[32m| time/                 |          |[m
+[32m+[m[32m|    fps                | 8        |[m
+[32m+[m[32m|    iterations         | 230700   |[m
+[32m+[m[32m|    time_elapsed       | 218024   |[m
+[32m+[m[32m|    total_timesteps    | 1845600  |[m
+[32m+[m[32m| train/                |          |[m
+[32m+[m[32m|    d_grad_norm        | 0.0237   |[m
+[32m+[m[32m|    entropy_loss       | -0.826   |[m
+[32m+[m[32m|    explained_variance | 0.997    |[m
+[32m+[m[32m|    learning_rate      | 0.00377  |[m
+[32m+[m[32m|    n_updates          | 230699   |[m
+[32m+[m[32m|    policy_loss        | 3.38     |[m
+[32m+[m[32m|    std                | 0.215    |[m
+[32m+[m[32m|    u_grad_norm        | 0.256    |[m
+[32m+[m[32m|    v_grad_norm        | 0.72     |[m
+[32m+[m[32m|    value_loss         | 4.53     |[m
+[32m+[m[32m------------------------------------[m
+[32m+[m[32m------------------------------------[m
+[32m+[m[32m| rollout/              |          |[m
+[32m+[m[32m|    ep_len_mean        | 200      |[m
+[32m+[m[32m|    ep_rew_mean        | -828     |[m
+[32m+[m[32m| time/                 |          |[m
+[32m+[m[32m|    fps                | 8        |[m
+[32m+[m[32m|    iterations         | 230500   |[m
+[32m+[m[32m|    time_elapsed       | 218037   |[m
+[32m+[m[32m|    total_timesteps    | 1844000  |[m
+[32m+[m[32m| train/                |          |[m
+[32m+[m[32m|    d_grad_norm        | 0.137    |[m
+[32m+[m[32m|    entropy_loss       | -1.32    |[m
+[32m+[m[32m|    explained_variance | 0.998    |[m
+[32m+[m[32m|    learning_rate      | 0.00377  |[m
+[32m+[m[32m|    n_updates          | 230499   |[m
+[32m+[m[32m|    policy_loss        | -0.623   |[m
+[32m+[m[32m|    std                | 0.223    |[m
+[32m+[m[32m|    u_grad_norm        | 0.17     |[m
+[32m+[m[32m|    v_grad_norm        | 0.816    |[m
+[32m+[m[32m|    value_loss         | 0.299    |[m
+[32m+[m[32m------------------------------------[m
+[32m+[m[32m------------------------------------[m
+[32m+[m[32m| rollout/              |          |[m
+[32m+[m[32m|    ep_len_mean        | 200      |[m
+[32m+[m[32m|    ep_rew_mean        | -775     |[m
+[32m+[m[32m| time/                 |          |[m
+[32m+[m[32m|    fps                | 8        |[m
+[32m+[m[32m|    iterations         | 230400   |[m
+[32m+[m[32m|    time_elapsed       | 218043   |[m
+[32m+[m[32m|    total_timesteps    | 1843200  |[m
+[32m+[m[32m| train/                |          |[m
+[32m+[m[32m|    d_grad_norm        | 0.49     |[m
+[32m+[m[32m|    entropy_loss       | 0.227    |[m
+[32m+[m[32m|    explained_variance | -1.32    |[m
+[32m+[m[32m|    learning_rate      | 0.00377  |[m
+[32m+[m[32m|    n_updates          | 230399   |[m
+[32m+[m[32m|    policy_loss        | 0.0138   |[m
+[32m+[m[32m|    std                | 0.203    |[m
+[32m+[m[32m|    u_grad_norm        | 0.191    |[m
+[32m+[m[32m|    v_grad_norm        | 0.867    |[m
+[32m+[m[32m|    value_loss         | 0.000464 |[m
+[32m+[m[32m------------------------------------[m
+[32m+[m[32m------------------------------------[m
+[32m+[m[32m| rollout/              |          |[m
+[32m+[m[32m|    ep_len_mean        | 200      |[m
+[32m+[m[32m|    ep_rew_mean        | -686     |[m
+[32m+[m[32m| time/                 |          |[m
+[32m+[m[32m|    fps                | 8        |[m
+[32m+[m[32m|    iterations         | 230300   |[m
+[32m+[m[32m|    time_elapsed       | 218056   |[m
+[32m+[m[32m|    total_timesteps    | 1842400  |[m
+[32m+[m[32m| train/                |          |[m
+[32m+[m[32m|    d_grad_norm        | 0.171    |[m
+[32m+[m[32m|    entropy_loss       | 0.293    |[m
+[32m+[m[32m|    explained_variance | 0.681    |[m
+[32m+[m[32m|    learning_rate      | 0.00377  |[m
+[32m+[m[32m|    n_updates          | 230299   |[m
+[32m+[m[32m|    policy_loss        | -0.00341 |[m
+[32m+[m[32m|    std                | 0.23     |[m
+[32m+[m[32m|    u_grad_norm        | 0.846    |[m
+[32m+[m[32m|    v_grad_norm        | 0.405    |[m
+[32m+[m[32m|    value_loss         | 0.000102 |[m
+[32m+[m[32m------------------------------------[m
+[1mdiff --git a/stable_baselines3/stac_parallel_10_wd_53_ud_46.out b/stable_baselines3/stac_parallel_10_wd_53_ud_46.out[m
+[1mindex 115f399..8744c43 100644[m
+[1m--- a/stable_baselines3/stac_parallel_10_wd_53_ud_46.out[m
+[1m+++ b/stable_baselines3/stac_parallel_10_wd_53_ud_46.out[m
+[36m@@ -417136,3 +417136,326 @@[m [mEpisode length: 200.00 +/- 0.00[m
+ |    v_grad_norm        | 0.352    |[m
+ |    value_loss         | 0.00118  |[m
+ ------------------------------------[m
+[32m+[m[32m------------------------------------[m
+[32m+[m[32m| rollout/              |          |[m
+[32m+[m[32m|    ep_len_mean        | 200      |[m
+[32m+[m[32m|    ep_rew_mean        | -552     |[m
+[32m+[m[32m| time/                 |          |[m
+[32m+[m[32m|    fps                | 8        |[m
+[32m+[m[32m|    iterations         | 230700   |[m
+[32m+[m[32m|    time_elapsed       | 217862   |[m
+[32m+[m[32m|    total_timesteps    | 1845600  |[m
+[32m+[m[32m| train/                |          |[m
+[32m+[m[32m|    d_grad_norm        | 0.166    |[m
+[32m+[m[32m|    entropy_loss       | 0.195    |[m
+[32m+[m[32m|    explained_variance | -0.917   |[m
+[32m+[m[32m|    learning_rate      | 0.00377  |[m
+[32m+[m[32m|    n_updates          | 230699   |[m
+[32m+[m[32m|    policy_loss        | -0.0104  |[m
+[32m+[m[32m|    std                | 0.221    |[m
+[32m+[m[32m|    u_grad_norm        | 0.682    |[m
+[32m+[m[32m|    v_grad_norm        | 0.693    |[m
+[32m+[m[32m|    value_loss         | 0.000649 |[m
+[32m+[m[32m------------------------------------[m
+[32m+[m[32m------------------------------------[m
+[32m+[m[32m| rollout/              |          |[m
+[32m+[m[32m|    ep_len_mean        | 200      |[m
+[32m+[m[32m|    ep_rew_mean        | -537     |[m
+[32m+[m[32m| time/                 |          |[m
+[32m+[m[32m|    fps                | 8        |[m
+[32m+[m[32m|    iterations         | 231300   |[m
+[32m+[m[32m|    time_elapsed       | 217871   |[m
+[32m+[m[32m|    total_timesteps    | 1850400  |[m
+[32m+[m[32m| train/                |          |[m
+[32m+[m[32m|    d_grad_norm        | 0.101    |[m
+[32m+[m[32m|    entropy_loss       | -0.434   |[m
+[32m+[m[32m|    explained_variance | 0.999    |[m
+[32m+[m[32m|    learning_rate      | 0.00377  |[m
+[32m+[m[32m|    n_updates          | 231299   |[m
+[32m+[m[32m|    policy_loss        | 0.0227   |[m
+[32m+[m[32m|    std                | 0.208    |[m
+[32m+[m[32m|    u_grad_norm        | 0.184    |[m
+[32m+[m[32m|    v_grad_norm        | 0.803    |[m
+[32m+[m[32m|    value_loss         | 0.00622  |[m
+[32m+[m[32m------------------------------------[m
+[32m+[m[32m------------------------------------[m
+[32m+[m[32m| rollout/              |          |[m
+[32m+[m[32m|    ep_len_mean        | 200      |[m
+[32m+[m[32m|    ep_rew_mean        | -594     |[m
+[32m+[m[32m| time/                 |          |[m
+[32m+[m[32m|    fps                | 8        |[m
+[32m+[m[32m|    iterations         | 230100   |[m
+[32m+[m[32m|    time_elapsed       | 217873   |[m
+[32m+[m[32m|    total_timesteps    | 1840800  |[m
+[32m+[m[32m| train/                |          |[m
+[32m+[m[32m|    d_grad_norm        | 0.0208   |[m
+[32m+[m[32m|    entropy_loss       | 0.399    |[m
+[32m+[m[32m|    explained_variance | -7.38    |[m
+[32m+[m[32m|    learning_rate      | 0.00377  |[m
+[32m+[m[32m|    n_updates          | 230099   |[m
+[32m+[m[32m|    policy_loss        | 0.00386  |[m
+[32m+[m[32m|    std                | 0.213    |[m
+[32m+[m[32m|    u_grad_norm        | 0.461    |[m
+[32m+[m[32m|    v_grad_norm        | 0.885    |[m
+[32m+[m[32m|    value_loss         | 0.000104 |[m
+[32m+[m[32m------------------------------------[m
+[32m+[m[32mEval num_timesteps=1850000, episode_reward=-662.70 +/- 330.52[m
+[32m+[m[32mEpisode length: 200.00 +/- 0.00[m
+[32m+[m[32m------------------------------------[m
+[32m+[m[32m| eval/                 |          |[m
+[32m+[m[32m|    mean_ep_length     | 200      |[m
+[32m+[m[32m|    mean_reward        | -663     |[m
+[32m+[m[32m| time/                 |          |[m
+[32m+[m[32m|    total_timesteps    | 1850000  |[m
+[32m+[m[32m| train/                |          |[m
+[32m+[m[32m|    d_grad_norm        | 0.00842  |[m
+[32m+[m[32m|    entropy_loss       | 0.335    |[m
+[32m+[m[32m|    explained_variance | 0.0441   |[m
+[32m+[m[32m|    learning_rate      | 0.00377  |[m
+[32m+[m[32m|    n_updates          | 231249   |[m
+[32m+[m[32m|    policy_loss        | 0.108    |[m
+[32m+[m[32m|    std                | 0.224    |[m
+[32m+[m[32m|    u_grad_norm        | 0.00286  |[m
+[32m+[m[32m|    v_grad_norm        | 0.971    |[m
+[32m+[m[32m|    value_loss         | 0.0189   |[m
+[32m+[m[32m------------------------------------[m
+[32m+[m[32m------------------------------------[m
+[32m+[m[32m| rollout/              |          |[m
+[32m+[m[32m|    ep_len_mean        | 200      |[m
+[32m+[m[32m|    ep_rew_mean        | -602     |[m
+[32m+[m[32m| time/                 |          |[m
+[32m+[m[32m|    fps                | 8        |[m
+[32m+[m[32m|    iterations         | 230100   |[m
+[32m+[m[32m|    time_elapsed       | 217882   |[m
+[32m+[m[32m|    total_timesteps    | 1840800  |[m
+[32m+[m[32m| train/                |          |[m
+[32m+[m[32m|    d_grad_norm        | 0.0107   |[m
+[32m+[m[32m|    entropy_loss       | -1.37    |[m
+[32m+[m[32m|    explained_variance | 0.998    |[m
+[32m+[m[32m|    learning_rate      | 0.00377  |[m
+[32m+[m[32m|    n_updates          | 230099   |[m
+[32m+[m[32m|    policy_loss        | 2.88     |[m
+[32m+[m[32m|    std                | 0.22     |[m
+[32m+[m[32m|    u_grad_norm        | 0.188    |[m
+[32m+[m[32m|    v_grad_norm        | 0.715    |[m
+[32m+[m[32m|    value_loss         | 0.953    |[m
+[32m+[m[32m------------------------------------[m
+[32m+[m[32m------------------------------------[m
+[32m+[m[32m| rollout/              |          |[m
+[32m+[m[32m|    ep_len_mean        | 200      |[m
+[32m+[m[32m|    ep_rew_mean        | -784     |[m
+[32m+[m[32m| time/                 |          |[m
+[32m+[m[32m|    fps                | 8        |[m
+[32m+[m[32m|    iterations         | 231300   |[m
+[32m+[m[32m|    time_elapsed       | 217907   |[m
+[32m+[m[32m|    total_timesteps    | 1850400  |[m
+[32m+[m[32m| train/                |          |[m
+[32m+[m[32m|    d_grad_norm        | 0.0161   |[m
+[32m+[m[32m|    entropy_loss       | 0.409    |[m
+[32m+[m[32m|    explained_variance | -17      |[m
+[32m+[m[32m|    learning_rate      | 0.00377  |[m
+[32m+[m[32m|    n_updates          | 231299   |[m
+[32m+[m[32m|    policy_loss        | -0.0103  |[m
+[32m+[m[32m|    std                | 0.225    |[m
+[32m+[m[32m|    u_grad_norm        | 0.836    |[m
+[32m+[m[32m|    v_grad_norm        | 0.446    |[m
+[32m+[m[32m|    value_loss         | 0.0916   |[m
+[32m+[m[32m------------------------------------[m
+[32m+[m[32m------------------------------------[m
+[32m+[m[32m| rollout/              |          |[m
+[32m+[m[32m|    ep_len_mean        | 200      |[m
+[32m+[m[32m|    ep_rew_mean        | -552     |[m
+[32m+[m[32m| time/                 |          |[m
+[32m+[m[32m|    fps                | 8        |[m
+[32m+[m[32m|    iterations         | 230800   |[m
+[32m+[m[32m|    time_elapsed       | 217922   |[m
+[32m+[m[32m|    total_timesteps    | 1846400  |[m
+[32m+[m[32m| train/                |          |[m
+[32m+[m[32m|    d_grad_norm        | 0.244    |[m
+[32m+[m[32m|    entropy_loss       | 0.147    |[m
+[32m+[m[32m|    explained_variance | 0.0216   |[m
+[32m+[m[32m|    learning_rate      | 0.00377  |[m
+[32m+[m[32m|    n_updates          | 230799   |[m
+[32m+[m[32m|    policy_loss        | -0.00203 |[m
+[32m+[m[32m|    std                | 0.222    |[m
+[32m+[m[32m|    u_grad_norm        | 0.765    |[m
+[32m+[m[32m|    v_grad_norm        | 0.566    |[m
+[32m+[m[32m|    value_loss         | 0.000922 |[m
+[32m+[m[32m------------------------------------[m
+[32m+[m[32m------------------------------------[m
+[32m+[m[32m| rollout/              |          |[m
+[32m+[m[32m|    ep_len_mean        | 200      |[m
+[32m+[m[32m|    ep_rew_mean        | -547     |[m
+[32m+[m[32m| time/                 |          |[m
+[32m+[m[32m|    fps                | 8        |[m
+[32m+[m[32m|    iterations         | 231400   |[m
+[32m+[m[32m|    time_elapsed       | 217930   |[m
+[32m+[m[32m|    total_timesteps    | 1851200  |[m
+[32m+[m[32m| train/                |          |[m
+[32m+[m[32m|    d_grad_norm        | 0.036    |[m
+[32m+[m[32m|    entropy_loss       | 0.263    |[m
+[32m+[m[32m|    explained_variance | -0.653   |[m
+[32m+[m[32m|    learning_rate      | 0.00377  |[m
+[32m+[m[32m|    n_updates          | 231399   |[m
+[32m+[m[32m|    policy_loss        | -0.0278  |[m
+[32m+[m[32m|    std                | 0.208    |[m
+[32m+[m[32m|    u_grad_norm        | 0.917    |[m
+[32m+[m[32m|    v_grad_norm        | 0.346    |[m
+[32m+[m[32m|    value_loss         | 0.000507 |[m
+[32m+[m[32m------------------------------------[m
+[32m+[m[32m------------------------------------[m
+[32m+[m[32m| rollout/              |          |[m
+[32m+[m[32m|    ep_len_mean        | 200      |[m
+[32m+[m[32m|    ep_rew_mean        | -602     |[m
+[32m+[m[32m| time/                 |          |[m
+[32m+[m[32m|    fps                | 8        |[m
+[32m+[m[32m|    iterations         | 230200   |[m
+[32m+[m[32m|    time_elapsed       | 217932   |[m
+[32m+[m[32m|    total_timesteps    | 1841600  |[m
+[32m+[m[32m| train/                |          |[m
+[32m+[m[32m|    d_grad_norm        | 0.227    |[m
+[32m+[m[32m|    entropy_loss       | 0.424    |[m
+[32m+[m[32m|    explained_variance | -0.25    |[m
+[32m+[m[32m|    learning_rate      | 0.00377  |[m
+[32m+[m[32m|    n_updates          | 230199   |[m
+[32m+[m[32m|    policy_loss        | -0.0334  |[m
+[32m+[m[32m|    std                | 0.214    |[m
+[32m+[m[32m|    u_grad_norm        | 0.757    |[m
+[32m+[m[32m|    v_grad_norm        | 0.542    |[m
+[32m+[m[32m|    value_loss         | 0.00749  |[m
+[32m+[m[32m------------------------------------[m
+[32m+[m[32m------------------------------------[m
+[32m+[m[32m| rollout/              |          |[m
+[32m+[m[32m|    ep_len_mean        | 200      |[m
+[32m+[m[32m|    ep_rew_mean        | -610     |[m
+[32m+[m[32m| time/                 |          |[m
+[32m+[m[32m|    fps                | 8        |[m
+[32m+[m[32m|    iterations         | 230200   |[m
+[32m+[m[32m|    time_elapsed       | 217940   |[m
+[32m+[m[32m|    total_timesteps    | 1841600  |[m
+[32m+[m[32m| train/                |          |[m
+[32m+[m[32m|    d_grad_norm        | 0.366    |[m
+[32m+[m[32m|    entropy_loss       | 0.0709   |[m
+[32m+[m[32m|    explained_variance | -5.49    |[m
+[32m+[m[32m|    learning_rate      | 0.00377  |[m
+[32m+[m[32m|    n_updates          | 230199   |[m
+[32m+[m[32m|    policy_loss        | -0.00704 |[m
+[32m+[m[32m|    std                | 0.221    |[m
+[32m+[m[32m|    u_grad_norm        | 0.196    |[m
+[32m+[m[32m|    v_grad_norm        | 0.967    |[m
+[32m+[m[32m|    value_loss         | 0.000198 |[m
+[32m+[m[32m------------------------------------[m
+[32m+[m[32m------------------------------------[m
+[32m+[m[32m| rollout/              |          |[m
+[32m+[m[32m|    ep_len_mean        | 200      |[m
+[32m+[m[32m|    ep_rew_mean        | -771     |[m
+[32m+[m[32m| time/                 |          |[m
+[32m+[m[32m|    fps                | 8        |[m
+[32m+[m[32m|    iterations         | 231400   |[m
+[32m+[m[32m|    time_elapsed       | 217964   |[m
+[32m+[m[32m|    total_timesteps    | 1851200  |[m
+[32m+[m[32m| train/                |          |[m
+[32m+[m[32m|    d_grad_norm        | 0.0545   |[m
+[32m+[m[32m|    entropy_loss       | 0.358    |[m
+[32m+[m[32m|    explained_variance | -0.97    |[m
+[32m+[m[32m|    learning_rate      | 0.00377  |[m
+[32m+[m[32m|    n_updates          | 231399   |[m
+[32m+[m[32m|    policy_loss        | 0.00475  |[m
+[32m+[m[32m|    std                | 0.224    |[m
+[32m+[m[32m|    u_grad_norm        | 0.312    |[m
+[32m+[m[32m|    v_grad_norm        | 0.924    |[m
+[32m+[m[32m|    value_loss         | 0.000168 |[m
+[32m+[m[32m------------------------------------[m
+[32m+[m[32mEval num_timesteps=1860000, episode_reward=-433.40 +/- 238.37[m
+[32m+[m[32mEpisode length: 200.00 +/- 0.00[m
+[32m+[m[32m------------------------------------[m
+[32m+[m[32m| eval/                 |          |[m
+[32m+[m[32m|    mean_ep_length     | 200      |[m
+[32m+[m[32m|    mean_reward        | -433     |[m
+[32m+[m[32m| time/                 |          |[m
+[32m+[m[32m|    total_timesteps    | 1860000  |[m
+[32m+[m[32m| train/                |          |[m
+[32m+[m[32m|    d_grad_norm        | 0.194    |[m
+[32m+[m[32m|    entropy_loss       | 0.113    |[m
+[32m+[m[32m|    explained_variance | 0.0129   |[m
+[32m+[m[32m|    learning_rate      | 0.00376  |[m
+[32m+[m[32m|    n_updates          | 232499   |[m
+[32m+[m[32m|    policy_loss        | 0.0141   |[m
+[32m+[m[32m|    std                | 0.243    |[m
+[32m+[m[32m|    u_grad_norm        | 0.011    |[m
+[32m+[m[32m|    v_grad_norm        | 1.08     |[m
+[32m+[m[32m|    value_loss         | 0.000611 |[m
+[32m+[m[32m------------------------------------[m
+[32m+[m[32m---------------------------------[m
+[32m+[m[32m| rollout/           |          |[m
+[32m+[m[32m|    ep_len_mean     | 200      |[m
+[32m+[m[32m|    ep_rew_mean     | -447     |[m
+[32m+[m[32m| time/              |          |[m
+[32m+[m[32m|    fps             | 8        |[m
+[32m+[m[32m|    iterations      | 232500   |[m
+[32m+[m[32m|    time_elapsed    | 217976   |[m
+[32m+[m[32m|    total_timesteps | 1860000  |[m
+[32m+[m[32m---------------------------------[m
+[32m+[m[32m------------------------------------[m
+[32m+[m[32m| rollout/              |          |[m
+[32m+[m[32m|    ep_len_mean        | 200      |[m
+[32m+[m[32m|    ep_rew_mean        | -563     |[m
+[32m+[m[32m| time/                 |          |[m
+[32m+[m[32m|    fps                | 8        |[m
+[32m+[m[32m|    iterations         | 230900   |[m
+[32m+[m[32m|    time_elapsed       | 217979   |[m
+[32m+[m[32m|    total_timesteps    | 1847200  |[m
+[32m+[m[32m| train/                |          |[m
+[32m+[m[32m|    d_grad_norm        | 0.113    |[m
+[32m+[m[32m|    entropy_loss       | 0.124    |[m
+[32m+[m[32m|    explained_variance | -1.2     |[m
+[32m+[m[32m|    learning_rate      | 0.00377  |[m
+[32m+[m[32m|    n_updates          | 230899   |[m
+[32m+[m[32m|    policy_loss        | 0.000108 |[m
+[32m+[m[32m|    std                | 0.223    |[m
+[32m+[m[32m|    u_grad_norm        | 0.799    |[m
+[32m+[m[32m|    v_grad_norm        | 0.541    |[m
+[32m+[m[32m|    value_loss         | 0.000207 |[m
+[32m+[m[32m------------------------------------[m
+[32m+[m[32m------------------------------------[m
+[32m+[m[32m| rollout/              |          |[m
+[32m+[m[32m|    ep_len_mean        | 200      |[m
+[32m+[m[32m|    ep_rew_mean        | -546     |[m
+[32m+[m[32m| time/                 |          |[m
+[32m+[m[32m|    fps                | 8        |[m
+[32m+[m[32m|    iterations         | 231500   |[m
+[32m+[m[32m|    time_elapsed       | 217988   |[m
+[32m+[m[32m|    total_timesteps    | 1852000  |[m
+[32m+[m[32m| train/                |          |[m
+[32m+[m[32m|    d_grad_norm        | 0.789    |[m
+[32m+[m[32m|    entropy_loss       | 0.408    |[m
+[32m+[m[32m|    explained_variance | -7.41    |[m
+[32m+[m[32m|    learning_rate      | 0.00377  |[m
+[32m+[m[32m|    n_updates          | 231499   |[m
+[32m+[m[32m|    policy_loss        | 0.0167   |[m
+[32m+[m[32m|    std                | 0.208    |[m
+[32m+[m[32m|    u_grad_norm        | 0.162    |[m
+[32m+[m[32m|    v_grad_norm        | 0.642    |[m
+[32m+[m[32m|    value_loss         | 0.00194  |[m
+[32m+[m[32m------------------------------------[m
+[32m+[m[32m------------------------------------[m
+[32m+[m[32m| rollout/              |          |[m
+[32m+[m[32m|    ep_len_mean        | 200      |[m
+[32m+[m[32m|    ep_rew_mean        | -587     |[m
+[32m+[m[32m| time/                 |          |[m
+[32m+[m[32m|    fps                | 8        |[m
+[32m+[m[32m|    iterations         | 230300   |[m
+[32m+[m[32m|    time_elapsed       | 217989   |[m
+[32m+[m[32m|    total_timesteps    | 1842400  |[m
+[32m+[m[32m| train/                |          |[m
+[32m+[m[32m|    d_grad_norm        | 0.0932   |[m
+[32m+[m[32m|    entropy_loss       | -0.0435  |[m
+[32m+[m[32m|    explained_variance | 0.867    |[m
+[32m+[m[32m|    learning_rate      | 0.00377  |[m
+[32m+[m[32m|    n_updates          | 230299   |[m
+[32m+[m[32m|    policy_loss        | -0.221   |[m
+[32m+[m[32m|    std                | 0.213    |[m
+[32m+[m[32m|    u_grad_norm        | 0.117    |[m
+[32m+[m[32m|    v_grad_norm        | 0.819    |[m
+[32m+[m[32m|    value_loss         | 0.627    |[m
+[32m+[m[32m------------------------------------[m
+[1mdiff --git a/stable_baselines3/stac_parallel_10_wd_53_ud_55.out b/stable_baselines3/stac_parallel_10_wd_53_ud_55.out[m
+[1mindex 161d89a..54e6d87 100644[m
+[1m--- a/stable_baselines3/stac_parallel_10_wd_53_ud_55.out[m
+[1m+++ b/stable_baselines3/stac_parallel_10_wd_53_ud_55.out[m
+[36m@@ -298936,3 +298936,66 @@[m [mEpisode length: 200.00 +/- 0.00[m
+ |    v_grad_norm        | 0.982    |[m
+ |    value_loss         | 0.00036  |[m
+ ------------------------------------[m
+[32m+[m[32m------------------------------------[m
+[32m+[m[32m| rollout/              |          |[m
+[32m+[m[32m|    ep_len_mean        | 200      |[m
+[32m+[m[32m|    ep_rew_mean        | -461     |[m
+[32m+[m[32m| time/                 |          |[m
+[32m+[m[32m|    fps                | 8        |[m
+[32m+[m[32m|    iterations         | 229900   |[m
+[32m+[m[32m|    time_elapsed       | 217828   |[m
+[32m+[m[32m|    total_timesteps    | 1839200  |[m
+[32m+[m[32m| train/                |          |[m
+[32m+[m[32m|    d_grad_norm        | 0.0539   |[m
+[32m+[m[32m|    entropy_loss       | -0.0567  |[m
+[32m+[m[32m|    explained_variance | 0.00228  |[m
+[32m+[m[32m|    learning_rate      | 0.00377  |[m
+[32m+[m[32m|    n_updates          | 229899   |[m
+[32m+[m[32m|    policy_loss        | 0.0212   |[m
+[32m+[m[32m|    std                | 0.3      |[m
+[32m+[m[32m|    u_grad_norm        | 0.576    |[m
+[32m+[m[32m|    v_grad_norm        | 0.857    |[m
+[32m+[m[32m|    value_loss         | 0.0037   |[m
+[32m+[m[32m------------------------------------[m
+[32m+[m[32m------------------------------------[m
+[32m+[m[32m| rollout/              |          |[m
+[32m+[m[32m|    ep_len_mean        | 200      |[m
+[32m+[m[32m|    ep_rew_mean        | -501     |[m
+[32m+[m[32m| time/                 |          |[m
+[32m+[m[32m|    fps                | 8        |[m
+[32m+[m[32m|    iterations         | 231400   |[m
+[32m+[m[32m|    time_elapsed       | 217865   |[m
+[32m+[m[32m|    total_timesteps    | 1851200  |[m
+[32m+[m[32m| train/                |          |[m
+[32m+[m[32m|    d_grad_norm        | 0.269    |[m
+[32m+[m[32m|    entropy_loss       | 0.5      |[m
+[32m+[m[32m|    explained_variance | -0.145   |[m
+[32m+[m[32m|    learning_rate      | 0.00377  |[m
+[32m+[m[32m|    n_updates          | 231399   |[m
+[32m+[m[32m|    policy_loss        | -0.00746 |[m
+[32m+[m[32m|    std                | 0.226    |[m
+[32m+[m[32m|    u_grad_norm        | 0.61     |[m
+[32m+[m[32m|    v_grad_norm        | 0.773    |[m
+[32m+[m[32m|    value_loss         | 0.000126 |[m
+[32m+[m[32m------------------------------------[m
+[32m+[m[32m------------------------------------[m
+[32m+[m[32m| rollout/              |          |[m
+[32m+[m[32m|    ep_len_mean        | 200      |[m
+[32m+[m[32m|    ep_rew_mean        | -514     |[m
+[32m+[m[32m| time/                 |          |[m
+[32m+[m[32m|    fps                | 8        |[m
+[32m+[m[32m|    iterations         | 231500   |[m
+[32m+[m[32m|    time_elapsed       | 217924   |[m
+[32m+[m[32m|    total_timesteps    | 1852000  |[m
+[32m+[m[32m| train/                |          |[m
+[32m+[m[32m|    d_grad_norm        | 0.00207  |[m
+[32m+[m[32m|    entropy_loss       | -1.47    |[m
+[32m+[m[32m|    explained_variance | 0.99     |[m
+[32m+[m[32m|    learning_rate      | 0.00377  |[m
+[32m+[m[32m|    n_updates          | 231499   |[m
+[32m+[m[32m|    policy_loss        | 0.876    |[m
+[32m+[m[32m|    std                | 0.226    |[m
+[32m+[m[32m|    u_grad_norm        | 0.0787   |[m
+[32m+[m[32m|    v_grad_norm        | 0.836    |[m
+[32m+[m[32m|    value_loss         | 1.17     |[m
+[32m+[m[32m------------------------------------[m
