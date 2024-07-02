@@ -73,8 +73,8 @@ from stable_baselines3 import A3C_rarl
 from stable_baselines3 import SAC
 
 USE_LEADERBOARD = True
-LEADERBOARD_SIZE = 10
-seed_list = [564387, 1928054, 67238674, 847859173, 901239586, 87271, 2017656, 90265, 82375,54157628]
+LEADERBOARD_SIZE = 2
+seed_list = [564387, 1928054]#, 67238674, 847859173, 901239586, 87271, 2017656, 90265, 82375,54157628]
 #env = gym.make("MountainCarContinuous-v0")
 #env = gym.make("my_half_cheetah", render_mode='human')
 env = gym.make("my_pendulum")
@@ -94,6 +94,15 @@ if USE_LEADERBOARD is True:
     for i in range(LEADERBOARD_SIZE):
         clone = A3C_rarl("MlPAACPolicy", use_stackelberg=True, env=env, verbose=2, n_steps=8, normalize_advantage=False,gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,vf_coef=.4,gamma=.9,v_learning_rate=linear_schedule(1e-3), c_learning_rate=linear_schedule(2e-3),d_learning_rate=linear_schedule(1e-2), use_sde=True,use_rms_prop=False, device='auto', seed=seed_list[i])
         model.policy.policy_memory[i] = clone.policy
+        model.policy.policy_memory[i] = model.policy.policy_memory[i].to(model.device)
+        model.policy.policy_memory[i].dstb_action_dist.exploration_mat = model.policy.policy_memory[
+            i].dstb_action_dist.exploration_mat.to(model.device)
+        model.policy.policy_memory[0].dstb_action_dist.exploration_matrices = model.policy.policy_memory[
+            i].dstb_action_dist.exploration_matrices.to(model.device)
+        model.policy.policy_memory[i].action_dist.exploration_mat = model.policy.policy_memory[
+            i].action_dist.exploration_mat.to(model.device)
+        model.policy.policy_memory[0].action_dist.exploration_matrices = model.policy.policy_memory[
+            i].action_dist.exploration_matrices.to(model.device)
         del clone
 #model = A3C_rarl("MlPAACPolicy", use_stackelberg=True, env=env, verbose=2, n_steps=8, normalize_advantage=False,gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,vf_coef=.4,gamma=.9,v_learning_rate=linear_schedule(5e-4), c_learning_rate=linear_schedule(1e-3),d_learning_rate=linear_schedule(5e-3), seed=42069, use_sde=True,use_rms_prop=False, device='auto')
 
