@@ -977,7 +977,7 @@ class ActorActorCriticPolicy(BasePolicy):
                 net_arch = []
             else:
 
-                net_arch = dict(pi=[16,16], vf=[64,64])
+                net_arch = dict(pi=[2,2], vf=[4,4])
 
         self.net_arch = net_arch
         self.activation_fn = activation_fn

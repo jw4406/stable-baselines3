@@ -89,7 +89,7 @@ env = gym.make("my_pendulum")
 #model = A3C_rarl("MlPAACPolicy", use_stackelberg=True, env=env, verbose=2, n_steps=100, normalize_advantage=False,v_learning_rate=linear_schedule(1e-5), c_learning_rate=linear_schedule(5e-5),d_learning_rate=linear_schedule(1e-4), use_sde=True,use_rms_prop=False, device='auto')
 
 
-model = A3C_rarl("MlPAACPolicy", use_stackelberg=True, env=env, verbose=2, n_steps=8, normalize_advantage=False,gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,vf_coef=.4,gamma=.9,v_learning_rate=linear_schedule(1e-3), c_learning_rate=linear_schedule(2e-3),d_learning_rate=linear_schedule(1e-2), use_sde=True,use_rms_prop=False, device='auto', seed=42069, policy_memory_size=LEADERBOARD_SIZE)
+model = A3C_rarl("MlPAACPolicy", use_stackelberg=True, env=env, verbose=2, n_steps=8, normalize_advantage=False,gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,vf_coef=.4,gamma=.9,v_learning_rate=linear_schedule(1e-3), c_learning_rate=linear_schedule(2e-3),d_learning_rate=linear_schedule(1e-2), use_sde=True,use_rms_prop=False, device='auto', seed=42069, policy_kwargs={'net_arch': dict(pi=[4,4], vf=[8,8])}, policy_memory_size=LEADERBOARD_SIZE)
 if USE_LEADERBOARD is True:
     for i in range(LEADERBOARD_SIZE):
         clone = A3C_rarl("MlPAACPolicy", use_stackelberg=True, env=env, verbose=2, n_steps=8, normalize_advantage=False,gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,vf_coef=.4,gamma=.9,v_learning_rate=linear_schedule(1e-3), c_learning_rate=linear_schedule(2e-3),d_learning_rate=linear_schedule(1e-2), use_sde=True,use_rms_prop=False, device='auto', seed=seed_list[i])
@@ -97,11 +97,11 @@ if USE_LEADERBOARD is True:
         model.policy.policy_memory[i] = model.policy.policy_memory[i].to(model.device)
         model.policy.policy_memory[i].dstb_action_dist.exploration_mat = model.policy.policy_memory[
             i].dstb_action_dist.exploration_mat.to(model.device)
-        model.policy.policy_memory[0].dstb_action_dist.exploration_matrices = model.policy.policy_memory[
+        model.policy.policy_memory[i].dstb_action_dist.exploration_matrices = model.policy.policy_memory[
             i].dstb_action_dist.exploration_matrices.to(model.device)
         model.policy.policy_memory[i].action_dist.exploration_mat = model.policy.policy_memory[
             i].action_dist.exploration_mat.to(model.device)
-        model.policy.policy_memory[0].action_dist.exploration_matrices = model.policy.policy_memory[
+        model.policy.policy_memory[i].action_dist.exploration_matrices = model.policy.policy_memory[
             i].action_dist.exploration_matrices.to(model.device)
         del clone
 #model = A3C_rarl("MlPAACPolicy", use_stackelberg=True, env=env, verbose=2, n_steps=8, normalize_advantage=False,gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,vf_coef=.4,gamma=.9,v_learning_rate=linear_schedule(5e-4), c_learning_rate=linear_schedule(1e-3),d_learning_rate=linear_schedule(5e-3), seed=42069, use_sde=True,use_rms_prop=False, device='auto')

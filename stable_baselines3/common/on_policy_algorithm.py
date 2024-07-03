@@ -124,7 +124,7 @@ class OnPolicyAlgorithm(BaseAlgorithm):
                 #self.rollout_buffer_class = AdvRolloutBuffer
 
         if len(self.policy_kwargs) > 0:
-            self.rollout_buffer_kwargs.update(self.policy_kwargs)
+            self.rollout_buffer_kwargs.update({'dstb_action_space': self.policy_kwargs['dstb_action_space']})
         self.rollout_buffer = self.rollout_buffer_class(
             self.n_steps,
             self.observation_space,  # type: ignore[arg-type]

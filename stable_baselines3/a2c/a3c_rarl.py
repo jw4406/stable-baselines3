@@ -308,8 +308,12 @@ class A3C_rarl(OnPolicyAlgorithm):
                 for ele in self.policy.ctrl_optimizer.param_groups[0]['params']:
                     num_ctrl_params = num_ctrl_params + torch.numel(ele)
                 num_dstb_params = 0
-                for ele in self.policy.dstb_optimizer.param_groups[0]['params']:
-                    num_dstb_params = num_dstb_params + torch.numel(ele)
+                if self.use_leaderboard is True:
+                    for ele in self.policy.policy_memory[self.dstb_model_choice].dstb_optimizer.param_groups[0]['params']:
+                        num_dstb_params = num_dstb_params + torch.numel(ele)
+                else:
+                    for ele in self.policy.dstb_optimizer.param_groups[0]['params']:
+                        num_dstb_params = num_dstb_params + torch.numel(ele)
 
                 hess_theta_J = self.matrix_unbatch(hess_theta_J_batched, num_ctrl_params)  # this is the 1,1 position
                 hess_psi_J = self.matrix_unbatch(hess_psi_J_batched, num_dstb_params)  # this is the 2,2 position
