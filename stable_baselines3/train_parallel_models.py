@@ -96,7 +96,7 @@ def f(tau2):
                      v_learning_rate=linear_schedule(v_learning_rate),
                      c_learning_rate=linear_schedule(v_learning_rate * tau_v_c),
                      d_learning_rate=linear_schedule(v_learning_rate * tau_v_c * tau_c_d),
-                     use_sde=True,use_rms_prop=False, device='auto', seed=seeds[int(tau2)], policy_memory_size=LEADERBOARD_SIZE)
+                     use_sde=True,use_rms_prop=False, device='cpu', seed=seeds[int(tau2)], policy_memory_size=LEADERBOARD_SIZE)
 
     if USE_LEADERBOARD is True:
         for i in range(LEADERBOARD_SIZE):
@@ -105,7 +105,7 @@ def f(tau2):
                      v_learning_rate=linear_schedule(v_learning_rate),
                      c_learning_rate=linear_schedule(v_learning_rate * tau_v_c),
                      d_learning_rate=linear_schedule(v_learning_rate * tau_v_c * tau_c_d),
-                     use_sde=True,use_rms_prop=False, device='auto', seed=seeds[int(tau2)]+i+1)
+                     use_sde=True,use_rms_prop=False, device='cpu', seed=seeds[int(tau2)]+i+1)
             model.policy.policy_memory[i] = clone.policy
             del clone
 

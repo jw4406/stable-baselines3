@@ -73,8 +73,8 @@ from stable_baselines3 import A3C_rarl
 from stable_baselines3 import SAC
 
 USE_LEADERBOARD = True
-LEADERBOARD_SIZE = 2
-seed_list = [564387, 1928054]#, 67238674, 847859173, 901239586, 87271, 2017656, 90265, 82375,54157628]
+LEADERBOARD_SIZE = 10
+seed_list = [564387, 1928054, 67238674, 847859173, 901239586, 87271, 2017656, 90265, 82375,54157628]
 #env = gym.make("MountainCarContinuous-v0")
 #env = gym.make("my_half_cheetah", render_mode='human')
 env = gym.make("my_pendulum")
@@ -89,10 +89,10 @@ env = gym.make("my_pendulum")
 #model = A3C_rarl("MlPAACPolicy", use_stackelberg=True, env=env, verbose=2, n_steps=100, normalize_advantage=False,v_learning_rate=linear_schedule(1e-5), c_learning_rate=linear_schedule(5e-5),d_learning_rate=linear_schedule(1e-4), use_sde=True,use_rms_prop=False, device='auto')
 
 
-model = A3C_rarl("MlPAACPolicy", use_stackelberg=True, env=env, verbose=2, n_steps=8, normalize_advantage=False,gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,vf_coef=.4,gamma=.9,v_learning_rate=linear_schedule(1e-3), c_learning_rate=linear_schedule(2e-3),d_learning_rate=linear_schedule(1e-2), use_sde=True,use_rms_prop=False, device='auto', seed=42069, policy_kwargs={'net_arch': dict(pi=[4,4], vf=[8,8])}, policy_memory_size=LEADERBOARD_SIZE)
+model = A3C_rarl("MlPAACPolicy", use_stackelberg=True, env=env, verbose=2, n_steps=8, normalize_advantage=False,gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,vf_coef=.4,gamma=.9,v_learning_rate=linear_schedule(1e-4), c_learning_rate=linear_schedule(8.7e-3),d_learning_rate=linear_schedule(6.35e-2), use_sde=True,use_rms_prop=False, device='auto', seed=42069, policy_kwargs={'net_arch': dict(pi=[4,4], vf=[8,8])}, policy_memory_size=LEADERBOARD_SIZE)
 if USE_LEADERBOARD is True:
     for i in range(LEADERBOARD_SIZE):
-        clone = A3C_rarl("MlPAACPolicy", use_stackelberg=True, env=env, verbose=2, n_steps=8, normalize_advantage=False,gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,vf_coef=.4,gamma=.9,v_learning_rate=linear_schedule(1e-3), c_learning_rate=linear_schedule(2e-3),d_learning_rate=linear_schedule(1e-2), use_sde=True,use_rms_prop=False, device='auto', seed=seed_list[i])
+        clone = A3C_rarl("MlPAACPolicy", use_stackelberg=True, env=env, verbose=2, n_steps=8, normalize_advantage=False,gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,vf_coef=.4,gamma=.9,v_learning_rate=linear_schedule(1e-4), c_learning_rate=linear_schedule(8.7e-3),d_learning_rate=linear_schedule(6.35e-2), use_sde=True,use_rms_prop=False, device='auto', seed=seed_list[i])
         model.policy.policy_memory[i] = clone.policy
         model.policy.policy_memory[i] = model.policy.policy_memory[i].to(model.device)
         model.policy.policy_memory[i].dstb_action_dist.exploration_mat = model.policy.policy_memory[
@@ -185,7 +185,7 @@ eval_callback = EvalCallback(env, callback_on_new_best=callback_on_best, verbose
 checkpoint_callback = CheckpointCallback(
   save_freq=1000,
   save_path="./logs/",
-  name_prefix='stac_ud_28_decay2_2_5_split',
+  name_prefix='stac_ud_37_decay2_zoo_tau_leaderboard',
 )
 
 callback_list = CallbackList([eval_callback, checkpoint_callback])
@@ -195,11 +195,11 @@ callback_list = CallbackList([eval_callback, checkpoint_callback])
 #callback_on_best = StopTrainingOnRewardThreshold(reward_threshold=-200, verbose=1)
 #eval_callback = EvalCallback(env, callback_on_new_best=callback_on_best, verbose=1)
 #model.save("stac_pend_heavy_3.zip")
-model.learn(total_timesteps=5_000_000, callback=callback_list)
+model.learn(total_timesteps=7_500_000, callback=callback_list)
 
 #callback_on_best = StopTrainingOnRewardThreshold(reward_threshold=-200, verbose=1)
 #eval_callback = EvalCallback(env, callback_on_new_best=callback_on_best, verbose=1)
-#model.save("test_tau_cd_40.zip")
+model.save("leaderboard_zoo87.zip")
 
 
 vec_env = model.get_env()
