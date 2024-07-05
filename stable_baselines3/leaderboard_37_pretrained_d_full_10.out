@@ -1,0 +1,45 @@
+nohup: ignoring input
+Using cuda device
+Wrapping the env with a `Monitor` wrapper
+Wrapping the env in a DummyVecEnv.
+Wrapping the env with a `Monitor` wrapper
+Wrapping the env in a DummyVecEnv.
+Wrapping the env with a `Monitor` wrapper
+Wrapping the env in a DummyVecEnv.
+Wrapping the env with a `Monitor` wrapper
+Wrapping the env in a DummyVecEnv.
+Wrapping the env with a `Monitor` wrapper
+Wrapping the env in a DummyVecEnv.
+Wrapping the env with a `Monitor` wrapper
+Wrapping the env in a DummyVecEnv.
+Wrapping the env with a `Monitor` wrapper
+Wrapping the env in a DummyVecEnv.
+Wrapping the env with a `Monitor` wrapper
+Wrapping the env in a DummyVecEnv.
+Wrapping the env with a `Monitor` wrapper
+Wrapping the env in a DummyVecEnv.
+Wrapping the env with a `Monitor` wrapper
+Wrapping the env in a DummyVecEnv.
+Wrapping the env with a `Monitor` wrapper
+Wrapping the env in a DummyVecEnv.
+---------------------------------------
+| rollout/              |             |
+|    ep_len_mean        | 500         |
+|    ep_rew_mean        | -4.76e+03   |
+| time/                 |             |
+|    fps                | 2           |
+|    iterations         | 100         |
+|    time_elapsed       | 280         |
+|    total_timesteps    | 800         |
+| train/                |             |
+|    d_grad_norm        | 1.03        |
+|    entropy_loss       | -0.863      |
+|    explained_variance | 0.009666264 |
+|    learning_rate      | 0.0124      |
+|    n_updates          | 99          |
+|    policy_loss        | -10         |
+|    std                | 1           |
+|    u_grad_norm        | 0.00765     |
+|    v_grad_norm        | 1.06        |
+|    value_loss         | 746         |
+---------------------------------------

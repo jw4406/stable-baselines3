@@ -39,7 +39,7 @@ register(
     # Note: entry_point also accept a class as input (and not only a string)
     entry_point=my_PendulumEnv,
     # Max number of steps per episode, using a `TimeLimitWrapper`
-    max_episode_steps=200,
+    max_episode_steps=500,
 )
 register(# unique identifier for the env `name-version`
     id="my_walker2d_v4",
@@ -74,6 +74,7 @@ from stable_baselines3 import SAC
 
 USE_LEADERBOARD = True
 LEADERBOARD_SIZE = 10
+use_pretrain = True
 seed_list = [564387, 1928054, 67238674, 847859173, 901239586, 87271, 2017656, 90265, 82375,54157628]
 #env = gym.make("MountainCarContinuous-v0")
 #env = gym.make("my_half_cheetah", render_mode='human')
@@ -89,21 +90,26 @@ env = gym.make("my_pendulum")
 #model = A3C_rarl("MlPAACPolicy", use_stackelberg=True, env=env, verbose=2, n_steps=100, normalize_advantage=False,v_learning_rate=linear_schedule(1e-5), c_learning_rate=linear_schedule(5e-5),d_learning_rate=linear_schedule(1e-4), use_sde=True,use_rms_prop=False, device='auto')
 
 
-model = A3C_rarl("MlPAACPolicy", use_stackelberg=True, env=env, verbose=2, n_steps=8, normalize_advantage=False,gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,vf_coef=.4,gamma=.9,v_learning_rate=linear_schedule(1e-4), c_learning_rate=linear_schedule(8.7e-3),d_learning_rate=linear_schedule(6.35e-2), use_sde=True,use_rms_prop=False, device='auto', seed=42069, policy_kwargs={'net_arch': dict(pi=[4,4], vf=[8,8])}, policy_memory_size=LEADERBOARD_SIZE)
+model = A3C_rarl("MlPAACPolicy", use_stackelberg=True, env=env, verbose=2, n_steps=8, normalize_advantage=False,gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,vf_coef=.4,gamma=.9,v_learning_rate=linear_schedule(0.0005933974267381725), c_learning_rate=linear_schedule(0.0066932472422626425),d_learning_rate=linear_schedule(0.01235801572155198), use_sde=True,use_rms_prop=False, device='auto', seed=42069, policy_kwargs={'net_arch': dict(pi=[32,32,32], vf=[128,128,128])}, use_leaderboard=USE_LEADERBOARD, policy_memory_size=LEADERBOARD_SIZE)
 if USE_LEADERBOARD is True:
     for i in range(LEADERBOARD_SIZE):
-        clone = A3C_rarl("MlPAACPolicy", use_stackelberg=True, env=env, verbose=2, n_steps=8, normalize_advantage=False,gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,vf_coef=.4,gamma=.9,v_learning_rate=linear_schedule(1e-4), c_learning_rate=linear_schedule(8.7e-3),d_learning_rate=linear_schedule(6.35e-2), use_sde=True,use_rms_prop=False, device='auto', seed=seed_list[i])
-        model.policy.policy_memory[i] = clone.policy
-        model.policy.policy_memory[i] = model.policy.policy_memory[i].to(model.device)
-        model.policy.policy_memory[i].dstb_action_dist.exploration_mat = model.policy.policy_memory[
-            i].dstb_action_dist.exploration_mat.to(model.device)
-        model.policy.policy_memory[i].dstb_action_dist.exploration_matrices = model.policy.policy_memory[
-            i].dstb_action_dist.exploration_matrices.to(model.device)
-        model.policy.policy_memory[i].action_dist.exploration_mat = model.policy.policy_memory[
-            i].action_dist.exploration_mat.to(model.device)
-        model.policy.policy_memory[i].action_dist.exploration_matrices = model.policy.policy_memory[
-            i].action_dist.exploration_matrices.to(model.device)
-        del clone
+        if use_pretrain is True:
+            pretrain_path = "/home/jw4406/codebase/stable-baselines3/stable_baselines3/competitive_models/"
+            pretrain_model_name = "stac_train_pend_parallel_FINISHED_wd_53_ud_37_%d.zip" % i
+            model.policy.policy_memory[i] = A3C_rarl.load(pretrain_path + pretrain_model_name, env=env).policy
+        else:
+            clone = A3C_rarl("MlPAACPolicy", use_stackelberg=True, env=env, verbose=2, n_steps=8, normalize_advantage=False,gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,vf_coef=.4,gamma=.9,v_learning_rate=linear_schedule(1e-4), c_learning_rate=linear_schedule(8.7e-3),d_learning_rate=linear_schedule(6.35e-2), use_sde=True,use_rms_prop=False, device='auto', seed=seed_list[i])
+            model.policy.policy_memory[i] = clone.policy
+            model.policy.policy_memory[i] = model.policy.policy_memory[i].to(model.device)
+            model.policy.policy_memory[i].dstb_action_dist.exploration_mat = model.policy.policy_memory[
+                i].dstb_action_dist.exploration_mat.to(model.device)
+            model.policy.policy_memory[i].dstb_action_dist.exploration_matrices = model.policy.policy_memory[
+                i].dstb_action_dist.exploration_matrices.to(model.device)
+            model.policy.policy_memory[i].action_dist.exploration_mat = model.policy.policy_memory[
+                i].action_dist.exploration_mat.to(model.device)
+            model.policy.policy_memory[i].action_dist.exploration_matrices = model.policy.policy_memory[
+                i].action_dist.exploration_matrices.to(model.device)
+            del clone
 #model = A3C_rarl("MlPAACPolicy", use_stackelberg=True, env=env, verbose=2, n_steps=8, normalize_advantage=False,gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,vf_coef=.4,gamma=.9,v_learning_rate=linear_schedule(5e-4), c_learning_rate=linear_schedule(1e-3),d_learning_rate=linear_schedule(5e-3), seed=42069, use_sde=True,use_rms_prop=False, device='auto')
 
 
@@ -152,7 +158,7 @@ if USE_LEADERBOARD is True:
 #model = A3C_rarl.load("./stac_tau_sweep_cheetah_rew_1500_take1_5.000000_1049000_steps.zip", env=env)
 #model = A3C_rarl.load("./logs/stac_heavy_280000_steps.zip", env=env)
 #model = A3C_rarl.load("./logs/stac_pend_heavy_1_863000_steps.zip", env=env)
-#model = A3C_rarl.load("./stac_pend_heavy_42069.zip", env=env)
+#model = A3C_rarl.load("./competitive_models/baseline_train_pend_parallel_FINISHED_wd_53_ud_37_1.zip", env=env)
 
 model.spirit=False
 #model = SMART.load("./sac_pend_t2_330000_steps.zip", env=env)
@@ -179,13 +185,13 @@ model.spirit=False
 
 
 
-callback_on_best = StopTrainingOnRewardThreshold(reward_threshold=-150, verbose=1)
+callback_on_best = StopTrainingOnRewardThreshold(reward_threshold=-175, verbose=1)
 eval_callback = EvalCallback(env, callback_on_new_best=callback_on_best, verbose=1, n_eval_episodes=10, jobid=args.jobid)
 
 checkpoint_callback = CheckpointCallback(
   save_freq=1000,
   save_path="./logs/",
-  name_prefix='stac_ud_37_decay2_zoo_tau_leaderboard',
+  name_prefix='stac_pend_ud_37_pretrained_d_tss_zoo_leaderboard_10',
 )
 
 callback_list = CallbackList([eval_callback, checkpoint_callback])
@@ -199,7 +205,7 @@ model.learn(total_timesteps=7_500_000, callback=callback_list)
 
 #callback_on_best = StopTrainingOnRewardThreshold(reward_threshold=-200, verbose=1)
 #eval_callback = EvalCallback(env, callback_on_new_best=callback_on_best, verbose=1)
-model.save("leaderboard_zoo87.zip")
+model.save("leaderboard_10_trained_d_no_grad_tss_zoo_ud_37.zip")
 
 
 vec_env = model.get_env()

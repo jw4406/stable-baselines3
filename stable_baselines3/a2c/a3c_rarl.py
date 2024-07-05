@@ -402,13 +402,15 @@ class A3C_rarl(OnPolicyAlgorithm):
             dstb_policy_loss.backward()
             # Clip grad norm
             th.nn.utils.clip_grad_norm_(self.policy.parameters(), self.max_grad_norm)
-            th.nn.utils.clip_grad_norm_(self.policy.policy_memory[self.dstb_model_choice].parameters(),self.max_grad_norm)
+            if self.use_leaderboard is True:
+                th.nn.utils.clip_grad_norm_(self.policy.policy_memory[self.dstb_model_choice].parameters(),self.max_grad_norm)
             #th.nn.utils.clip_grad_norm_(self.policy.advantages.parameters(), self.max_grad_norm)
             #self.policy.optimizer.step()
             self.policy.value_optimizer.step()
             self.policy.ctrl_optimizer.step()
             if self.use_leaderboard is True:
-                self.policy.policy_memory[self.dstb_model_choice].dstb_optimizer.step()
+                #self.policy.policy_memory[self.dstb_model_choice].dstb_optimizer.step()
+                pass
             else:
                 self.policy.dstb_optimizer.step()
 

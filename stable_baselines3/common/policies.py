@@ -977,7 +977,7 @@ class ActorActorCriticPolicy(BasePolicy):
                 net_arch = []
             else:
 
-                net_arch = dict(pi=[2,2], vf=[4,4])
+                net_arch = dict(pi=[16,16], vf=[64,64])
 
         self.net_arch = net_arch
         self.activation_fn = activation_fn
@@ -1145,7 +1145,6 @@ class ActorActorCriticPolicy(BasePolicy):
         #        torch.save(self, "weights.pt")
         #        self.policy_memory[i] = torch.load("weights.pt")
         self.ctrl_optimizer = self.optimizer_class(itertools.chain([self.log_std], self.mlp_extractor.policy_net.parameters(), self.action_net.parameters()), joint_schedule[1](1),maximize=False)
-        assert len(self.policy_memory) == self.policy_memory_size
         self.dstb_optimizer = self.optimizer_class(itertools.chain([self.dstb_log_std], self.mlp_extractor.dstb_net.parameters(), self.dstb_action_net.parameters()), joint_schedule[2](1), maximize=False)
         self.value_optimizer = self.optimizer_class(
             itertools.chain(self.mlp_extractor.value_net.parameters(), self.value_net.parameters()),
