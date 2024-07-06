@@ -125,6 +125,21 @@ class OnPolicyAlgorithm(BaseAlgorithm):
 
         if len(self.policy_kwargs) > 0:
             self.rollout_buffer_kwargs.update({'dstb_action_space': self.policy_kwargs['dstb_action_space']})
+        '''
+        if self.use_leaderboard is True:
+            self.rollout_buffer = []
+            self.rollout_buffer.append(self.rollout_buffer_class(
+            self.n_steps,
+            self.observation_space,  # type: ignore[arg-type]
+            self.action_space,
+            device=self.device,
+            gamma=self.gamma,
+            gae_lambda=self.gae_lambda,
+            n_envs=self.n_envs,
+            **self.rollout_buffer_kwargs,
+        ))
+        '''
+
         self.rollout_buffer = self.rollout_buffer_class(
             self.n_steps,
             self.observation_space,  # type: ignore[arg-type]
@@ -259,6 +274,10 @@ class OnPolicyAlgorithm(BaseAlgorithm):
                     log_probs,
                     dstb_log_probs
                 )
+
+                #if self.use_leaderboard is True:
+                #    self.all_last_obs[self.dstb_model_choice] = new_obs
+                #else:
                 self._last_obs = new_obs  # type: ignore[assignment]
                 self._last_episode_starts = dones
             else:
@@ -417,19 +436,26 @@ class OnPolicyAlgorithm(BaseAlgorithm):
             tb_log_name,
             progress_bar,
         )
-
+        '''
+        if self.use_leaderboard is True:
+            self.all_last_obs = np.zeros((self.policy_memory_size, len(self._last_obs)))
+            for i in range(self.policy_memory_size):
+                self.all_last_obs[i] = self._last_obs
+        '''
         callback.on_training_start(locals(), globals())
 
         assert self.env is not None
 
         while self.num_timesteps < total_timesteps:
-            if self.num_timesteps % self.env.envs[0].spec.max_episode_steps == 0:
-                # we need to pick a disturbance policy here
-                dstb_win_count = self.duel_models(self, self.policy.policy_memory, self.env)
-                probs = softy(dstb_win_count)
-                dstb_model_choice = np.random.choice(self.policy_memory_size, p=probs)
-                self.dstb_model_choice = dstb_model_choice
-            continue_training = self.collect_rollouts(self.env, callback, self.rollout_buffer, n_rollout_steps=self.n_steps)
+            if self.use_leaderboard is True:
+                if self.num_timesteps % self.env.envs[0].spec.max_episode_steps == 0:
+                    # we need to pick a disturbance policy here
+                    dstb_win_count = self.duel_models(self, self.policy.policy_memory, self.env)
+                    probs = softy(dstb_win_count)
+                    dstb_model_choice = np.random.choice(self.policy_memory_size, p=probs)
+                    self.dstb_model_choice = dstb_model_choice
+            continue_training = self.collect_rollouts(self.env, callback, self.rollout_buffer,
+                                                      n_rollout_steps=self.n_steps)
 
             if not continue_training:
                 break

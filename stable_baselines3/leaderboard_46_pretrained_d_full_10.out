@@ -1,0 +1,87 @@
+nohup: ignoring input
+Using cuda device
+Wrapping the env with a `Monitor` wrapper
+Wrapping the env in a DummyVecEnv.
+Wrapping the env with a `Monitor` wrapper
+Wrapping the env in a DummyVecEnv.
+Wrapping the env with a `Monitor` wrapper
+Wrapping the env in a DummyVecEnv.
+Wrapping the env with a `Monitor` wrapper
+Wrapping the env in a DummyVecEnv.
+Wrapping the env with a `Monitor` wrapper
+Wrapping the env in a DummyVecEnv.
+Wrapping the env with a `Monitor` wrapper
+Wrapping the env in a DummyVecEnv.
+Wrapping the env with a `Monitor` wrapper
+Wrapping the env in a DummyVecEnv.
+Wrapping the env with a `Monitor` wrapper
+Wrapping the env in a DummyVecEnv.
+Wrapping the env with a `Monitor` wrapper
+Wrapping the env in a DummyVecEnv.
+Wrapping the env with a `Monitor` wrapper
+Wrapping the env in a DummyVecEnv.
+Wrapping the env with a `Monitor` wrapper
+Wrapping the env in a DummyVecEnv.
+---------------------------------------
+| rollout/              |             |
+|    ep_len_mean        | 500         |
+|    ep_rew_mean        | -4.64e+03   |
+| time/                 |             |
+|    fps                | 3           |
+|    iterations         | 100         |
+|    time_elapsed       | 232         |
+|    total_timesteps    | 800         |
+| train/                |             |
+|    d_grad_norm        | 1.12        |
+|    entropy_loss       | -0.935      |
+|    explained_variance | 0.001067102 |
+|    learning_rate      | 0.0124      |
+|    n_updates          | 99          |
+|    policy_loss        | -10.8       |
+|    std                | 1           |
+|    u_grad_norm        | 0.0192      |
+|    v_grad_norm        | 1.02        |
+|    value_loss         | 681         |
+---------------------------------------
+---------------------------------------
+| rollout/              |             |
+|    ep_len_mean        | 500         |
+|    ep_rew_mean        | -4.07e+03   |
+| time/                 |             |
+|    fps                | 3           |
+|    iterations         | 200         |
+|    time_elapsed       | 469         |
+|    total_timesteps    | 1600        |
+| train/                |             |
+|    d_grad_norm        | 0.719       |
+|    entropy_loss       | -2.56       |
+|    explained_variance | -0.85033214 |
+|    learning_rate      | 0.0124      |
+|    n_updates          | 199         |
+|    policy_loss        | -43.8       |
+|    std                | 1.01        |
+|    u_grad_norm        | 0.00572     |
+|    v_grad_norm        | 0.853       |
+|    value_loss         | 370         |
+---------------------------------------
+-------------------------------------
+| rollout/              |           |
+|    ep_len_mean        | 500       |
+|    ep_rew_mean        | -3.79e+03 |
+| time/                 |           |
+|    fps                | 3         |
+|    iterations         | 300       |
+|    time_elapsed       | 755       |
+|    total_timesteps    | 2400      |
+| train/                |           |
+|    d_grad_norm        | 1.05      |
+|    entropy_loss       | -0.987    |
+|    explained_variance | 0.8758886 |
+|    learning_rate      | 0.0124    |
+|    n_updates          | 299       |
+|    policy_loss        | 1.49      |
+|    std                | 1.01      |
+|    u_grad_norm        | 0.0134    |
+|    v_grad_norm        | 0.856     |
+|    value_loss         | 1.26      |
+-------------------------------------
