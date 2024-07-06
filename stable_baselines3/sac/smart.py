@@ -303,7 +303,7 @@ class SMART(OffPolicyAlgorithm):
 
                 surr_q_values = torch.mean(torch.sum(torch.hstack((critic_pred[0], critic_pred[1])), dim=1))
                 #surr_q_values = self.critic.gpt_forward(replay_data.observations, actions_pi, dstb_actions_pi)
-                surr_q_values = self.critic.q1_forward(replay_data.observations, actions_pi, dstb_actions_pi).mean()
+                #surr_q_values = self.critic.q1_forward(replay_data.observations, actions_pi, dstb_actions_pi).mean()
                 #surr_q_values = torch.min(critic_pred, dim=0)
                 #surr_q_values = torch.div(torch.add(critic_pred[0], critic_pred[1]), 2).mean()
 
