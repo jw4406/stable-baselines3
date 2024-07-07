@@ -277,6 +277,7 @@ class SMART(OffPolicyAlgorithm):
                 # Compute the next Q values: min over all critics targets
                 next_q_values = th.cat(self.critic_target(replay_data.next_observations, next_actions, next_dstb_actions), dim=1)
                 next_q_values, _ = th.min(next_q_values, dim=1, keepdim=True)
+                #next_q_values = next_q_values[0]
                 # add entropy term
                 #next_q_values = next_q_values - ent_coef * next_log_prob.reshape(-1, 1) + dstb_ent_coef * next_dstb_log_prob.reshape(-1, 1)
                 # td error + entropy term
@@ -318,8 +319,8 @@ class SMART(OffPolicyAlgorithm):
                 #dstb_model_latent_pi, dstb_model_latent_pi_params = make_functional(self.dstb_actor.latent_pi)
 
                 #f_model_dstb, dstb_params, dstb_buffers = make_functional_with_buffers(self.dstb_actor)
-                #f_model_critic, critic_params, critic_buffers = make_functional_with_buffers(self.critic)
-
+                f_model_critic, batched_critic_params, critic_buffers = make_functional_with_buffers(self.critic)
+                critic_params = torch.hstack([t.flatten() for t in batched_critic_params])
                 #stateless_q_values = self.compute_stateless_q_surr(f_model_critic, critic_params, critic_buffers, replay_data.observations)
 
                 critic_pred = self.critic(replay_data.observations, actions_pi, dstb_actions_pi)
@@ -403,17 +404,19 @@ class SMART(OffPolicyAlgorithm):
 
                 #imp = autograd.grad(h1_pre_omega, list(self.critic.parameters()), ivp_H_h2,
                 #                    create_graph=True, retain_graph=True)
-                test_imp = autograd.grad(h1_pre_omega, self.critic.parameters(), torch.eye(h1_pre_omega.shape[0], device=self.device), is_grads_batched=True, create_graph=True, retain_graph=True)
+                J = self.cent_diff(f_model_critic, critic_params, critic_buffers, replay_data.observations, actions_pi, dstb_actions_pi, num_ctrl_params, num_dstb_params)
+                #test_imp = autograd.grad(h1_pre_omega, self.critic.parameters(), torch.eye(h1_pre_omega.shape[0], device=self.device), is_grads_batched=True, create_graph=True, retain_graph=True)
+                imp = torch.matmul(torch.transpose(J, 0,1), ivp_H_h2)
                 # imp is the stackelberg part of the total derivative
 
             # Optimize the critic
             self.critic.optimizer.zero_grad()
             critic_loss.backward()
             if self.use_stackelberg is True:
-                for i in range(len(self.policy.value_optimizer.param_groups[0]['params'])):
-                    self.policy.value_optimizer.param_groups[0]['params'][i].grad = \
-                    self.policy.value_optimizer.param_groups[0]['params'][i].grad - imp[i]
-            del test_imp
+                for i in range(len(self.critic.optimizer.param_groups[0]['params'])):
+                    self.critic.optimizer.param_groups[0]['params'][i].grad = \
+                    self.critic.optimizer.param_groups[0]['params'][i].grad - imp[i]
+            del imp
             self.critic.optimizer.step()
 
             # Compute actor loss
@@ -524,3 +527,81 @@ class SMART(OffPolicyAlgorithm):
         q_values = critic_model(critic_params, critic_buffers, obs, ctrl_action, dstb_action)
         return q_values
 
+    def cent_diff(self, critic_model, critic_params, critic_buffers, obs, u, d, ctrl_size, dstb_size):
+        delta = torch.rand(1)
+
+        J = torch.zeros((ctrl_size + dstb_size, len(critic_params)))
+        #In = I(n)
+        #for j in range():
+        #    J[:, j] = (f(x0 + delta * In[:, j]) - y0) / delta
+        Ij = torch.eye(len(critic_params))
+        for k in range(len(critic_params)):
+            flat_critic_params_pos = critic_params + delta * Ij[:, k]
+            flat_critic_params_neg = critic_params - delta * Ij[:, k]
+
+            reshaped_critic_params_pos = self.param_reshape(flat_critic_params_pos)
+            forward_double_q_pred_pos = critic_model(reshaped_critic_params_pos, critic_buffers, obs, u, d)
+
+            surr_q_pos = torch.mean(torch.sum(torch.hstack((forward_double_q_pred_pos[0], forward_double_q_pred_pos[1])), dim=1))
+            h1_pos = self.compute_stage_1_grad(surr_q_pos)
+
+            reshaped_critic_params_neg = self.param_reshape(flat_critic_params_neg)
+            forward_double_q_pred_neg = critic_model(reshaped_critic_params_neg, critic_buffers, obs, u, d)
+
+            surr_q_neg = torch.mean(torch.sum(torch.hstack((forward_double_q_pred_neg[0], forward_double_q_pred_neg[1])), dim=1))
+            h1_neg = self.compute_stage_1_grad(surr_q_neg)
+
+            J[:, k] = (h1_pos - h1_neg) / (2*delta)
+
+        return J
+
+    def param_reshape(self, flat_critic_params):
+        reshaped_critic_params = np.zeros(len(self.critic.qf0) + len(self.critic.qf1) + 2, dtype=object)
+        params_pointer = 0
+
+        i = 0
+        for j in range(0, len(self.critic.qf0) + len(self.critic.qf1) + 2, 2):
+            # if i == 0:
+            #    reshaped_ctrl_params[i] = ctrl_params[0]
+            #    params_pointer = 1
+            #    i = i + 1
+
+            if j <= len(self.critic.qf0):
+                end = len(self.critic.qf0[j].weight.flatten())
+                reshaped_critic_params[i] = torch.reshape(flat_critic_params[params_pointer:params_pointer + end],
+                                                          self.critic.qf0[j].weight.shape)
+                params_pointer = params_pointer + end
+                i = i + 1
+                # bias
+                end = len(self.critic.qf0[j].bias.flatten())
+                reshaped_critic_params[i] = torch.reshape(flat_critic_params[params_pointer:params_pointer + end],
+                                                          self.critic.qf0[j].bias.shape)
+                params_pointer = params_pointer + end
+                i = i + 1
+            else:
+                m = j - len(self.critic.qf0) - 1
+                end = len(self.critic.qf1[m].weight.flatten())
+                reshaped_critic_params[i] = torch.reshape(flat_critic_params[params_pointer:params_pointer + end],
+                                                          self.critic.qf1[m].weight.shape)
+                params_pointer = params_pointer + end
+                i = i + 1
+                # bias
+                end = len(self.critic.qf1[m].bias.flatten())
+                reshaped_critic_params[i] = torch.reshape(flat_critic_params[params_pointer:params_pointer + end],
+                                                          self.critic.qf1[m].bias.shape)
+                params_pointer = params_pointer + end
+                i = i + 1
+        return reshaped_critic_params
+
+    def compute_stage_1_grad(self, surr_q_values):
+        h1_upper_grad_batched = autograd.grad(surr_q_values, list(self.actor.parameters()),
+                                              create_graph=True, retain_graph=True)
+        h1_upper = torch.hstack([t.flatten() for t in h1_upper_grad_batched])
+        # autograd.grad(h1_upper, self.critic.parameters(), torch.eye(4545), is_grads_batched=True, create_graph=True, retain_graph=True)
+        h1_lower_grad_batched = autograd.grad(surr_q_values, self.policy.dstb_actor.optimizer.param_groups[0]['params'],
+                                              create_graph=True, retain_graph=True)
+        h1_lower = torch.hstack([t.flatten() for t in h1_lower_grad_batched])
+
+        h1_pre_omega = torch.hstack((h1_upper, h1_lower))
+
+        return h1_pre_omega
