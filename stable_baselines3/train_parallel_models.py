@@ -41,7 +41,7 @@ register(
     # Note: entry_point also accept a class as input (and not only a string)
     entry_point=my_PendulumEnv,
     # Max number of steps per episode, using a `TimeLimitWrapper`
-    max_episode_steps=200,
+    max_episode_steps=500,
 )
 register(# unique identifier for the env `name-version`
     id="my_walker2d_v4",
@@ -80,10 +80,10 @@ from stable_baselines3 import A3C_rarl
 env = gym.make("my_pendulum")
 v_learning_rate = 5e-4
 
-tau_v_c = 2
-tau_c_d = 5
+tau_v_c = 0.0066932472422626425 / 0.0005933974267381725
+tau_c_d = 0.01235801572155198 / 0.0066932472422626425
 
-USE_LEADERBOARD = True
+USE_LEADERBOARD = False
 LEADERBOARD_SIZE = 10
 
 #model = A3C_rarl("MlPAACPolicy", use_stackelberg=False, env=env, verbose=2, n_steps=8, normalize_advantage=False,gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,vf_coef=.4,gamma=.9,v_learning_rate=5e-4, c_learning_rate=5e-4,d_learning_rate=5e-4, use_sde=True,use_rms_prop=False, device='cpu')
@@ -96,7 +96,7 @@ def f(tau2):
                      v_learning_rate=linear_schedule(v_learning_rate),
                      c_learning_rate=linear_schedule(v_learning_rate * tau_v_c),
                      d_learning_rate=linear_schedule(v_learning_rate * tau_v_c * tau_c_d),
-                     use_sde=True,use_rms_prop=False, device='cpu', seed=seeds[int(tau2)], policy_memory_size=LEADERBOARD_SIZE)
+                     use_sde=True,use_rms_prop=False, device='auto', seed=seeds[int(tau2)], use_leaderboard=USE_LEADERBOARD, policy_memory_size=LEADERBOARD_SIZE)
 
     if USE_LEADERBOARD is True:
         for i in range(LEADERBOARD_SIZE):
@@ -109,7 +109,7 @@ def f(tau2):
             model.policy.policy_memory[i] = clone.policy
             del clone
 
-    callback_on_best = StopTrainingOnRewardThreshold(reward_threshold=-150, verbose=1)
+    callback_on_best = StopTrainingOnRewardThreshold(reward_threshold=-175, verbose=1)
 
     #model = A3C_rarl("MlPAACPolicy", dstb_action_space=Box(-.3, .3, (2,), dtype=np.float32), use_stackelberg=True,
                      #env=env, verbose=2, n_steps=32, normalize_advantage=False, gae_lambda=.95, ent_coef=0.0,
@@ -121,15 +121,15 @@ def f(tau2):
         save_freq=1000,
         save_path="./competitive_models/",
         #stac_train_sweep_pend_competitive_%d % int(tau2)
-        name_prefix="baseline_train_pend_parallel_competitive_wd_53_ud_55_%d" % int(tau2),
+        name_prefix="stac_pretrain_parallel_pend_tss_zoo_ud_37_%d" % int(tau2),
         save_replay_buffer=True,
         save_vecnormalize=True,
         jobid=args.jobid
     )
     callback_list = CallbackList([eval_callback, checkpoint_callback])  # , checkpoint_callback])
     # model.learn(total_timesteps=1_000_000, callback=callback_list)
-    model.learn(total_timesteps=7_500_000, callback=callback_list)
-    model.save("./competitive_models/baseline_train_pend_parallel_FINISHED_wd_53_ud_55_%d.zip" % int(tau2))
+    model.learn(total_timesteps=10_000_000, callback=callback_list)
+    model.save("./competitive_models/stac_pretrain_pend_parallel_FINISHED_ud_37_%d.zip" % int(tau2))
     print("HI IM DONE")
 if __name__ == '__main__':
 

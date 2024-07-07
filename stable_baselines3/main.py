@@ -191,7 +191,7 @@ eval_callback = EvalCallback(env, callback_on_new_best=callback_on_best, verbose
 checkpoint_callback = CheckpointCallback(
   save_freq=1000,
   save_path="./logs/",
-  name_prefix='stac_pend_ud_37_pretrained_d_tss_zoo_leaderboard_10',
+  name_prefix='DELETE_ME',
 )
 
 callback_list = CallbackList([eval_callback, checkpoint_callback])
