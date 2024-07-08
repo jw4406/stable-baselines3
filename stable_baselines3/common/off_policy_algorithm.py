@@ -190,8 +190,9 @@ class OffPolicyAlgorithm(BaseAlgorithm):
                 assert self.env is not None, "You must pass an environment when using `HerReplayBuffer`"
                 replay_buffer_kwargs["env"] = self.env
             if len(self.policy_kwargs) > 0:
-                self.replay_buffer_kwargs.update(self.policy_kwargs)
-                replay_buffer_kwargs.update(self.policy_kwargs)
+                #self.replay_buffer_kwargs.update(self.policy_kwargs)
+
+                replay_buffer_kwargs.update({'dstb_action_space': self.policy_kwargs['dstb_action_space']})
             self.replay_buffer = self.replay_buffer_class(
                 self.buffer_size,
                 self.observation_space,

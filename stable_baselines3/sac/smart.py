@@ -172,6 +172,8 @@ class SMART(OffPolicyAlgorithm):
         if _init_setup_model:
             self._setup_model()
 
+        self.cent_diff_compiled = torch.compile(self.cent_diff, mode='max-autotune', fullgraph=True)
+
     def _setup_model(self) -> None:
         super()._setup_model()
         self._create_aliases()
@@ -330,6 +332,7 @@ class SMART(OffPolicyAlgorithm):
                 #h1_upper_grad_batched = autograd.grad(surr_q_values, self.critic.parameters(), create_graph=True, retain_graph=True)
                 #h1_upper_grad = torch.hstack([t.flatten() for t in h1_upper_grad_batched])
                 #h1_upper_theta = autograd.grad(h1_upper_grad, self.actor.parameters(), torch.eye(9218), is_grads_batched=True, create_graph=True, retain_graph=True)
+
                 h1_upper_grad_batched = autograd.grad(surr_q_values, list(self.actor.parameters()),
                                                       create_graph=True, retain_graph=True)
                 h1_upper = torch.hstack([t.flatten() for t in h1_upper_grad_batched])
@@ -338,7 +341,7 @@ class SMART(OffPolicyAlgorithm):
                                                       create_graph=True, retain_graph=True)
                 h1_lower = torch.hstack([t.flatten() for t in h1_lower_grad_batched])
 
-                h1_pre_omega = torch.hstack((h1_upper, h1_lower))
+                #h1_pre_omega = torch.hstack((h1_upper, h1_lower))
                 surr_critic_loss = 0.5 * sum(F.mse_loss(current_q, target_q_values) for current_q in critic_pred)
                 h2_grad_theta_batched = autograd.grad(
                     surr_critic_loss, self.policy.actor.optimizer.param_groups[0]['params'], create_graph=True, retain_graph=True
@@ -382,8 +385,7 @@ class SMART(OffPolicyAlgorithm):
                 grad_theta_psi_J_batched = autograd.grad(h1_upper,
                                                          self.policy.dstb_actor.optimizer.param_groups[0]['params'],
                                                          torch.eye(num_ctrl_params, device=self.device),
-                                                         is_grads_batched=True, create_graph=True,
-                                                         retain_graph=True)
+                                                         is_grads_batched=True, create_graph=True, retain_graph=True)
 
                 grad_theta_psi_J = self.matrix_unbatch(grad_theta_psi_J_batched,
                                                        num_ctrl_params,
@@ -397,17 +399,20 @@ class SMART(OffPolicyAlgorithm):
                 # H = torch.cat((x, y), dim=1).t()
                 H = torch.cat((upper_rows, lower_rows), dim=0)
                 reg_param = 10
-                H = H + torch.eye(H.shape[0], device=self.device) * reg_param
+                #H = H + torch.eye(H.shape[0], device=self.device) * reg_param
                 # assert torch.allclose(H, H_test)
                 # assert torch.equal(H, H_test)
                 ivp_H_h2 = torch.linalg.solve(H, h2)
 
                 #imp = autograd.grad(h1_pre_omega, list(self.critic.parameters()), ivp_H_h2,
+
                 #                    create_graph=True, retain_graph=True)
                 J = self.cent_diff(f_model_critic, critic_params, critic_buffers, replay_data.observations, actions_pi, dstb_actions_pi, num_ctrl_params, num_dstb_params)
                 #test_imp = autograd.grad(h1_pre_omega, self.critic.parameters(), torch.eye(h1_pre_omega.shape[0], device=self.device), is_grads_batched=True, create_graph=True, retain_graph=True)
-                imp = torch.matmul(torch.transpose(J, 0,1), ivp_H_h2)
+                flat_imp = torch.matmul(torch.transpose(J, 0,1), ivp_H_h2)
                 # imp is the stackelberg part of the total derivative
+
+                imp = self.param_reshape(flat_imp)
 
             # Optimize the critic
             self.critic.optimizer.zero_grad()
@@ -417,6 +422,7 @@ class SMART(OffPolicyAlgorithm):
                     self.critic.optimizer.param_groups[0]['params'][i].grad = \
                     self.critic.optimizer.param_groups[0]['params'][i].grad - imp[i]
             del imp
+            del flat_imp
             self.critic.optimizer.step()
 
             # Compute actor loss
@@ -528,13 +534,13 @@ class SMART(OffPolicyAlgorithm):
         return q_values
 
     def cent_diff(self, critic_model, critic_params, critic_buffers, obs, u, d, ctrl_size, dstb_size):
-        delta = torch.rand(1)
+        delta = torch.rand(1, device=self.device)
 
-        J = torch.zeros((ctrl_size + dstb_size, len(critic_params)))
+        J = torch.zeros((ctrl_size + dstb_size, len(critic_params)), device=self.device)
         #In = I(n)
         #for j in range():
         #    J[:, j] = (f(x0 + delta * In[:, j]) - y0) / delta
-        Ij = torch.eye(len(critic_params))
+        Ij = torch.eye(len(critic_params), device=self.device)
         for k in range(len(critic_params)):
             flat_critic_params_pos = critic_params + delta * Ij[:, k]
             flat_critic_params_neg = critic_params - delta * Ij[:, k]
