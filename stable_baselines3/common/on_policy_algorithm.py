@@ -483,7 +483,7 @@ class OnPolicyAlgorithm(BaseAlgorithm):
 
         return state_dicts, []
 
-    def duel_models(self, model1, model2, env, num_episodes=10, angle_thresh=20, hold_thresh=200, degrees=True,
+    def duel_models(self, model1, model2, env, num_episodes=1, angle_thresh=20, hold_thresh=200, degrees=True,
                     model_class='pendulum'):
 
         """

@@ -3,7 +3,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import gymnasium as gym
 import numpy as np
-
+from scipy.special import softmax as softy
 from stable_baselines3.common import type_aliases
 from stable_baselines3.common.vec_env import DummyVecEnv, VecEnv, VecMonitor, is_vecenv_wrapped
 
@@ -84,8 +84,13 @@ def evaluate_policy(
     observations = env.reset()
     states = None
     episode_starts = np.ones((env.num_envs,), dtype=bool)
+    if model.use_leaderboard is True:
+        dstb_win_count = model.duel_models(model, model.policy.policy_memory, model.env)
+        probs = softy(dstb_win_count)
+        dstb_model_choice = np.random.choice(model.policy_memory_size, p=probs)
+        model.dstb_model_choice = dstb_model_choice
     while (episode_counts < episode_count_targets).any():
-        if (hasattr(model, 'adversarial') and model.adversarial is True) or (hasattr(model, "smart") and model.smart is True):
+        if ((hasattr(model, 'adversarial') and model.adversarial is True) or (hasattr(model, "smart") and model.smart is True)) and model.use_leaderboard is False:
             actions, dstb_actions, states = model.predict(
                 observations,  # type: ignore[arg-type]
                 state=states,
@@ -93,6 +98,16 @@ def evaluate_policy(
                 deterministic=deterministic,
             )
             new_observations, rewards, dones, infos = env.step([[actions, dstb_actions, episode_counts]])
+        elif model.use_leaderboard is True:
+            ctrl_action, _, _ = model.predict(observations,  # type: ignore[arg-type]
+                state=states,
+                episode_start=episode_starts,
+                deterministic=deterministic,
+            )
+            _, dstb_actions, _ = model.policy.policy_memory[model.dstb_model_choice].predict(observations, state=states,
+                episode_start=episode_starts,
+                deterministic=deterministic )
+            new_observations, rewards, dones, infos = env.step([[ctrl_action, dstb_actions, episode_counts]])
         else:
             actions, states = model.predict(
                 observations,  # type: ignore[arg-type]
