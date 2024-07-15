@@ -336,7 +336,7 @@ class CheckpointCallback(BaseCallback):
                 self.model.v_norm = self.model.q_norm
                 self.model.max_v_grad_norm = self.model.max_q_grad_norm
 
-            if (self.model.v_norm / self.model.max_v_grad_norm < .005) and (self.model.u_norm / self.model.max_u_grad_norm < .005) and (self.model.d_norm / self.model.max_d_grad_norm < .005):
+            if (self.model.v_norm / self.model.max_v_grad_norm < .0025) and (self.model.u_norm / self.model.max_u_grad_norm < .0025) and (self.model.d_norm / self.model.max_d_grad_norm < .0025):
                 print("Stopping because gradient norm condition is fulfilled")
                 return False
 

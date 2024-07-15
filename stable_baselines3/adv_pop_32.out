@@ -1,0 +1,361 @@
+nohup: ignoring input
+Using cuda device
+Wrapping the env with a `Monitor` wrapper
+Wrapping the env in a DummyVecEnv.
+--------------------------------------
+| rollout/              |            |
+|    ep_len_mean        | 500        |
+|    ep_rew_mean        | -2.53e+03  |
+| time/                 |            |
+|    fps                | 16         |
+|    iterations         | 100        |
+|    time_elapsed       | 49         |
+|    total_timesteps    | 800        |
+| train/                |            |
+|    d_grad_norm        | 0.176      |
+|    entropy_loss       | -1.93      |
+|    explained_variance | 0.10064763 |
+|    learning_rate      | 0.0104     |
+|    n_updates          | 99         |
+|    policy_loss        | -24.3      |
+|    std                | 1.01       |
+|    u_grad_norm        | 0.151      |
+|    v_grad_norm        | 0.87       |
+|    value_loss         | 178        |
+--------------------------------------
+Using cuda device
+Wrapping the env with a `Monitor` wrapper
+Wrapping the env in a DummyVecEnv.
+---------------------------------------
+| rollout/              |             |
+|    ep_len_mean        | 500         |
+|    ep_rew_mean        | -3.48e+03   |
+| time/                 |             |
+|    fps                | 16          |
+|    iterations         | 100         |
+|    time_elapsed       | 49          |
+|    total_timesteps    | 800         |
+| train/                |             |
+|    d_grad_norm        | 0.107       |
+|    entropy_loss       | -1.3        |
+|    explained_variance | 0.030107617 |
+|    learning_rate      | 0.0104      |
+|    n_updates          | 99          |
+|    policy_loss        | -17.3       |
+|    std                | 1.01        |
+|    u_grad_norm        | 0.066       |
+|    v_grad_norm        | 1.06        |
+|    value_loss         | 448         |
+---------------------------------------
+Using cuda device
+Wrapping the env with a `Monitor` wrapper
+Wrapping the env in a DummyVecEnv.
+-----------------------------------------
+| rollout/              |               |
+|    ep_len_mean        | 500           |
+|    ep_rew_mean        | -3.85e+03     |
+| time/                 |               |
+|    fps                | 15            |
+|    iterations         | 100           |
+|    time_elapsed       | 50            |
+|    total_timesteps    | 800           |
+| train/                |               |
+|    d_grad_norm        | 0.12          |
+|    entropy_loss       | -2.42         |
+|    explained_variance | -0.0119354725 |
+|    learning_rate      | 0.0104        |
+|    n_updates          | 99            |
+|    policy_loss        | -84.5         |
+|    std                | 1.01          |
+|    u_grad_norm        | 0.0332        |
+|    v_grad_norm        | 0.831         |
+|    value_loss         | 1.35e+03      |
+-----------------------------------------
+Using cuda device
+Wrapping the env with a `Monitor` wrapper
+Wrapping the env in a DummyVecEnv.
+---------------------------------------
+| rollout/              |             |
+|    ep_len_mean        | 500         |
+|    ep_rew_mean        | -3.15e+03   |
+| time/                 |             |
+|    fps                | 15          |
+|    iterations         | 100         |
+|    time_elapsed       | 50          |
+|    total_timesteps    | 800         |
+| train/                |             |
+|    d_grad_norm        | 0.312       |
+|    entropy_loss       | -1.12       |
+|    explained_variance | -0.03470683 |
+|    learning_rate      | 0.0104      |
+|    n_updates          | 99          |
+|    policy_loss        | -21.8       |
+|    std                | 1           |
+|    u_grad_norm        | 0.285       |
+|    v_grad_norm        | 0.928       |
+|    value_loss         | 209         |
+---------------------------------------
+Using cuda device
+Wrapping the env with a `Monitor` wrapper
+Wrapping the env in a DummyVecEnv.
+--------------------------------------
+| rollout/              |            |
+|    ep_len_mean        | 500        |
+|    ep_rew_mean        | -2.79e+03  |
+| time/                 |            |
+|    fps                | 15         |
+|    iterations         | 100        |
+|    time_elapsed       | 50         |
+|    total_timesteps    | 800        |
+| train/                |            |
+|    d_grad_norm        | 0.0699     |
+|    entropy_loss       | -1.06      |
+|    explained_variance | 0.19741756 |
+|    learning_rate      | 0.0104     |
+|    n_updates          | 99         |
+|    policy_loss        | -25.1      |
+|    std                | 1.01       |
+|    u_grad_norm        | 0.0853     |
+|    v_grad_norm        | 1.07       |
+|    value_loss         | 330        |
+--------------------------------------
+Using cuda device
+Wrapping the env with a `Monitor` wrapper
+Wrapping the env in a DummyVecEnv.
+-------------------------------------
+| rollout/              |           |
+|    ep_len_mean        | 500       |
+|    ep_rew_mean        | -2.71e+03 |
+| time/                 |           |
+|    fps                | 15        |
+|    iterations         | 100       |
+|    time_elapsed       | 50        |
+|    total_timesteps    | 800       |
+| train/                |           |
+|    d_grad_norm        | 0.0195    |
+|    entropy_loss       | -1.63     |
+|    explained_variance | 0.4366994 |
+|    learning_rate      | 0.0104    |
+|    n_updates          | 99        |
+|    policy_loss        | -14.6     |
+|    std                | 0.999     |
+|    u_grad_norm        | 0.0405    |
+|    v_grad_norm        | 0.931     |
+|    value_loss         | 63        |
+-------------------------------------
+Using cuda device
+Wrapping the env with a `Monitor` wrapper
+Wrapping the env in a DummyVecEnv.
+----------------------------------------
+| rollout/              |              |
+|    ep_len_mean        | 500          |
+|    ep_rew_mean        | -2.72e+03    |
+| time/                 |              |
+|    fps                | 15           |
+|    iterations         | 100          |
+|    time_elapsed       | 50           |
+|    total_timesteps    | 800          |
+| train/                |              |
+|    d_grad_norm        | 0.116        |
+|    entropy_loss       | -1.19        |
+|    explained_variance | -0.062313557 |
+|    learning_rate      | 0.0104       |
+|    n_updates          | 99           |
+|    policy_loss        | -3.02        |
+|    std                | 1.01         |
+|    u_grad_norm        | 0.049        |
+|    v_grad_norm        | 0.952        |
+|    value_loss         | 19.4         |
+----------------------------------------
+Using cuda device
+Wrapping the env with a `Monitor` wrapper
+Wrapping the env in a DummyVecEnv.
+--------------------------------------
+| rollout/              |            |
+|    ep_len_mean        | 500        |
+|    ep_rew_mean        | -3.18e+03  |
+| time/                 |            |
+|    fps                | 15         |
+|    iterations         | 100        |
+|    time_elapsed       | 50         |
+|    total_timesteps    | 800        |
+| train/                |            |
+|    d_grad_norm        | 0.398      |
+|    entropy_loss       | -1.72      |
+|    explained_variance | 0.13099551 |
+|    learning_rate      | 0.0104     |
+|    n_updates          | 99         |
+|    policy_loss        | -28.5      |
+|    std                | 1          |
+|    u_grad_norm        | 0.0796     |
+|    v_grad_norm        | 0.813      |
+|    value_loss         | 343        |
+--------------------------------------
+Using cuda device
+Wrapping the env with a `Monitor` wrapper
+Wrapping the env in a DummyVecEnv.
+---------------------------------------
+| rollout/              |             |
+|    ep_len_mean        | 500         |
+|    ep_rew_mean        | -3.37e+03   |
+| time/                 |             |
+|    fps                | 15          |
+|    iterations         | 100         |
+|    time_elapsed       | 50          |
+|    total_timesteps    | 800         |
+| train/                |             |
+|    d_grad_norm        | 0.0485      |
+|    entropy_loss       | -1.05       |
+|    explained_variance | -0.63953996 |
+|    learning_rate      | 0.0104      |
+|    n_updates          | 99          |
+|    policy_loss        | -7.83       |
+|    std                | 1           |
+|    u_grad_norm        | 0.0579      |
+|    v_grad_norm        | 0.983       |
+|    value_loss         | 38.9        |
+---------------------------------------
+Using cuda device
+Wrapping the env with a `Monitor` wrapper
+Wrapping the env in a DummyVecEnv.
+--------------------------------------
+| rollout/              |            |
+|    ep_len_mean        | 500        |
+|    ep_rew_mean        | -3.53e+03  |
+| time/                 |            |
+|    fps                | 15         |
+|    iterations         | 100        |
+|    time_elapsed       | 50         |
+|    total_timesteps    | 800        |
+| train/                |            |
+|    d_grad_norm        | 0.0215     |
+|    entropy_loss       | -1.76      |
+|    explained_variance | 0.08425516 |
+|    learning_rate      | 0.0104     |
+|    n_updates          | 99         |
+|    policy_loss        | -15.9      |
+|    std                | 1          |
+|    u_grad_norm        | 0.0346     |
+|    v_grad_norm        | 0.949      |
+|    value_loss         | 106        |
+--------------------------------------
+Using cuda device
+Wrapping the env with a `Monitor` wrapper
+Wrapping the env in a DummyVecEnv.
+--------------------------------------
+| rollout/              |            |
+|    ep_len_mean        | 500        |
+|    ep_rew_mean        | -3.07e+03  |
+| time/                 |            |
+|    fps                | 15         |
+|    iterations         | 100        |
+|    time_elapsed       | 50         |
+|    total_timesteps    | 800        |
+| train/                |            |
+|    d_grad_norm        | 0.0241     |
+|    entropy_loss       | -1.42      |
+|    explained_variance | 0.06618643 |
+|    learning_rate      | 0.0104     |
+|    n_updates          | 99         |
+|    policy_loss        | -25.5      |
+|    std                | 1          |
+|    u_grad_norm        | 0.00631    |
+|    v_grad_norm        | 1.05       |
+|    value_loss         | 684        |
+--------------------------------------
+Using cuda device
+Wrapping the env with a `Monitor` wrapper
+Wrapping the env in a DummyVecEnv.
+---------------------------------------
+| rollout/              |             |
+|    ep_len_mean        | 500         |
+|    ep_rew_mean        | -4.08e+03   |
+| time/                 |             |
+|    fps                | 15          |
+|    iterations         | 100         |
+|    time_elapsed       | 50          |
+|    total_timesteps    | 800         |
+| train/                |             |
+|    d_grad_norm        | 0.313       |
+|    entropy_loss       | -0.811      |
+|    explained_variance | 0.008963525 |
+|    learning_rate      | 0.0104      |
+|    n_updates          | 99          |
+|    policy_loss        | -12.3       |
+|    std                | 1           |
+|    u_grad_norm        | 0.173       |
+|    v_grad_norm        | 0.891       |
+|    value_loss         | 836         |
+---------------------------------------
+Using cuda device
+Wrapping the env with a `Monitor` wrapper
+Wrapping the env in a DummyVecEnv.
+---------------------------------------
+| rollout/              |             |
+|    ep_len_mean        | 500         |
+|    ep_rew_mean        | -3e+03      |
+| time/                 |             |
+|    fps                | 15          |
+|    iterations         | 100         |
+|    time_elapsed       | 50          |
+|    total_timesteps    | 800         |
+| train/                |             |
+|    d_grad_norm        | 0.0962      |
+|    entropy_loss       | -1.79       |
+|    explained_variance | 0.091872394 |
+|    learning_rate      | 0.0104      |
+|    n_updates          | 99          |
+|    policy_loss        | -46.1       |
+|    std                | 0.999       |
+|    u_grad_norm        | 0.0326      |
+|    v_grad_norm        | 0.845       |
+|    value_loss         | 931         |
+---------------------------------------
+Using cuda device
+Wrapping the env with a `Monitor` wrapper
+Wrapping the env in a DummyVecEnv.
+---------------------------------------
+| rollout/              |             |
+|    ep_len_mean        | 500         |
+|    ep_rew_mean        | -4.28e+03   |
+| time/                 |             |
+|    fps                | 15          |
+|    iterations         | 100         |
+|    time_elapsed       | 50          |
+|    total_timesteps    | 800         |
+| train/                |             |
+|    d_grad_norm        | 0.0993      |
+|    entropy_loss       | -0.161      |
+|    explained_variance | -0.04352188 |
+|    learning_rate      | 0.0104      |
+|    n_updates          | 99          |
+|    policy_loss        | -2.86       |
+|    std                | 1           |
+|    u_grad_norm        | 0.35        |
+|    v_grad_norm        | 0.909       |
+|    value_loss         | 586         |
+---------------------------------------
+Using cuda device
+Wrapping the env with a `Monitor` wrapper
+Wrapping the env in a DummyVecEnv.
+---------------------------------------
+| rollout/              |             |
+|    ep_len_mean        | 500         |
+|    ep_rew_mean        | -2.72e+03   |
+| time/                 |             |
+|    fps                | 15          |
+|    iterations         | 100         |
+|    time_elapsed       | 50          |
+|    total_timesteps    | 800         |
+| train/                |             |
+|    d_grad_norm        | 0.0675      |
+|    entropy_loss       | -1.35       |
+|    explained_variance | 0.045540452 |
+|    learning_rate      | 0.0104      |
+|    n_updates          | 99          |
+|    policy_loss        | -17.1       |
+|    std                | 1.01        |
+|    u_grad_norm        | 0.0528      |
+|    v_grad_norm        | 0.998       |
+|    value_loss         | 366         |
+---------------------------------------

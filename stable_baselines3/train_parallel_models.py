@@ -80,26 +80,27 @@ from stable_baselines3 import A3C_rarl
 env = gym.make("my_pendulum")
 v_learning_rate = 5e-4
 
-#tau_v_c = 0.0066932472422626425 / 0.0005933974267381725
-#tau_c_d = 0.01235801572155198 / 0.0066932472422626425
-tau_v_c = 1
-tau_c_d = 1
+tau_v_c = 0.0066932472422626425 / 0.0005933974267381725
+tau_c_d = 0.01235801572155198 / 0.0066932472422626425
+#tau_v_c = 1
+#tau_c_d = 1
 USE_LEADERBOARD = False
 LEADERBOARD_SIZE = 10
-
+np.random.seed(seed=0)
 #model = A3C_rarl("MlPAACPolicy", use_stackelberg=False, env=env, verbose=2, n_steps=8, normalize_advantage=False,gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,vf_coef=.4,gamma=.9,v_learning_rate=5e-4, c_learning_rate=5e-4,d_learning_rate=5e-4, use_sde=True,use_rms_prop=False, device='cpu')
 
 #model = lambda tau1, tau2: A3C_rarl("MlPAACPolicy", use_stackelberg=False, env=env, verbose=2, n_steps=8, normalize_advantage=False,gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,vf_coef=.4,gamma=.9,v_learning_rate=v_learning_rate, c_learning_rate=v_learning_rate * tau1,d_learning_rate=v_learning_rate * tau1 * tau2, use_sde=True,use_rms_prop=False, device='cpu')
 def f(tau2):
-    seeds = [3721, 1234785, 834981, 9274, 42069, 92048, 109475, 373095, 5, 92038]
-    model = A3C_rarl("MlPAACPolicy", use_stackelberg=False, env=env, verbose=2, n_steps=8, normalize_advantage=False,
+    high = 10_000_000_000
+    seed_list = np.random.randint(0, high=high, size=32, dtype=int)
+    model = A3C_rarl("MlPAACPolicy", use_stackelberg=True, env=env, verbose=2, n_steps=8, normalize_advantage=False,
                      gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,vf_coef=.4,gamma=.9,
                      v_learning_rate=linear_schedule(v_learning_rate),
                      c_learning_rate=linear_schedule(v_learning_rate * tau_v_c),
                      d_learning_rate=linear_schedule(v_learning_rate * tau_v_c * tau_c_d),
-                     use_sde=True,use_rms_prop=False, device='auto', seed=seeds[int(tau2)],policy_kwargs={'net_arch': dict(pi=[32,32,32], qf=[128,128,128])}, use_leaderboard=USE_LEADERBOARD, policy_memory_size=LEADERBOARD_SIZE)
-    name = "/home/jw4406/codebase/stable-baselines3/stable_baselines3/competitive_models/baseline_pretrain_parallel_pend_tss_zoo_ud_55_%d_518000_steps.zip" % int(tau2)
-    model = A3C_rarl.load(name, env=env)
+                     use_sde=True,use_rms_prop=False, device='auto', seed=int(seed_list[int(tau2)]),policy_kwargs={'net_arch': dict(pi=[16,16], vf=[64,64])}, use_leaderboard=USE_LEADERBOARD, policy_memory_size=LEADERBOARD_SIZE)
+    #name = "/home/jw4406/codebase/stable-baselines3/stable_baselines3/competitive_models/baseline_pretrain_parallel_pend_tss_zoo_ud_55_%d_518000_steps.zip" % int(tau2)
+    #model = A3C_rarl.load(name, env=env)
     if USE_LEADERBOARD is True:
         for i in range(LEADERBOARD_SIZE):
             clone = A3C_rarl("MlPAACPolicy", use_stackelberg=True, env=env, verbose=2, n_steps=8, normalize_advantage=False,
@@ -107,7 +108,7 @@ def f(tau2):
                      v_learning_rate=linear_schedule(v_learning_rate),
                      c_learning_rate=linear_schedule(v_learning_rate * tau_v_c),
                      d_learning_rate=linear_schedule(v_learning_rate * tau_v_c * tau_c_d),
-                     use_sde=True,use_rms_prop=False, device='cpu', seed=seeds[int(tau2)]+i+1)
+                     use_sde=True,use_rms_prop=False, device='cpu', seed=seed_list[int(tau2)]+i+1)
             model.policy.policy_memory[i] = clone.policy
             del clone
 
@@ -123,7 +124,7 @@ def f(tau2):
         save_freq=1000,
         save_path="./competitive_models/",
         #stac_train_sweep_pend_competitive_%d % int(tau2)
-        name_prefix="baseline_pretrain_parallel_pend_tss_zoo_ud_55_%d" % int(tau2),
+        name_prefix="adversarial_populations_pretrain_stac_size_32_ud_55_iter_%d" % int(tau2),
         save_replay_buffer=True,
         save_vecnormalize=True,
         jobid=args.jobid
@@ -131,12 +132,12 @@ def f(tau2):
     callback_list = CallbackList([eval_callback, checkpoint_callback])  # , checkpoint_callback])
     # model.learn(total_timesteps=1_000_000, callback=callback_list)
     model.learn(total_timesteps=10_000_000, callback=callback_list)
-    model.save("./competitive_models/baseline_pretrain_pend_parallel_FINISHED_ud_55_%d.zip" % int(tau2))
+    model.save("./competitive_models/stac_pretrain_pend_adversarial_populations_FINISHED_ud_55_%d.zip" % int(tau2))
     print("HI IM DONE")
 if __name__ == '__main__':
 
-    with Pool(10) as p:
-        p.map(f, np.arange(0,10))
+    with Pool(32) as p:
+        p.map(f, np.arange(0, 32))
 
 
 '''
