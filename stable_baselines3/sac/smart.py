@@ -182,6 +182,11 @@ class SMART(OffPolicyAlgorithm):
         self.d_learning_rate = d_learning_rate
         self.learning_rate = [v_learning_rate, c_learning_rate, d_learning_rate]
         self.smart = True
+        self.use_leaderboard = False
+        #TODO: leaderboard
+        self.max_q_grad_norm = 0
+        self.max_u_grad_norm = 0
+        self.max_d_grad_norm = 0
         self.policy_kwargs['dstb_action_space'] = dstb_action_space
         if dstb_action_space is None:
             self.dstb_action_space = env.action_space
@@ -430,8 +435,8 @@ class SMART(OffPolicyAlgorithm):
                 #                 dim=1).t().chunk(2)
                 # H = torch.cat((x, y), dim=1).t()
                 H = torch.cat((upper_rows, lower_rows), dim=0)
-                reg_param = 10
-                #H = H + torch.eye(H.shape[0], device=self.device) * reg_param
+                reg_param = 5
+                H = H + torch.eye(H.shape[0], device=self.device) * reg_param
                 # assert torch.allclose(H, H_test)
                 # assert torch.equal(H, H_test)
                 ivp_H_h2 = torch.linalg.solve(H, h2)
@@ -496,7 +501,31 @@ class SMART(OffPolicyAlgorithm):
                 # Copy running stats, see GH issue #996
                 polyak_update(self.batch_norm_stats, self.batch_norm_stats_target, 1.0)
             elapsed = time.time() - start
-            1
+            q_norm = 0
+            u_norm = 0
+            d_norm = 0
+            for i in range(len(self.critic.optimizer.param_groups[0]['params'])):
+                q_norm = q_norm + torch.linalg.norm(self.critic.optimizer.param_groups[0]['params'][i].grad)
+            for i in range(len(self.actor.optimizer.param_groups[0]['params'])):
+                u_norm = u_norm + torch.linalg.norm(self.actor.optimizer.param_groups[0]['params'][i].grad)
+            if self.use_leaderboard is True:
+                for i in range(len(
+                        self.policy.policy_memory[self.dstb_model_choice].dstb_optimizer.param_groups[0]['params'])):
+                    d_norm = d_norm + torch.linalg.norm(
+                        self.policy.policy_memory[self.dstb_model_choice].dstb_optimizer.param_groups[0]['params'][
+                            i].grad)
+            else:
+                for i in range(len(self.dstb_actor.optimizer.param_groups[0]['params'])):
+                    d_norm = d_norm + torch.linalg.norm(self.dstb_actor.optimizer.param_groups[0]['params'][i].grad)
+            self.q_norm = q_norm
+            self.d_norm = d_norm
+            self.u_norm = u_norm
+            if self.q_norm > self.max_q_grad_norm:
+                self.max_q_grad_norm = self.q_norm
+            if self.u_norm > self.max_u_grad_norm:
+                self.max_u_grad_norm = self.u_norm
+            if self.d_norm > self.max_d_grad_norm:
+                self.max_d_grad_norm = self.d_norm
         self._n_updates += gradient_steps
 
         self.logger.record("train/n_updates", self._n_updates, exclude="tensorboard")
@@ -755,11 +784,11 @@ class SMART(OffPolicyAlgorithm):
         return h1_pos
 
     def do_gradients_reversed(self, replay_data, num_critic_params, num_ctrl_params, num_dstb_params):
-        delta = torch.rand(1, device=self.device) * .0001
+        delta = torch.rand(1, device=self.device) * .00001
         #player_params = torch.cat((flat_ctrl_params, flat_dstb_params), dim=0)
         J = torch.zeros(num_ctrl_params + num_dstb_params, num_critic_params, device=self.device)
 
-        weights_path = 'weights_temp.pt'
+        weights_path = 'weights_temp_large.pt'
         torch.save(self.policy, weights_path)
         hacky_trick = torch.load(weights_path)
 

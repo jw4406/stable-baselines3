@@ -52,6 +52,7 @@ def duel_models(model1, model2, env, num_episodes=10, angle_thresh=20, hold_thre
                 my_env = model1[k].get_env()
                 for _ in range(num_episodes):
                     #obs = env.reset()
+                    rew_test = 0
                     #obs_for_env = obs[0]
                     #obs_for_env = obs_for_env[None, :]
                     done = False
@@ -65,6 +66,7 @@ def duel_models(model1, model2, env, num_episodes=10, angle_thresh=20, hold_thre
                         action, _, _ = model1[k].predict(obs, deterministic=True)
                         _, dstb_action, _ = model2[l].predict(obs, deterministic=True)
                         obs, reward, done, info = my_env.step([[action, dstb_action, 1]])
+                        rew_test = rew_test + reward
                         #vec_env.render()
                         #print(reward, action, dstb_action, action + dstb_action, dstb_action)
                         x = obs[0,0]
@@ -99,7 +101,7 @@ def duel_models(model1, model2, env, num_episodes=10, angle_thresh=20, hold_thre
                         # CONTROLLER VICTORY
                         # We got up there quickly and stayed there!
                         model1_wins = model1_wins + 1
-                controller_wins.append(model1_wins)
+                controller_wins.append(rew_test)
     elif model_class == "cheetah" or model_class == "half_cheetah" or model_class == "my_half_cheetah":
         for _ in range(num_episodes):
             rew = 0
@@ -127,7 +129,7 @@ def duel_models(model1, model2, env, num_episodes=10, angle_thresh=20, hold_thre
                 model1_wins = model1_wins + 1
             else:
                 model2_wins = model2_wins + 1
-    return model1_wins, model2_wins
+    return controller_wins, model2_wins
 
 
 #env = gym.make("my_pendulum", render_mode='human')
@@ -141,19 +143,28 @@ if model_class == 'pend':
     smart_model_list = []
     ablation_model_list = []
     baseline_model_list = []
+    # folder = "/home/jw4406/codebase/stable-baselines3/stable_baselines3/logs/"
+    #smart_model_path = 'stac_train_pend_parallel_FINISHED_%d.zip' % nums[i]
+    smart_model_path = 'leaderboard_10_trained_d_no_grad_tss_zoo_ud_55_3.zip'
+    env.reset(seed=seeds[0])
+    smart = A3C_rarl.load(folder + smart_model_path, env=env)
+    smart.spirit = False
+    smart_model_list.append(smart)
     for i in range(len(nums)):
-        #folder = "/home/jw4406/codebase/stable-baselines3/stable_baselines3/logs/"
+        '''#folder = "/home/jw4406/codebase/stable-baselines3/stable_baselines3/logs/"
         smart_model_path = 'stac_train_pend_parallel_FINISHED_%d.zip' % nums[i]
         env.reset(seed=seeds[i])
         smart = A3C_rarl.load(folder + smart_model_path, env=env)
         smart.spirit = False
         smart_model_list.append(smart)
+        '''
         folder = "/home/jw4406/codebase/stable-baselines3/stable_baselines3/competitive_models/"
-        smart_ablation_model_path = 'ablation_train_pend_parallel_FINISHED_%d.zip' % nums[i]
-        smart_ablation = A3C_rarl.load(folder + smart_ablation_model_path, env=env)
-        smart_ablation.spirit = False
-        ablation_model_list.append(smart_ablation)
-        baseline_model_path = 'baseline_train_pend_parallel_FINISHED_%d.zip' % nums[i]
+        #smart_ablation_model_path = 'ablation_train_pend_parallel_FINISHED_%d.zip' % nums[i]
+        #smart_ablation = A3C_rarl.load(folder + smart_ablation_model_path, env=env)
+        #smart_ablation.spirit = False
+        #ablation_model_list.append(smart_ablation)
+        #baseline_model_path = 'stac_train_pend_parallel_FINISHED_wd_53_ud_55_%d.zip' % nums[i]
+        baseline_model_path = 'baseline_pretrain_parallel_pend_tss_zoo_ud_55_%d_553000_steps.zip' % nums[i]
         baseline = A3C_rarl.load(folder + baseline_model_path, env=env)
         baseline.spirit = False
         baseline_model_list.append(baseline)
@@ -181,6 +192,20 @@ for i in range(2):
 
     smartc_baselined_win, baselined_smartc_win = duel_models(smart_model_list, baseline_model_list, smart.get_env(), num_episodes=rounds, model_class=model_class)
     s_b.append(smartc_baselined_win)
+
+    #TEST
+    baselinec_smartd_win, smartd_baselinec_win = duel_models(baseline_model_list, smart_model_list, smart.get_env(),
+                                                             num_episodes=rounds, model_class=model_class)
+    b_s.append(baselinec_smartd_win)
+    smartc_smartd_win, smartd_smartc_win = duel_models(smart_model_list, smart_model_list, smart.get_env(),
+                                                       num_episodes=rounds, model_class=model_class)
+    s_s.append(smartc_smartd_win)
+
+    baselinec_baselind_win, baselined_baselinec_win = duel_models(baseline_model_list, baseline_model_list,
+                                                                  smart.get_env(), num_episodes=rounds,
+                                                                  model_class=model_class)
+    b_b.append(baselinec_baselind_win)
+
     smartc_ablationd_win, ablationd_smartc_win = duel_models(smart_model_list, ablation_model_list, smart.get_env(), num_episodes=rounds, model_class=model_class)
     s_a.append(smartc_ablationd_win)
     smartc_smartd_win, smartd_smartc_win = duel_models(smart_model_list, smart_model_list, smart.get_env(), num_episodes=rounds, model_class=model_class)
