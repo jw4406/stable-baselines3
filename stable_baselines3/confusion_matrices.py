@@ -138,7 +138,7 @@ model_class = 'pend'
 if model_class == 'pend':
     nums = np.arange(10)
     seeds = [3721, 1234785, 834981, 9274, 42069, 92048, 109475, 373095, 5, 92038]
-    env = gym.make("my_pendulum")
+    env = gym.make("my_pendulum", render_mode='human')
     folder = "/home/jw4406/codebase/stable-baselines3/stable_baselines3/competitive_models/"
     smart_model_list = []
     ablation_model_list = []
