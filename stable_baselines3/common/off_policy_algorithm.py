@@ -20,6 +20,7 @@ from stable_baselines3.common.type_aliases import GymEnv, MaybeCallback, Rollout
 from stable_baselines3.common.utils import safe_mean, should_collect_more_steps
 from stable_baselines3.common.vec_env import VecEnv
 from stable_baselines3.her.her_replay_buffer import HerReplayBuffer
+from torch.profiler import profile, record_function, ProfilerActivity
 
 SelfOffPolicyAlgorithm = TypeVar("SelfOffPolicyAlgorithm", bound="OffPolicyAlgorithm")
 
@@ -352,8 +353,15 @@ class OffPolicyAlgorithm(BaseAlgorithm):
                 gradient_steps = self.gradient_steps if self.gradient_steps >= 0 else rollout.episode_timesteps
                 # Special case when the user passes `gradient_steps=0`
                 if gradient_steps > 0:
+                    '''
+                    with profile(activities=[
+                        ProfilerActivity.CPU, ProfilerActivity.CUDA], record_shapes=True) as prof:
+                        with record_function("model_inference"):'''
+
                     self.train(batch_size=self.batch_size, gradient_steps=gradient_steps)
 
+                    '''print(prof.key_averages().table(sort_by="cuda_time_total", row_limit=10))
+                    1'''
         callback.on_training_end()
 
         return self

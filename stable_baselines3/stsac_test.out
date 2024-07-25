@@ -1,3 +1,0 @@
-nohup: ignoring input
-/home/jw4406/anaconda3/envs/mujoco_sb3_parallel/lib/python3.11/site-packages/torch/_functorch/deprecated.py:104: UserWarning: We've integrated functorch into PyTorch. As the final step of the integration, functorch.make_functional_with_buffers is deprecated as of PyTorch 2.0 and will be deleted in a future version of PyTorch >= 2.3. Please use torch.func.functional_call instead; see the PyTorch 2.0 release notes and/or the torch.func migration guide for more details https://pytorch.org/docs/master/func.migrating.html
-  warn_deprecated('make_functional_with_buffers', 'torch.func.functional_call')
