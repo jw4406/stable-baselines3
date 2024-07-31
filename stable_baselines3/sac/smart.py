@@ -16,8 +16,6 @@ from stable_baselines3.common.utils import get_parameters_by_name, polyak_update
 from stable_baselines3.sac.policies import Actor, CnnPolicy, MlpPolicy, MultiInputPolicy, SACPolicy, MlPAACPolicy
 from functorch import make_functional_with_buffers, make_functional, vmap, grad, jacrev, hessian
 #import multiprocess
-import datetime
-from torch.profiler import profile, record_function, ProfilerActivity
 #multiprocess.set_start_method('spawn', force=True)
 import time
 from multiprocess.pool import ThreadPool as bitx
@@ -185,7 +183,6 @@ class SMART(OffPolicyAlgorithm):
         self.learning_rate = [v_learning_rate, c_learning_rate, d_learning_rate]
         self.smart = True
         self.use_leaderboard = False
-        self.step_count = 0
         #TODO: leaderboard
         self.max_q_grad_norm = 0
         self.max_u_grad_norm = 0
@@ -245,7 +242,6 @@ class SMART(OffPolicyAlgorithm):
         self.critic_target = self.policy.critic_target
 
     def train(self, gradient_steps: int, batch_size: int = 64) -> None:
-        bigstart = time.time()
         # Switch to train mode (this affects batch norm / dropout)
         self.policy.set_training_mode(True)
         # Update optimizers learning rate
@@ -260,7 +256,7 @@ class SMART(OffPolicyAlgorithm):
         ent_coef_losses, ent_coefs = [], []
         actor_losses, critic_losses, dstb_actor_losses = [], [], []
         for gradient_step in range(gradient_steps):
-            #start = time.time()
+            start = time.time()
             # Sample replay buffer
             replay_data = self.replay_buffer.sample(batch_size, env=self._vec_normalize_env)  # type: ignore[union-attr]
 
@@ -306,8 +302,8 @@ class SMART(OffPolicyAlgorithm):
                 next_dstb_actions, next_dstb_log_prob = self.dstb_actor.action_log_prob(replay_data.next_observations)
                 # Compute the next Q values: min over all critics targets
                 next_q_values = th.cat(self.critic_target(replay_data.next_observations, next_actions, next_dstb_actions), dim=1)
-                next_q_values, _ = th.min(next_q_values, dim=1, keepdim=True)
-                #next_q_values = next_q_values[0]
+                #next_q_values, _ = th.min(next_q_values, dim=1, keepdim=True)
+                next_q_values = next_q_values[0]
                 # add entropy term
                 #next_q_values = next_q_values - ent_coef * next_log_prob.reshape(-1, 1) + dstb_ent_coef * next_dstb_log_prob.reshape(-1, 1)
                 # td error + entropy term
@@ -337,7 +333,7 @@ class SMART(OffPolicyAlgorithm):
 
                 #critic_pred_sum = torch.add(critic_pred[0], critic_pred[1])
                 #surr_q_value_pre_mean = torch.div(critic_pred_sum, 2)
-                #surr_q_values = torch.mean(torch.sum(critic_pred,dim=1))
+
                 surr_q_values = torch.mean(torch.sum(torch.hstack((critic_pred[0], critic_pred[1])), dim=1))
                 #surr_q_values = self.critic.gpt_forward(replay_data.observations, actions_pi, dstb_actions_pi)
                 #surr_q_values = self.critic.q1_forward(replay_data.observations, actions_pi, dstb_actions_pi).mean()
@@ -356,7 +352,7 @@ class SMART(OffPolicyAlgorithm):
 
                 #f_model_dstb, dstb_params, dstb_buffers = make_functional_with_buffers(self.dstb_actor)
                 f_model_critic, batched_critic_params, critic_buffers = make_functional_with_buffers(self.critic)
-                #critic_params = torch.hstack([t.flatten() for t in batched_critic_params])
+                critic_params = torch.hstack([t.flatten() for t in batched_critic_params])
                 #stateless_q_values = self.compute_stateless_q_surr(f_model_critic, critic_params, critic_buffers, replay_data.observations)
 
                 #critic_pred = self.critic(replay_data.observations, actions_pi, dstb_actions_pi)
@@ -373,31 +369,10 @@ class SMART(OffPolicyAlgorithm):
                 #my_array[:] = result[:]
                 #x = pool.apply_async(self.do_gradients_reversed,
                 #                    (f_x_0, replay_data, len(critic_params), num_ctrl_params, num_dstb_params))
-                #h1_gpt_start = time.time()
-                #J = self.gpt_gradients(surr_q_values, replay_data, len(critic_params), num_ctrl_params, num_dstb_params)
-                #h1_gpt_elapsed=time.time() - h1_gpt_start
-
-                #h1_my_start = time.time()
-                #J = self.do_gradients_reversed_singleshot(surr_q_values, replay_data, len(critic_params), num_ctrl_params, num_dstb_params)
-                #h1_my_elapsed = time.time() - h1_my_start
-
-                #gpt_left_start = time.time()
-                #test_left_J = self.gpt_left(surr_q_values, replay_data, len(critic_params), num_ctrl_params, num_dstb_params)
-                #gpt_left_elapsed=time.time() - gpt_left_start
-
-                #gpt_right_start = time.time()
-                #test_right_J = self.gpt_right(surr_q_values, replay_data, len(critic_params), num_ctrl_params,
-                #                            num_dstb_params)
-                #gpt_right_elapsed = time.time() - gpt_right_start
-
-                #gpt_another_start = time.time()
-                #test_another_J = self.gpt_another(surr_q_values, replay_data, len(critic_params), num_ctrl_params,
-                #            num_dstb_params)
-                #gpt_another_elapsed = time.time() - gpt_another_start
+                J = self.do_gradients_reversed_singleshot(surr_q_values, replay_data, len(critic_params), num_ctrl_params, num_dstb_params)
                 #h1_upper_grad = torch.hstack([t.flatten() for t in h1_upper_grad_batched])
                 #h1_upper_theta = autograd.grad(h1_upper_grad, self.actor.parameters(), torch.eye(9218), is_grads_batched=True, create_graph=True, retain_graph=True)
                 #self.do_gradients_reversed(surr_q_values, len(critic_params), num_ctrl_params, num_dstb_params)
-
                 h1_upper_grad_batched = autograd.grad(surr_q_values, list(self.actor.parameters()),
                                                       create_graph=True, retain_graph=True)
                 h1_upper = torch.hstack([t.flatten() for t in h1_upper_grad_batched])
@@ -406,11 +381,11 @@ class SMART(OffPolicyAlgorithm):
                                                       create_graph=True, retain_graph=True)
                 h1_lower = torch.hstack([t.flatten() for t in h1_lower_grad_batched])
                 h1_pre_omega = torch.hstack((h1_upper, h1_lower))
-
+                #self.jtv(h1_pre_omega, f_model_critic, critic_params, critic_buffers, replay_data.observations,
+                #         actions_pi, dstb_actions_pi, torch.ones(num_ctrl_params + num_dstb_params))
                 #result_dict = self.forward_diff(h1_pre_omega, f_model_critic, critic_params, critic_buffers,
                 #                                replay_data.observations, actions_pi, dstb_actions_pi, num_ctrl_params,
                 #                                num_dstb_params, use_parallel=True)
-                #h2_time_start = time.time()
                 surr_critic_loss = 0.5 * sum(F.mse_loss(current_q, target_q_values) for current_q in critic_pred)
                 h2_grad_theta_batched = autograd.grad(
                     surr_critic_loss, self.policy.actor.optimizer.param_groups[0]['params'], create_graph=True, retain_graph=True
@@ -421,14 +396,13 @@ class SMART(OffPolicyAlgorithm):
                 )
                 h2_lower = torch.hstack([t.flatten() for t in h2_grad_psi_batched])
                 h2 = torch.hstack((h2_upper, h2_lower))
-                #h2_time_elapsed = time.time() - h2_time_start
+
                 # Build big H matrix
                 # H is a 2x2 block matrix. The diagonals are hessians -- H_\theta (J) and H_\psi (J). The off diagonal terms are
                 # cross gradients -- \grad_{\theta\psi} J and \grad_{\psi\theta} J.
                 # We assemble it block by block.
 
                 # Diagonal terms (Hessians) first
-                #H_time_start = time.time()
                 hess_theta_J_batched = autograd.grad(h1_upper, self.policy.actor.optimizer.param_groups[0]['params'],
                                                      torch.eye(h1_upper.shape[0], device=self.device),
                                                      is_grads_batched=True, create_graph=True, retain_graph=True)
@@ -465,12 +439,11 @@ class SMART(OffPolicyAlgorithm):
                 H = torch.cat((upper_rows, lower_rows), dim=0)
                 reg_param = 5
                 H = H + torch.eye(H.shape[0], device=self.device) * reg_param
-                #H_time_elapsed = time.time() - H_time_start
                 # assert torch.allclose(H, H_test)
                 # assert torch.equal(H, H_test)
                 ivp_H_h2 = torch.linalg.solve(H, h2)
-                #self.jtv(h1_pre_omega, f_model_critic, critic_params, critic_buffers, replay_data.observations,
-                #         actions_pi, dstb_actions_pi, ivp_H_h2)
+                #self.jtv(h1_pre_omega, f_model_critic, critic_params, critic_buffers, replay_data.observations, actions_pi, dstb_actions_pi, ivp_H_h2)
+                #self.jacobian_vector_product(h1_pre_omega, ivp_H_h2)
                 #imp = autograd.grad(h1_pre_omega, list(self.critic.parameters()), ivp_H_h2,
 
                 #                    create_graph=True, retain_graph=True)
@@ -484,15 +457,14 @@ class SMART(OffPolicyAlgorithm):
                     except KeyError:
                         continue
                 '''
-                #elapsed = time.time() - t
-                imp = autograd.grad(h1_pre_omega, self.critic.parameters(), ivp_H_h2,allow_unused=False, create_graph=True, retain_graph=True)
+                elapsed = time.time() - start
+                #test_imp = autograd.grad(h1_pre_omega, self.critic.parameters(), torch.eye(h1_pre_omega.shape[0], device=self.device), is_grads_batched=True, create_graph=True, retain_graph=True)
                 #J = x.get()
-                #flat_imp = torch.matmul(torch.transpose(J, 0,1), ivp_H_h2)
+                flat_imp = torch.matmul(torch.transpose(J, 0,1), ivp_H_h2)
                 # imp is the stackelberg part of the total derivative
 
-                #imp = self.critic_param_reshape(flat_imp)
-                #elapsed = time.time() - start
-                #1
+                imp = self.critic_param_reshape(flat_imp)
+
             # Optimize the critic
             self.critic.optimizer.zero_grad()
             critic_loss.backward()
@@ -500,8 +472,8 @@ class SMART(OffPolicyAlgorithm):
                 for i in range(len(self.critic.optimizer.param_groups[0]['params'])):
                     self.critic.optimizer.param_groups[0]['params'][i].grad = \
                     self.critic.optimizer.param_groups[0]['params'][i].grad - imp[i]
-                del imp
-                #del flat_imp
+            del imp
+            del flat_imp
             self.critic.optimizer.step()
 
             # Compute actor loss
@@ -531,7 +503,7 @@ class SMART(OffPolicyAlgorithm):
                 polyak_update(self.critic.parameters(), self.critic_target.parameters(), self.tau)
                 # Copy running stats, see GH issue #996
                 polyak_update(self.batch_norm_stats, self.batch_norm_stats_target, 1.0)
-            #elapsed = time.time() - start
+            elapsed = time.time() - start
             q_norm = 0
             u_norm = 0
             d_norm = 0
@@ -557,8 +529,6 @@ class SMART(OffPolicyAlgorithm):
                 self.max_u_grad_norm = self.u_norm
             if self.d_norm > self.max_d_grad_norm:
                 self.max_d_grad_norm = self.d_norm
-            self.step_count = self.step_count + 1
-        #total = time.time() - bigstart
         self._n_updates += gradient_steps
 
         self.logger.record("train/n_updates", self._n_updates, exclude="tensorboard")
@@ -852,7 +822,6 @@ class SMART(OffPolicyAlgorithm):
                     surr_q_values = torch.mean(torch.sum(torch.hstack((critic_pred[0], critic_pred[1])), dim=1))
                     omega_grads_batched = autograd.grad(surr_q_values, hacky_trick.critic.parameters())
                     omega_grads_pos = torch.hstack([t.flatten() for t in omega_grads_batched])
-
                     with torch.no_grad():
                         p[indices] = old_val
 
@@ -883,15 +852,70 @@ class SMART(OffPolicyAlgorithm):
 
         return J
 
+    def jacobian_vector_product(self, f_x_0, v, epsilon=1e-5):
+        # Get all parameters as a single vector
+        params = torch.cat([p.view(-1) for p in self.critic.parameters()])
+        params_size = params.numel()
+
+        # Convert vector v to numpy array
+        v = v.detach().numpy()
+
+        # Perturb the parameters in the direction of v
+        original_params = params.clone().detach().numpy()
+        perturbed_params = original_params + epsilon * v
+
+        # Update the network parameters with perturbed values
+        start_idx = 0
+        for param in self.critic.qf0.parameters():
+            end_idx = start_idx + param.numel()
+            param.data = torch.tensor(perturbed_params[start_idx:end_idx]).view(param.size())
+            start_idx = end_idx
+        start_idx = 0
+        assert params_size // 2 == 0
+        offset = params_size / 2
+
+        for param in self.critic.qf1.parameters():
+            end_idx = start_idx + param.numel()
+            param.data = torch.tensor(original_params[offset + start_idx:offset + end_idx]).view(param.size())
+            start_idx = end_idx
+
+        # Compute the loss at perturbed parameters
+        forward_double_q_pred_pos = self.critic(obs, u, d)
+
+        surr_q_pos = torch.mean(
+            torch.sum(torch.hstack((forward_double_q_pred_pos[0], forward_double_q_pred_pos[1])), dim=1))
+        h1_perturbed = self.compute_stage_1_grad(surr_q_pos)
+        #output = net(x)
+        #perturbed_loss = vector_loss_fn(output, target)
+
+        # Restore the original parameters
+        start_idx = 0
+        for param in self.critic.qf0.parameters():
+            end_idx = start_idx + param.numel()
+            param.data = torch.tensor(original_params[start_idx:end_idx]).view(param.size())
+            start_idx = end_idx
+        start_idx = 0
+        for param in net.parameters():
+            end_idx = start_idx + param.numel()
+            param.data = torch.tensor(original_params[offset + start_idx:offset + end_idx]).view(param.size())
+            start_idx = end_idx
+
+        # Compute the original loss
+
+        # get from pass in?
+
+        original_loss = f_x_0
+
+        # Compute the Jacobian-vector product
+        jvp = (perturbed_loss - original_loss) / epsilon
+
+        return jvp
+
     def jtv(self, f_x_0, critic_model, critic_params, critic_buffers, obs, u, d, v, epsilon=1e-5):
         J_T_v = torch.zeros(len(critic_params), dtype=torch.float32)
-        global pool
-        pool = bitx(processes=os.cpu_count())
-        def parallel_helper(k):
-
-
+        for i in range(len(critic_params)):
             ej = torch.zeros((len(critic_params)), device=self.device)
-            ej[k] = 1
+            ej[i] = 1
             flat_critic_params_pos = critic_params + epsilon * ej
             # flat_critic_params_neg = critic_params - delta * Ij[:, k]
 
@@ -912,25 +936,18 @@ class SMART(OffPolicyAlgorithm):
             test = (h1_pos - f_x_0) / epsilon
 
         # Compute the dot product with v
-            return torch.dot(test, v)
-        result = Result()
-        for idx, val in enumerate(range(len(critic_params))):
-            #result.stash_col(idx)
-            J_T_v[idx] = pool.map(parallel_helper, (val,))[0]
+            J_T_v[i] = torch.dot(test, v)
+
         return J_T_v
 
     def do_gradients_reversed_singleshot(self, surr_q_pre, replay_data, num_critic_params, num_ctrl_params, num_dstb_params):
-        delta = 1e-3
+        delta = 1e-5
         f_x_0_batched = autograd.grad(surr_q_pre, self.critic.parameters(), create_graph=True, retain_graph=True)
         f_x_0 = torch.hstack([p.flatten() for p in f_x_0_batched])
         #player_params = torch.cat((flat_ctrl_params, flat_dstb_params), dim=0)
         J = torch.zeros(num_ctrl_params + num_dstb_params, num_critic_params, device=self.device)
-        if self.step_count == 0:
-            timenow_unique = int(datetime.datetime.utcnow().timestamp())
-            self.timenow_unique = timenow_unique
-        else:
-            timenow_unique = self.timenow_unique
-        weights_path = 'weights_temp_large_%d.pt' % timenow_unique
+
+        weights_path = 'weights_temp_large.pt'
         torch.save(self.policy, weights_path)
         hacky_trick = torch.load(weights_path)
         count = 0
@@ -967,242 +984,5 @@ class SMART(OffPolicyAlgorithm):
                     J[count, :] = (omega_grads_pos - f_x_0) / delta
 
                     count = count + 1
-
-        return J
-
-    def gpt_gradients(self, surr_q_pre, replay_data, num_critic_params, num_ctrl_params,
-                                         num_dstb_params):
-        delta = 1e-3
-        device = self.device
-
-        # Compute the initial gradients with respect to critic parameters
-        f_x_0_batched = autograd.grad(surr_q_pre, self.critic.parameters(), create_graph=True, retain_graph=True)
-        f_x_0 = torch.hstack([p.flatten() for p in f_x_0_batched])
-        J = torch.zeros(num_ctrl_params + num_dstb_params, num_critic_params, device=device)
-
-        def perturb_and_compute_jacobian(model, start_count, end_count):
-            nonlocal count
-
-            for name, param in model.named_parameters():
-                param_flat = param.view(-1)
-                num_elements = param_flat.numel()
-                for j in range(num_elements):
-                    # Create a copy of the parameter tensor with perturbation
-                    perturbed_param = param_flat.clone()
-                    perturbed_param[j] += delta
-
-                    # Assign the perturbed parameter tensor to the model
-                    param.data = perturbed_param.view(param.shape)
-
-                    if start_count < num_ctrl_params and count < num_ctrl_params:
-                        actions_pi, log_prob = self.policy.actor.action_log_prob(replay_data.observations)
-                    if start_count < num_ctrl_params and count >= num_ctrl_params:
-                        dstb_actions_pi, dstb_log_prob = self.policy.dstb_actor.action_log_prob(
-                            replay_data.observations)
-                    else:
-                        actions_pi, log_prob = self.policy.actor.action_log_prob(replay_data.observations)
-                        dstb_actions_pi, dstb_log_prob = self.policy.dstb_actor.action_log_prob(
-                            replay_data.observations)
-
-                    critic_pred = self.policy.critic(replay_data.next_observations, actions_pi, dstb_actions_pi)
-                    surr_q_values = torch.mean(torch.sum(torch.hstack((critic_pred[0], critic_pred[1])), dim=1))
-                    omega_grads_batched = autograd.grad(surr_q_values, self.policy.critic.parameters(),
-                                                        retain_graph=True)
-                    omega_grads_pos = torch.hstack([t.flatten() for t in omega_grads_batched])
-
-                    # Restore the original parameter value
-                    param.data = param_flat.view(param.shape)
-
-                    # Compute the Jacobian row
-                    J[count, :] = (omega_grads_pos - f_x_0) / delta
-                    count += 1
-
-        count = 0
-        perturb_and_compute_jacobian(self.policy.actor, 0, num_ctrl_params)
-        perturb_and_compute_jacobian(self.policy.dstb_actor, num_ctrl_params, num_ctrl_params + num_dstb_params)
-
-        return J
-
-    def gpt_left(self, surr_q_pre, replay_data, num_critic_params, num_ctrl_params,
-                                         num_dstb_params):
-        delta = 1e-3
-        device = self.device
-
-        # Compute the initial gradients with respect to critic parameters
-        f_x_0_batched = autograd.grad(surr_q_pre, self.critic.parameters(), create_graph=True, retain_graph=True)
-        f_x_0 = torch.hstack([p.flatten() for p in f_x_0_batched])
-        J = torch.zeros(num_ctrl_params + num_dstb_params, num_critic_params, device=device)
-
-        def perturb_and_compute_jacobian(model, start_count, end_count):
-            nonlocal count
-
-            param_list = list(model.parameters())
-            original_params = [param.clone() for param in param_list]
-            num_params = sum(p.numel() for p in param_list)
-
-            # Flatten all parameters into a single vector
-            flat_params = torch.cat([param.view(-1) for param in param_list])
-            num_elements = flat_params.numel()
-
-            # Create a matrix to store perturbed parameters
-            perturbed_params = flat_params.unsqueeze(0).repeat(num_elements, 1)
-            idx = torch.arange(num_elements)
-            perturbed_params[idx, idx] += delta
-
-            # Iterate through each perturbed parameter vector
-            for i in range(num_elements):
-                # Assign perturbed parameters back to the model
-                start = 0
-                for param, original_param in zip(param_list, original_params):
-                    numel = param.numel()
-                    param.data = perturbed_params[i, start:start + numel].view(param.shape)
-                    start += numel
-
-                if start_count < num_ctrl_params and count < num_ctrl_params:
-                    actions_pi, log_prob = self.policy.actor.action_log_prob(replay_data.observations)
-                if start_count < num_ctrl_params and count >= num_ctrl_params:
-                    dstb_actions_pi, dstb_log_prob = self.policy.dstb_actor.action_log_prob(replay_data.observations)
-                else:
-                    actions_pi, log_prob = self.policy.actor.action_log_prob(replay_data.observations)
-                    dstb_actions_pi, dstb_log_prob = self.policy.dstb_actor.action_log_prob(replay_data.observations)
-
-                critic_pred = self.policy.critic(replay_data.next_observations, actions_pi, dstb_actions_pi)
-                surr_q_values = torch.mean(torch.sum(torch.hstack((critic_pred[0], critic_pred[1])), dim=1))
-                omega_grads_batched = autograd.grad(surr_q_values, self.policy.critic.parameters(), retain_graph=True)
-                omega_grads_pos = torch.hstack([t.flatten() for t in omega_grads_batched])
-
-                # Compute the Jacobian row
-                J[count, :] = (omega_grads_pos - f_x_0) / delta
-                count += 1
-
-            # Restore the original parameters
-            for param, original_param in zip(param_list, original_params):
-                param.data = original_param
-
-        count = 0
-        perturb_and_compute_jacobian(self.policy.actor, 0, num_ctrl_params)
-        perturb_and_compute_jacobian(self.policy.dstb_actor, num_ctrl_params, num_ctrl_params + num_dstb_params)
-
-        return J
-
-    def gpt_right(self, surr_q_pre, replay_data, num_critic_params, num_ctrl_params,
-                                         num_dstb_params):
-        delta = 1e-3
-        device = self.device
-
-        # Compute the initial gradients with respect to critic parameters
-        f_x_0_batched = autograd.grad(surr_q_pre, self.critic.parameters(), create_graph=True, retain_graph=True)
-        f_x_0 = torch.hstack([p.flatten() for p in f_x_0_batched])
-        J = torch.zeros(num_ctrl_params + num_dstb_params, num_critic_params, device=device)
-
-        def perturb_and_compute_jacobian(model, start_count, end_count):
-            nonlocal count
-
-            param_data = [param.data for param in model.parameters()]
-            param_grads = [torch.zeros_like(param).flatten() for param in param_data]
-
-            for p_idx, param in enumerate(param_data):
-                param_flat = param.view(-1)
-                num_elements = param_flat.numel()
-
-                for j in range(num_elements):
-                    # Create a new tensor with the perturbation applied
-                    perturbed_param = param_flat.clone()
-                    perturbed_param[j] += delta
-
-                    # Assign the perturbed parameter tensor to the model
-                    param_flat_view = perturbed_param.view(param.shape)
-
-                    # Temporarily assign the perturbed parameter
-                    param.copy_(param_flat_view)
-
-                    if start_count < num_ctrl_params and count < num_ctrl_params:
-                        actions_pi, log_prob = self.policy.actor.action_log_prob(replay_data.observations)
-                    if start_count < num_ctrl_params and count >= num_ctrl_params:
-                        dstb_actions_pi, dstb_log_prob = self.policy.dstb_actor.action_log_prob(
-                            replay_data.observations)
-                    else:
-                        actions_pi, log_prob = self.policy.actor.action_log_prob(replay_data.observations)
-                        dstb_actions_pi, dstb_log_prob = self.policy.dstb_actor.action_log_prob(
-                            replay_data.observations)
-
-                    critic_pred = self.policy.critic(replay_data.next_observations, actions_pi, dstb_actions_pi)
-                    surr_q_values = torch.mean(torch.sum(torch.hstack((critic_pred[0], critic_pred[1])), dim=1))
-                    omega_grads_batched = autograd.grad(surr_q_values, self.policy.critic.parameters(),
-                                                        retain_graph=True)
-                    omega_grads_pos = torch.hstack([t.flatten() for t in omega_grads_batched])
-
-                    # Restore the original parameter value
-                    param_flat[j] -= delta
-
-                    # Store the Jacobian row
-                    J[count, :] = (omega_grads_pos - f_x_0) / delta
-
-                    count += 1
-
-        count = 0
-        perturb_and_compute_jacobian(self.policy.actor, 0, num_ctrl_params)
-        perturb_and_compute_jacobian(self.policy.dstb_actor, num_ctrl_params, num_ctrl_params + num_dstb_params)
-
-        return J
-
-
-    def gpt_another(self, surr_q_pre, replay_data, num_critic_params, num_ctrl_params,
-                                         num_dstb_params):
-        delta = 1e-3
-        device = self.device
-
-        # Compute the initial gradients with respect to critic parameters
-        f_x_0_batched = autograd.grad(surr_q_pre, self.critic.parameters(), create_graph=True, retain_graph=True)
-        f_x_0 = torch.cat([p.view(-1) for p in f_x_0_batched])
-        J = torch.zeros(num_ctrl_params + num_dstb_params, num_critic_params, device=device)
-
-        def perturb_and_compute_jacobian(model, start_count, end_count):
-            nonlocal count
-
-            param_list = list(model.parameters())
-            original_params = [param.clone().detach() for param in param_list]
-            num_params = sum(p.numel() for p in param_list)
-
-            # Flatten all parameters into a single vector
-            flat_params = torch.cat([param.view(-1) for param in param_list])
-            num_elements = flat_params.numel()
-
-            # Create a matrix to store perturbed parameters
-            perturbed_params = flat_params.unsqueeze(0).repeat(num_elements, 1)
-            idx = torch.arange(num_elements, device=device)
-            perturbed_params[idx, idx] += delta
-
-            # Iterate through each perturbed parameter vector
-            for i in range(num_elements):
-                start = 0
-                for param in param_list:
-                    numel = param.numel()
-                    param.data = perturbed_params[i, start:start + numel].view(param.shape)
-                    start += numel
-
-                if start_count < num_ctrl_params and count < num_ctrl_params:
-                    actions_pi, _ = self.policy.actor.action_log_prob(replay_data.observations)
-                if start_count < num_ctrl_params and count >= num_ctrl_params:
-                    dstb_actions_pi, _ = self.policy.dstb_actor.action_log_prob(replay_data.observations)
-                else:
-                    actions_pi, _ = self.policy.actor.action_log_prob(replay_data.observations)
-                    dstb_actions_pi, _ = self.policy.dstb_actor.action_log_prob(replay_data.observations)
-
-                critic_pred = self.policy.critic(replay_data.next_observations, actions_pi, dstb_actions_pi)
-                surr_q_values = torch.mean(torch.sum(torch.cat(critic_pred, dim=1), dim=1))
-                omega_grads_batched = autograd.grad(surr_q_values, self.policy.critic.parameters(), retain_graph=True)
-                omega_grads_pos = torch.cat([t.view(-1) for t in omega_grads_batched])
-
-                J[count, :] = (omega_grads_pos - f_x_0) / delta
-                count += 1
-
-            # Restore the original parameters
-            for param, original_param in zip(param_list, original_params):
-                param.data.copy_(original_param)
-
-        count = 0
-        perturb_and_compute_jacobian(self.policy.actor, 0, num_ctrl_params)
-        perturb_and_compute_jacobian(self.policy.dstb_actor, num_ctrl_params, num_ctrl_params + num_dstb_params)
 
         return J

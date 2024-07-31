@@ -311,13 +311,15 @@ class BaseAlgorithm(ABC):
         """
         # Log the current learning rate
         for i in range(len(self.lr_schedule)):
-            self.logger.record("train/learning_rate", self.lr_schedule[i](self._current_progress_remaining))
+            #self.logger.record("train/learning_rate", self.lr_schedule[i](self._current_progress_remaining))
+            self.logger.record("train/learning_rate", self.lr_schedule[i](self.num_timesteps))
 
         if not isinstance(optimizers, list):
             optimizers = [optimizers]
         count = 0
         for optimizer in optimizers:
-            update_learning_rate(optimizer, self.lr_schedule[count](self._current_progress_remaining))
+            #update_learning_rate(optimizer, self.lr_schedule[count](self._current_progress_remaining))
+            update_learning_rate(optimizer, self.lr_schedule[count](self.num_timesteps))
             count = count + 1
 
     def _excluded_save_params(self) -> List[str]:

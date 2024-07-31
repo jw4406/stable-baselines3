@@ -173,12 +173,12 @@ class A3C_rarl(OnPolicyAlgorithm):
         self.policy.set_training_mode(True)
 
         # Update optimizer learning rate
-        self._update_learning_rate(self.policy.ctrl_optimizer)
-        self._update_learning_rate(self.policy.dstb_optimizer)
+        self._update_learning_rate([self.policy.value_optimizer, self.policy.ctrl_optimizer, self.policy.dstb_optimizer])
+        #self._update_learning_rate(self.policy.dstb_optimizer)
         if self.use_leaderboard is True:
             for i in range(self.policy_memory_size):
                 self._update_learning_rate(self.policy.policy_memory[i].dstb_optimizer)
-        self._update_learning_rate(self.policy.value_optimizer)
+        #self._update_learning_rate(self.policy.value_optimizer)
         #self._update_learning_rate(self.policy.optimizer)
         # This will only loop once (get all data in one go)
         for rollout_data in self.rollout_buffer.get(batch_size=None):
