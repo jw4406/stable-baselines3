@@ -1641,7 +1641,7 @@ class ContinuousCriticAdv(BaseModel):
         self.n_critics = n_critics
         self.q_networks: List[nn.Module] = []
         for idx in range(n_critics):
-            q_net_list = create_mlp(features_dim + action_dim + dstb_action_dim, 1, net_arch, activation_fn)
+            q_net_list = create_mlp(features_dim + action_dim + dstb_action_dim, 1, net_arch, activation_fn, smart_bias_off=True)
             q_net = nn.Sequential(*q_net_list)
             self.add_module(f"qf{idx}", q_net)
             self.q_networks.append(q_net)

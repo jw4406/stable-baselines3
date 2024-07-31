@@ -81,7 +81,7 @@ env = gym.make("my_pendulum")
 v_learning_rate = 5e-4
 
 tau_v_c = 0.0066932472422626425 / 0.0005933974267381725
-tau_c_d = (0.01235801572155198 / 0.0066932472422626425)
+tau_c_d = (0.01235801572155198 / 0.0066932472422626425) * 2
 #tau_v_c = 1
 #tau_c_d = 1
 USE_LEADERBOARD = False
@@ -134,7 +134,7 @@ def f(tau2):
         save_freq=1000,
         save_path="./competitive_models/",
         #stac_train_sweep_pend_competitive_%d % int(tau2)
-        name_prefix="adversarial_populations_pretrain_ablation_size_10_ud_46_iter_%d" % int(tau2),
+        name_prefix="adversarial_populations_pretrain_ablation_size_10_ud_46_larger_tss_iter_%d" % int(tau2),
         save_replay_buffer=True,
         save_vecnormalize=True,
         jobid=args.jobid
@@ -142,7 +142,7 @@ def f(tau2):
     callback_list = CallbackList([eval_callback, checkpoint_callback])  # , checkpoint_callback])
     # model.learn(total_timesteps=1_000_000, callback=callback_list)
     model.learn(total_timesteps=10_000_000, callback=callback_list)
-    model.save("./competitive_models/ablation_pretrain_pend_adversarial_populations_10_FINISHED_ud_46_%d.zip" % int(tau2))
+    model.save("./competitive_models/ablation_pretrain_pend_adversarial_populations_10_FINISHED_ud_46_larger_tss_%d.zip" % int(tau2))
     print("HI IM DONE")
 if __name__ == '__main__':
 

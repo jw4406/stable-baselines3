@@ -113,6 +113,7 @@ def create_mlp(
     activation_fn: Type[nn.Module] = nn.ReLU,
     squash_output: bool = False,
     with_bias: bool = True,
+    smart_bias_off=False
 ) -> List[nn.Module]:
     """
     Create a multi layer perceptron (MLP), which is
@@ -137,12 +138,21 @@ def create_mlp(
         modules = []
 
     for idx in range(len(net_arch) - 1):
-        modules.append(nn.Linear(net_arch[idx], net_arch[idx + 1], bias=with_bias))
+        if smart_bias_off is True:
+            if idx == len(net_arch) - 2:
+                modules.append(nn.Linear(net_arch[idx], net_arch[idx + 1] + 1, bias=with_bias))
+            else:
+                modules.append(nn.Linear(net_arch[idx], net_arch[idx + 1], bias=with_bias))
+        else:
+            modules.append(nn.Linear(net_arch[idx], net_arch[idx + 1], bias=with_bias))
         modules.append(activation_fn())
 
     if output_dim > 0:
         last_layer_dim = net_arch[-1] if len(net_arch) > 0 else input_dim
-        modules.append(nn.Linear(last_layer_dim, output_dim, bias=with_bias))
+        if smart_bias_off is True:
+            modules.append(nn.Linear(last_layer_dim + 1, output_dim, bias=False))
+        else:
+            modules.append(nn.Linear(last_layer_dim, output_dim, bias=with_bias))
     if squash_output:
         modules.append(nn.Tanh())
     return modules

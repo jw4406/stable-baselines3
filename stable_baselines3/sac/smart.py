@@ -260,7 +260,7 @@ class SMART(OffPolicyAlgorithm):
         ent_coef_losses, ent_coefs = [], []
         actor_losses, critic_losses, dstb_actor_losses = [], [], []
         for gradient_step in range(gradient_steps):
-            start = time.time()
+            #start = time.time()
             # Sample replay buffer
             replay_data = self.replay_buffer.sample(batch_size, env=self._vec_normalize_env)  # type: ignore[union-attr]
 
@@ -331,14 +331,14 @@ class SMART(OffPolicyAlgorithm):
                     num_dstb_params = num_dstb_params + torch.numel(ele)
                 actions_pi, log_prob = self.actor.action_log_prob(replay_data.observations)
                 dstb_actions_pi, dstb_log_prob = self.dstb_actor.action_log_prob(replay_data.observations)
-                critic_pred = th.cat(self.critic(replay_data.observations, actions_pi, dstb_actions_pi), dim=1)
+                critic_pred = self.critic(replay_data.observations, actions_pi, dstb_actions_pi)
                 #tmp1 = autograd.grad(critic_pred[0][0], self.actor.optimizer.param_groups[0]['params'], create_graph=True, retain_graph=True)
                 #tmp2 = autograd.grad(tmp1[0][0][0], self.critic.parameters()[:6], create_graph=True, retain_graph=True)
 
                 #critic_pred_sum = torch.add(critic_pred[0], critic_pred[1])
                 #surr_q_value_pre_mean = torch.div(critic_pred_sum, 2)
-                surr_q_values = torch.mean(torch.sum(critic_pred,dim=1))
-                #surr_q_values = torch.mean(torch.sum(torch.hstack((critic_pred[0], critic_pred[1])), dim=1))
+                #surr_q_values = torch.mean(torch.sum(critic_pred,dim=1))
+                surr_q_values = torch.mean(torch.sum(torch.hstack((critic_pred[0], critic_pred[1])), dim=1))
                 #surr_q_values = self.critic.gpt_forward(replay_data.observations, actions_pi, dstb_actions_pi)
                 #surr_q_values = self.critic.q1_forward(replay_data.observations, actions_pi, dstb_actions_pi).mean()
                 #surr_q_values = torch.min(critic_pred, dim=0)
@@ -356,7 +356,7 @@ class SMART(OffPolicyAlgorithm):
 
                 #f_model_dstb, dstb_params, dstb_buffers = make_functional_with_buffers(self.dstb_actor)
                 f_model_critic, batched_critic_params, critic_buffers = make_functional_with_buffers(self.critic)
-                critic_params = torch.hstack([t.flatten() for t in batched_critic_params])
+                #critic_params = torch.hstack([t.flatten() for t in batched_critic_params])
                 #stateless_q_values = self.compute_stateless_q_surr(f_model_critic, critic_params, critic_buffers, replay_data.observations)
 
                 #critic_pred = self.critic(replay_data.observations, actions_pi, dstb_actions_pi)
@@ -377,9 +377,9 @@ class SMART(OffPolicyAlgorithm):
                 #J = self.gpt_gradients(surr_q_values, replay_data, len(critic_params), num_ctrl_params, num_dstb_params)
                 #h1_gpt_elapsed=time.time() - h1_gpt_start
 
-                h1_my_start = time.time()
+                #h1_my_start = time.time()
                 #J = self.do_gradients_reversed_singleshot(surr_q_values, replay_data, len(critic_params), num_ctrl_params, num_dstb_params)
-                h1_my_elapsed = time.time() - h1_my_start
+                #h1_my_elapsed = time.time() - h1_my_start
 
                 #gpt_left_start = time.time()
                 #test_left_J = self.gpt_left(surr_q_values, replay_data, len(critic_params), num_ctrl_params, num_dstb_params)
@@ -410,7 +410,7 @@ class SMART(OffPolicyAlgorithm):
                 #result_dict = self.forward_diff(h1_pre_omega, f_model_critic, critic_params, critic_buffers,
                 #                                replay_data.observations, actions_pi, dstb_actions_pi, num_ctrl_params,
                 #                                num_dstb_params, use_parallel=True)
-                h2_time_start = time.time()
+                #h2_time_start = time.time()
                 surr_critic_loss = 0.5 * sum(F.mse_loss(current_q, target_q_values) for current_q in critic_pred)
                 h2_grad_theta_batched = autograd.grad(
                     surr_critic_loss, self.policy.actor.optimizer.param_groups[0]['params'], create_graph=True, retain_graph=True
@@ -421,14 +421,14 @@ class SMART(OffPolicyAlgorithm):
                 )
                 h2_lower = torch.hstack([t.flatten() for t in h2_grad_psi_batched])
                 h2 = torch.hstack((h2_upper, h2_lower))
-                h2_time_elapsed = time.time() - h2_time_start
+                #h2_time_elapsed = time.time() - h2_time_start
                 # Build big H matrix
                 # H is a 2x2 block matrix. The diagonals are hessians -- H_\theta (J) and H_\psi (J). The off diagonal terms are
                 # cross gradients -- \grad_{\theta\psi} J and \grad_{\psi\theta} J.
                 # We assemble it block by block.
 
                 # Diagonal terms (Hessians) first
-                H_time_start = time.time()
+                #H_time_start = time.time()
                 hess_theta_J_batched = autograd.grad(h1_upper, self.policy.actor.optimizer.param_groups[0]['params'],
                                                      torch.eye(h1_upper.shape[0], device=self.device),
                                                      is_grads_batched=True, create_graph=True, retain_graph=True)
@@ -465,7 +465,7 @@ class SMART(OffPolicyAlgorithm):
                 H = torch.cat((upper_rows, lower_rows), dim=0)
                 reg_param = 5
                 H = H + torch.eye(H.shape[0], device=self.device) * reg_param
-                H_time_elapsed = time.time() - H_time_start
+                #H_time_elapsed = time.time() - H_time_start
                 # assert torch.allclose(H, H_test)
                 # assert torch.equal(H, H_test)
                 ivp_H_h2 = torch.linalg.solve(H, h2)
@@ -485,14 +485,14 @@ class SMART(OffPolicyAlgorithm):
                         continue
                 '''
                 #elapsed = time.time() - t
-                imp = autograd.grad(h1_pre_omega, self.critic.parameters(), ivp_H_h2,allow_unused=True, create_graph=True, retain_graph=True)
+                imp = autograd.grad(h1_pre_omega, self.critic.parameters(), ivp_H_h2,allow_unused=False, create_graph=True, retain_graph=True)
                 #J = x.get()
                 #flat_imp = torch.matmul(torch.transpose(J, 0,1), ivp_H_h2)
                 # imp is the stackelberg part of the total derivative
 
                 #imp = self.critic_param_reshape(flat_imp)
-                elapsed = time.time() - start
-                1
+                #elapsed = time.time() - start
+                #1
             # Optimize the critic
             self.critic.optimizer.zero_grad()
             critic_loss.backward()
@@ -531,7 +531,7 @@ class SMART(OffPolicyAlgorithm):
                 polyak_update(self.critic.parameters(), self.critic_target.parameters(), self.tau)
                 # Copy running stats, see GH issue #996
                 polyak_update(self.batch_norm_stats, self.batch_norm_stats_target, 1.0)
-            elapsed = time.time() - start
+            #elapsed = time.time() - start
             q_norm = 0
             u_norm = 0
             d_norm = 0
@@ -558,7 +558,7 @@ class SMART(OffPolicyAlgorithm):
             if self.d_norm > self.max_d_grad_norm:
                 self.max_d_grad_norm = self.d_norm
             self.step_count = self.step_count + 1
-        total = time.time() - bigstart
+        #total = time.time() - bigstart
         self._n_updates += gradient_steps
 
         self.logger.record("train/n_updates", self._n_updates, exclude="tensorboard")
