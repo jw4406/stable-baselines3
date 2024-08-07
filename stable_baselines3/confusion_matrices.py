@@ -157,14 +157,17 @@ if model_class == 'pend':
 
         #smart_model_path = 'leaderboard_10_trained_d_no_grad_tss_zoo_ud_46.zip'
         #smart_model_path = "stac_fulltrain_pend_adversarial_populations_10_FINISHED_ud_55_%d.zip" % nums[i]
-        smart_model_path = 'stac_fulltrain_pend_adversarial_populations_10_FINISHED_ud_46_%d_cont2.zip' % nums[i]
-        if nums[i] == 9:
-            smart_model_path = 'stac_fulltrain_pend_adversarial_populations_10_FINISHED_ud_46_%d_cont3.zip' % nums[i]
+        #smart_model_path = 'stac_fulltrain_pend_adversarial_populations_10_FINISHED_ud_46_%d_cont2.zip' % nums[i]
+        #smart_model_path = "adv_pop_ws10cont2_exp_decay_lr25_ud46_%d_777000_steps.zip" % nums[i]
+        #smart_model_path = "adv_pop_ws10cont1_exp_decay_lr25_ud46_%d_429000_steps.zip" % nums[i]
+        smart_model_path = 'stac_completely_new_pretrain_exp_decay_start750000_advpop_10_%d_47000_steps.zip' % nums[i]
+        #if nums[i] == 9:
+        #    smart_model_path = 'stac_fulltrain_pend_adversarial_populations_10_FINISHED_ud_46_%d_cont3.zip' % nums[i]
         env.reset(seed=seeds[0])
         smart = A3C_rarl.load(folder + smart_model_path, env=env)
-        pretrain_path = "/home/jw4406/codebase/stable-baselines3/stable_baselines3/competitive_models/"
-        pretrain_model_name = "stac_pretrain_pend_parallel_FINISHED_ud_46_%d.zip" % i
-        smart.policy.policy_memory[i] = A3C_rarl.load(pretrain_path + pretrain_model_name, env=env).policy
+        #pretrain_path = "/home/jw4406/codebase/stable-baselines3/stable_baselines3/competitive_models/"
+        #pretrain_model_name = "stac_pretrain_pend_parallel_FINISHED_ud_46_%d.zip" % i
+        #smart.policy.policy_memory[i] = A3C_rarl.load(pretrain_path + pretrain_model_name, env=env).policy
         smart.spirit = False
         smart_model_list.append(smart)
     for i in range(len(nums)):
@@ -183,7 +186,9 @@ if model_class == 'pend':
         #baseline_model_path = 'stac_train_pend_parallel_FINISHED_wd_53_ud_55_%d.zip' % nums[i]
         #baseline_model_path = 'baseline_pretrain_parallel_pend_tss_zoo_ud_55_%d_553000_steps.zip' % nums[i]
         #baseline_model_path = 'adversarial_populations_pretrain_stac_size_10_ud_46_iter_%d_1301000_steps.zip' % nums[i]
-        baseline_model_path = 'stac_pretrain_pend_adversarial_populations_10_FINISHED_ud_46_%d.zip' % nums[i]
+        #baseline_model_path = 'stac_pretrain_pend_adversarial_populations_10_FINISHED_ud_46_%d.zip' % nums[i]
+        #baseline_model_path = 'baseline_adv_pop_ws10_exp_decay_ud46_%d_1348000_steps.zip' % nums[i]
+        baseline_model_path = 'baseline_adv_pop_ws10_exp_decay_ud46_%d_750000_steps.zip' % nums[i]
         baseline = A3C_rarl.load(folder + baseline_model_path, env=env)
         baseline.spirit = False
         baseline_model_list.append(baseline)
@@ -215,17 +220,20 @@ rounds=5 # change later
 s_b, s_a, s_s, a_b, a_a, a_s, b_b, b_a, b_s = [], [], [], [], [], [], [], [], []
 
 for i in range(1):
+    smartc_baselined_win, baselined_smartc_win = duel_models(smart_model_list, baseline_model_list, smart.get_env(),
+                                                             num_episodes=rounds, model_class=model_class)
+    smartc_smartd_win, smartd_smartc_win = duel_models(smart_model_list, smart_model_list, smart.get_env(),
+                                                       num_episodes=rounds, model_class=model_class, sd=False) #!!
 
-    smartc_baselined_win, baselined_smartc_win = duel_models(smart_model_list, baseline_model_list, smart.get_env(), num_episodes=rounds, model_class=model_class)
     s_b.append(smartc_baselined_win)
 
     #TEST
     baselinec_smartd_win, smartd_baselinec_win = duel_models(baseline_model_list, smart_model_list, smart.get_env(),
-                                                             num_episodes=rounds, model_class=model_class, sd=True)
+                                                             num_episodes=rounds, model_class=model_class, sd=False) #!!
     b_s.append(baselinec_smartd_win)
-    smartc_smartd_win, smartd_smartc_win = duel_models(smart_model_list, smart_model_list, smart.get_env(),
-                                                       num_episodes=rounds, model_class=model_class, sd=True)
-    s_s.append(smartc_smartd_win)
+    #smartc_smartd_win, smartd_smartc_win = duel_models(smart_model_list, smart_model_list, smart.get_env(),
+    #                                                   num_episodes=rounds, model_class=model_class, sd=True)
+    #s_s.append(smartc_smartd_win)
 
     baselinec_baselind_win, baselined_baselinec_win = duel_models(baseline_model_list, baseline_model_list,
                                                                   smart.get_env(), num_episodes=rounds,

@@ -82,7 +82,7 @@ from stable_baselines3 import A2C
 from stable_baselines3 import A3C_rarl
 from stable_baselines3 import SAC
 
-USE_LEADERBOARD = True
+USE_LEADERBOARD = False
 LEADERBOARD_SIZE = 10
 use_pretrain = True
 seed_list = [564387, 1928054, 67238674, 847859173, 901239586, 87271, 2017656, 90265, 82375,54157628]
@@ -104,7 +104,7 @@ model = A3C_rarl("MlPAACPolicy", use_stackelberg=False, env=env, verbose=2, n_st
 #model = A3C_rarl("MlPAACPolicy", use_stackelberg=True, env=env, verbose=2, n_steps=8, normalize_advantage=False,gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,vf_coef=.4,gamma=.9,v_learning_rate=linear_schedule(0.0005933974267381725), c_learning_rate=linear_schedule(0.0066932472422626425),d_learning_rate=linear_schedule(0.01235801572155198), use_sde=True,use_rms_prop=False, device='auto', seed=42069, policy_kwargs={'net_arch': dict(pi=[32,32,32], vf=[128,128,128])}, use_leaderboard=USE_LEADERBOARD, policy_memory_size=LEADERBOARD_SIZE)
 #model = A3C_rarl("MlPAACPolicy", use_stackelberg=True, env=env, verbose=2, n_steps=8, normalize_advantage=False,gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,vf_coef=.4,gamma=.9,v_learning_rate=linear_schedule(0.0005933974267381725), c_learning_rate=linear_schedule(0.0066932472422626425),d_learning_rate=linear_schedule(0.01235801572155198), use_sde=True,use_rms_prop=False, device='auto', seed=42069, policy_kwargs={'net_arch': dict(pi=[2,2], vf=[4,4])}, use_leaderboard=USE_LEADERBOARD, policy_memory_size=LEADERBOARD_SIZE)
 
-model = A3C_rarl("MlPAACPolicy", use_stackelberg=True, env=env, verbose=2, n_steps=8, normalize_advantage=False,gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,vf_coef=.4,gamma=.9,v_learning_rate=critic_decay_schedule(0.0005933974267381725), c_learning_rate=actor_decay_schedule(0.0066932472422626425),d_learning_rate=actor_decay_schedule(0.01235801572155198), use_sde=True,use_rms_prop=False, device='auto', seed=42069, policy_kwargs={'net_arch': dict(pi=[2,2], vf=[4,4])}, use_leaderboard=USE_LEADERBOARD, policy_memory_size=LEADERBOARD_SIZE)
+model = A3C_rarl("MlPAACPolicy", use_stackelberg=True, env=env, verbose=2, n_steps=8, normalize_advantage=False,gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,vf_coef=.4,gamma=.9,v_learning_rate=critic_decay_schedule(0.1), c_learning_rate=actor_decay_schedule(0.3),d_learning_rate=actor_decay_schedule(0.85), use_sde=True,use_rms_prop=False, device='auto', seed=42069, policy_kwargs={'net_arch': dict(pi=[16,16], vf=[64,64])}, use_leaderboard=USE_LEADERBOARD, policy_memory_size=LEADERBOARD_SIZE)
 
 if USE_LEADERBOARD is True:
     for i in range(LEADERBOARD_SIZE):
@@ -206,12 +206,12 @@ model.spirit=False
 
 
 callback_on_best = StopTrainingOnRewardThreshold(reward_threshold=-175, verbose=1)
-eval_callback = EvalCallback(env, callback_on_new_best=callback_on_best, verbose=1, eval_freq=1000, n_eval_episodes=10, jobid=args.jobid)
+eval_callback = EvalCallback(env, callback_on_new_best=callback_on_best, verbose=1, eval_freq=10000, n_eval_episodes=10, jobid=args.jobid)
 
 checkpoint_callback = CheckpointCallback(
   save_freq=1000,
   save_path="./logs/",
-  name_prefix='stsac_test_jac_short',
+  name_prefix='test',
 )
 
 callback_list = CallbackList([eval_callback, checkpoint_callback])
@@ -225,7 +225,7 @@ model.learn(total_timesteps=7_500_000, callback=callback_list)
 
 #callback_on_best = StopTrainingOnRewardThreshold(reward_threshold=-200, verbose=1)
 #eval_callback = EvalCallback(env, callback_on_new_best=callback_on_best, verbose=1)
-model.save("stsac_test.zip")
+model.save("exp_decay_ac3_test.zip")
 
 
 vec_env = model.get_env()

@@ -302,6 +302,7 @@ class BaseAlgorithm(ABC):
         self._current_progress_remaining = 1.0 - float(num_timesteps) / float(total_timesteps)
 
     def _update_learning_rate(self, optimizers: Union[List[th.optim.Optimizer], th.optim.Optimizer]) -> None:
+        from stable_baselines3.a2c.a3c_rarl import A3C_rarl
         """
         Update the optimizers learning rate using the current learning rate schedule
         and the current progress remaining (from 1 to 0).
@@ -310,16 +311,28 @@ class BaseAlgorithm(ABC):
             An optimizer or a list of optimizers.
         """
         # Log the current learning rate
-        for i in range(len(self.lr_schedule)):
+        #for i in range(len(self.lr_schedule)):
             #self.logger.record("train/learning_rate", self.lr_schedule[i](self._current_progress_remaining))
-            self.logger.record("train/learning_rate", self.lr_schedule[i](self.num_timesteps))
+        if isinstance(self, A3C_rarl):
+            if self.linear_phase is True:
+                self.logger.record("train/v_learning_rate", self.lr_schedule[0](self._current_progress_remaining))
+                self.logger.record("train/u_learning_rate", self.lr_schedule[1](self._current_progress_remaining))
+                self.logger.record("train/d_learning_rate", self.lr_schedule[2](self._current_progress_remaining))
+            else:
+
+                self.logger.record("train/v_learning_rate", self.lr_schedule[0](self._n_updates+1))
+                self.logger.record("train/u_learning_rate", self.lr_schedule[1](self._n_updates+1))
+                self.logger.record("train/d_learning_rate", self.lr_schedule[2](self._n_updates+1))
 
         if not isinstance(optimizers, list):
             optimizers = [optimizers]
         count = 0
         for optimizer in optimizers:
-            #update_learning_rate(optimizer, self.lr_schedule[count](self._current_progress_remaining))
-            update_learning_rate(optimizer, self.lr_schedule[count](self.num_timesteps))
+            if isinstance(self, A3C_rarl):
+                if self.linear_phase is True:
+                    update_learning_rate(optimizer, self.lr_schedule[count](self._current_progress_remaining))
+                else: # we are in exp decay phase
+                    update_learning_rate(optimizer, self.lr_schedule[count](self._n_updates+1))
             count = count + 1
 
     def _excluded_save_params(self) -> List[str]:

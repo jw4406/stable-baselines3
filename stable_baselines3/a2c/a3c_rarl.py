@@ -98,10 +98,12 @@ class A3C_rarl(OnPolicyAlgorithm):
         dstb_action_space: spaces.Space = None,
         spirit=False,
         fix=False,
-        use_leaderboard=True,
+        use_leaderboard=False,
         policy_memory_size: Optional[int] = 2,
+        linear_phase: bool = True
     ):
         self.spirit = spirit
+        self.linear_phase = linear_phase
         self.use_leaderboard = use_leaderboard
         if self.use_leaderboard is True:
             self.policy_memory_size = policy_memory_size
@@ -347,7 +349,7 @@ class A3C_rarl(OnPolicyAlgorithm):
                 #                 dim=1).t().chunk(2)
                 #H = torch.cat((x, y), dim=1).t()
                 H = torch.cat((upper_rows, lower_rows), dim=0)
-                reg_param = 10
+                reg_param = 5
                 H = H + torch.eye(H.shape[0], device=self.device) * reg_param
                 #assert torch.allclose(H, H_test)
                 #assert torch.equal(H, H_test)
@@ -456,7 +458,7 @@ class A3C_rarl(OnPolicyAlgorithm):
         callback: MaybeCallback = None,
         log_interval: int = 100,
         tb_log_name: str = "A2C",
-        reset_num_timesteps: bool = False,
+        reset_num_timesteps: bool = True,
         progress_bar: bool = False,
     ) -> SelfA2C:
         return super().learn(
