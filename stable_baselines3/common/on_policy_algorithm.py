@@ -1,7 +1,7 @@
 import sys
 import time
 from typing import Any, Dict, List, Optional, Tuple, Type, TypeVar, Union
-
+import wandb
 import numpy as np
 from scipy.special import softmax as softy
 import torch as th
@@ -20,7 +20,7 @@ SelfOnPolicyAlgorithm = TypeVar("SelfOnPolicyAlgorithm", bound="OnPolicyAlgorith
 
 class OnPolicyAlgorithm(BaseAlgorithm):
     """
-    The base for On-Policy algorithms (ex: A2C/PPO).
+    The base f or On-Policy algorithms (ex: A2C/PPO).
 
     :param policy: The policy model to use (MlpPolicy, CnnPolicy, ...)
     :param env: The environment to learn from (if registered in Gym, can be str)
@@ -238,7 +238,7 @@ class OnPolicyAlgorithm(BaseAlgorithm):
                     new_obs, rewards, dones, infos = env.step(a)
 
                 self.num_timesteps += env.num_envs
-
+                wandb.log({"epochs":self.num_timesteps})
                 # Give access to local variables
                 callback.update_locals(locals())
                 if not callback.on_step():
@@ -410,6 +410,7 @@ class OnPolicyAlgorithm(BaseAlgorithm):
         self.logger.record("time/iterations", iteration, exclude="tensorboard")
         if len(self.ep_info_buffer) > 0 and len(self.ep_info_buffer[0]) > 0:
             self.logger.record("rollout/ep_rew_mean", safe_mean([ep_info["r"] for ep_info in self.ep_info_buffer]))
+            wandb.log({"eval_rew": safe_mean([ep_info["r"] for ep_info in self.ep_info_buffer])})
             self.logger.record("rollout/ep_len_mean", safe_mean([ep_info["l"] for ep_info in self.ep_info_buffer]))
         self.logger.record("time/fps", fps)
         self.logger.record("time/time_elapsed", int(time_elapsed), exclude="tensorboard")

@@ -53,3 +53,4 @@ MUJOCO_LOG.TXT
 pug*.png
 *.png
 *.csv
+*/wandb/*

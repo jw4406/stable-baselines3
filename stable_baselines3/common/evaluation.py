@@ -1,6 +1,6 @@
 import warnings
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
-
+import wandb
 import gymnasium as gym
 import numpy as np
 from scipy.special import softmax as softy

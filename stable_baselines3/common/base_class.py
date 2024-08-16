@@ -7,7 +7,7 @@ import warnings
 from abc import ABC, abstractmethod
 from collections import deque
 from typing import Any, ClassVar, Dict, Iterable, List, Optional, Tuple, Type, TypeVar, Union
-
+import wandb
 import gymnasium as gym
 import numpy as np
 import torch as th
@@ -282,6 +282,7 @@ class BaseAlgorithm(ABC):
             else:
 
                 self.lr_schedule = np.zeros((len(self.learning_rate),), dtype=object)
+                self.lr_schedule_decay = np.zeros((len(self.learning_rate),), dtype=object)
         except TypeError:
             if hasattr(self, 'ent_coef') and self.ent_coef == 'auto':
                 self.lr_schedule = np.zeros((len([self.learning_rate])+1,), dtype=object)
@@ -291,7 +292,8 @@ class BaseAlgorithm(ABC):
             self.learning_rate = [self.learning_rate]
         for i in range(len(self.lr_schedule)):
             self.lr_schedule[i] = get_schedule_fn(self.learning_rate[i])
-
+            if hasattr(self, "learning_rate_decay_phase"):
+                self.lr_schedule_decay[i] = get_schedule_fn(self.learning_rate_decay_phase[i])
     def _update_current_progress_remaining(self, num_timesteps: int, total_timesteps: int) -> None:
         """
         Compute current progress remaining (starts from 1 and ends to 0)
@@ -313,16 +315,32 @@ class BaseAlgorithm(ABC):
         # Log the current learning rate
         #for i in range(len(self.lr_schedule)):
             #self.logger.record("train/learning_rate", self.lr_schedule[i](self._current_progress_remaining))
+        #warmup = 100
+        explore = 750_000
         if isinstance(self, A3C_rarl):
+
+            if self.num_timesteps < explore:
+                self.linear_phase = True
+            else:
+                self.linear_phase = False
+                if (self.num_timesteps == explore) or (self.num_timesteps - explore <= self.n_steps):
+                    self._n_updates = 0 # new phase: hyperbolic decay time!
+
             if self.linear_phase is True:
                 self.logger.record("train/v_learning_rate", self.lr_schedule[0](self._current_progress_remaining))
                 self.logger.record("train/u_learning_rate", self.lr_schedule[1](self._current_progress_remaining))
                 self.logger.record("train/d_learning_rate", self.lr_schedule[2](self._current_progress_remaining))
+                wandb.log({"v_learning_rate": self.lr_schedule[0](self._current_progress_remaining),
+                           "u_learning_rate": self.lr_schedule[1](self._current_progress_remaining),
+                           "d_learning_rate": self.lr_schedule[2](self._current_progress_remaining)})
             else:
 
-                self.logger.record("train/v_learning_rate", self.lr_schedule[0](self._n_updates+1))
-                self.logger.record("train/u_learning_rate", self.lr_schedule[1](self._n_updates+1))
-                self.logger.record("train/d_learning_rate", self.lr_schedule[2](self._n_updates+1))
+                self.logger.record("train/v_learning_rate", self.lr_schedule_decay[0](self._n_updates+1))
+                self.logger.record("train/u_learning_rate", self.lr_schedule_decay[1](self._n_updates+1))
+                self.logger.record("train/d_learning_rate", self.lr_schedule_decay[2](self._n_updates+1))
+                wandb.log({"v_learning_rate": self.lr_schedule_decay[0](self._n_updates+1),
+                           "u_learning_rate": self.lr_schedule_decay[1](self._n_updates+1),
+                           "d_learning_rate": self.lr_schedule_decay[2](self._n_updates+1)})
 
         if not isinstance(optimizers, list):
             optimizers = [optimizers]

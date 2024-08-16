@@ -10,6 +10,7 @@ from stable_baselines3.common.callbacks import EvalCallback, StopTrainingOnRewar
 import argparse
 from multiprocessing import Pool
 import os
+import wandb
 from gymnasium.spaces import Box
 import numpy as np
 parser = argparse.ArgumentParser()
@@ -87,37 +88,61 @@ from stable_baselines3 import A3C_rarl
 #env = gym.make("MountainCarContinuous-v0")
 #env = gym.make("my_half_cheetah", render_mode='human')
 env = gym.make("my_pendulum")
-v_learning_rate = 0.0005933974267381725
+v_learning_rate = 5e-4
 
 tau_v_c = 0.0066932472422626425 / 0.0005933974267381725
 tau_c_d = 0.01235801572155198 / 0.0066932472422626425
-#tau_v_c = 2
-#tau_c_d = 5
-use_pretrain = True
-exp_decay_load = True
+tau_v_c = 5
+tau_c_d = 10
+use_pretrain = False
+exp_decay_load = False
 USE_LEADERBOARD = False
-LEADERBOARD_SIZE = 10
-np.random.seed(seed=0)
+LEADERBOARD_SIZE = 1
+np.random.seed(seed=981724)
 #model = A3C_rarl("MlPAACPolicy", use_stackelberg=False, env=env, verbose=2, n_steps=8, normalize_advantage=False,gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,vf_coef=.4,gamma=.9,v_learning_rate=5e-4, c_learning_rate=5e-4,d_learning_rate=5e-4, use_sde=True,use_rms_prop=False, device='cpu')
 
 #model = lambda tau1, tau2: A3C_rarl("MlPAACPolicy", use_stackelberg=False, env=env, verbose=2, n_steps=8, normalize_advantage=False,gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,vf_coef=.4,gamma=.9,v_learning_rate=v_learning_rate, c_learning_rate=v_learning_rate * tau1,d_learning_rate=v_learning_rate * tau1 * tau2, use_sde=True,use_rms_prop=False, device='cpu')
 def f(tau2):
     high = 1_000_000_000
-    seed_list = np.random.randint(0, high=high, size=10, dtype=int)
+    seed_list = np.random.randint(0, high=high, size=32, dtype=int)
+
+    wandb.init(project="test",
+               entity='jw4406',
+               config={"v_lr": v_learning_rate,
+                       "u_lr": v_learning_rate * tau_v_c,
+                       "d_lr": v_learning_rate * tau_v_c * tau_c_d,
+                       "v_grad_norm": 1.,
+                       "u_grad_norm": 1.,
+                       "d_grad_norm": 1.,
+                       "eval_rew": 0,
+                       "epochs": 0})
+
     model = A3C_rarl("MlPAACPolicy", use_stackelberg=True, env=env, verbose=2, n_steps=8, normalize_advantage=False,
                      gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,vf_coef=.4,gamma=.9,
-                     v_learning_rate=linear_schedule(v_learning_rate),
-                     c_learning_rate=linear_schedule(v_learning_rate * tau_v_c),
-                     d_learning_rate=linear_schedule(v_learning_rate * tau_v_c * tau_c_d),
+                     v_learning_rate=v_learning_rate,
+                     c_learning_rate=v_learning_rate * tau_v_c,
+                     d_learning_rate=v_learning_rate * tau_v_c * tau_c_d,
+                     v_learning_rate_decay=critic_decay_schedule(v_learning_rate),
+                     c_learning_rate_decay=actor_decay_schedule(v_learning_rate * tau_v_c),
+                     d_learning_rate_decay=actor_decay_schedule(v_learning_rate * tau_v_c * tau_c_d),
                      linear_phase=True,
-                     use_sde=True,use_rms_prop=False, device='auto', seed=int(seed_list[int(tau2)]),policy_kwargs={'net_arch': dict(pi=[16,16], vf=[64,64])}, use_leaderboard=USE_LEADERBOARD, policy_memory_size=LEADERBOARD_SIZE)
+                     use_sde=True,use_rms_prop=False,
+                     device='auto',
+                     seed=int(tau2),
+                     policy_kwargs={'net_arch': dict(pi=[16,16], vf=[64,64])},
+                     use_leaderboard=USE_LEADERBOARD,
+                     policy_memory_size=LEADERBOARD_SIZE,
+                     parallel_run_num=int(tau2))
     #name = "/home/jw4406/codebase/stable-baselines3/stable_baselines3/competitive_models/baseline_pretrain_parallel_pend_tss_zoo_ud_55_%d_518000_steps.zip" % int(tau2)
     #name = "/home/jw4406/codebase/stable-baselines3/stable_baselines3/competitive_models/adv_pop_ws10cont2_exp_decay_lr25_ud46_%d_777000_steps.zip" % int(
     #    tau2)
     if exp_decay_load is True:
 
         #name = '/home/jw4406/codebase/stable-baselines3/stable_baselines3/competitive_models/stac_fulltrain_pend_adversarial_populations_10_FINISHED_ud_46_%d.zip' % int(tau2)
-        name = '/home/jw4406/codebase/stable-baselines3/stable_baselines3/competitive_models/stac_completely_new_pretrain_linear_advpop_10_%d_750000_steps.zip' % int(tau2)
+        #name = '/home/jw4406/codebase/stable-baselines3/stable_baselines3/competitive_models/ablation_completely_new_pretrain_linear_tautau1010_advpop_10_%d_1000000_steps.zip' % int(tau2)
+        #name = '/home/jw4406/codebase/stable-baselines3/stable_baselines3/competitive_models/stac_completely_new_pretrain_linear_5mil_advpop_10_%d_1120000_steps.zip' % int(tau2)
+        name = '/home/jw4406/codebase/stable-baselines3/stable_baselines3/smart_trained_2_%d.zip' % int(tau2)
+
         model = A3C_rarl.load(name, env=env)
 
         model.linear_phase = False
@@ -140,7 +165,7 @@ def f(tau2):
             if use_pretrain is True:
                 # pretrain_path = "/home/jw4406/codebase/stable-baselines3/stable_baselines3/competitive_models/"
                 pretrain_path = "/home/jw4406/codebase/stable-baselines3/stable_baselines3/competitive_models/"
-                pretrain_model_name = "stac_pretrain_pend_parallel_FINISHED_ud_46_%d.zip" % i
+                pretrain_model_name = 'ablation_slow_critic_linear_%d_1500000_steps.zip' % int(tau2)
                 model.policy.policy_memory[i] = A3C_rarl.load(pretrain_path + pretrain_model_name, env=env).policy
             else:
 
@@ -160,20 +185,20 @@ def f(tau2):
                      #max_grad_norm=.7, vf_coef=.4, gamma=.95, v_learning_rate=linear_schedule(5e-4),
                      #c_learning_rate=linear_schedule(1e-3), d_learning_rate=linear_schedule(5e-3), use_sde=True,
                      #use_rms_prop=False)
-    eval_callback = EvalCallback(env, verbose=1, callback_on_new_best=callback_on_best,n_eval_episodes=50, jobid=args.jobid)
+    eval_callback = EvalCallback(env, verbose=1, callback_on_new_best=callback_on_best,n_eval_episodes=5, jobid=args.jobid)
     checkpoint_callback = CheckpointCallback(
         save_freq=1000,
         save_path="./competitive_models/",
         #stac_train_sweep_pend_competitive_%d % int(tau2)
-        name_prefix="stac_completely_new_pretrain_exp_decay_start750000_advpop_10_%d" % int(tau2),
+        name_prefix="from_beginning_%d" % int(tau2),
         save_replay_buffer=True,
         save_vecnormalize=True,
         jobid=args.jobid
     )
     callback_list = CallbackList([eval_callback, checkpoint_callback])  # , checkpoint_callback])
     # model.learn(total_timesteps=1_000_000, callback=callback_list)
-    model.learn(total_timesteps=1_000_000, callback=callback_list)
-    model.save("./competitive_models/stac_complete_new_pretrain_EXP_DECAY_FROM_750000_COMPLETE_advpop10_%d.zip" % int(tau2))
+    model.learn(total_timesteps=5_500_000, callback=callback_list)
+    #model.save("./competitive_models/ablation_frozen_d_trainu_1500000_%d.zip" % int(tau2))
     print("HI IM DONE")
 if __name__ == '__main__':
 

@@ -1,5 +1,5 @@
 from typing import Any, ClassVar, Dict, Optional, Type, TypeVar, Union
-
+import wandb
 import torch as th
 from gymnasium import spaces
 from torch.nn import functional as F
@@ -73,6 +73,9 @@ class A3C_rarl(OnPolicyAlgorithm):
         c_learning_rate: Union[float, Schedule] = 1e-4,
         d_learning_rate: Union[float, Schedule] = 7e-4,
         v_learning_rate: Union[float, Schedule] = 7e-4,
+        c_learning_rate_decay: Union[float, Schedule] = 1e-4,
+        d_learning_rate_decay: Union[float, Schedule] = 7e-4,
+        v_learning_rate_decay: Union[float, Schedule] = 7e-4,
         n_steps: int = 5,
         gamma: float = 0.99,
         gae_lambda: float = 1.0,
@@ -100,7 +103,8 @@ class A3C_rarl(OnPolicyAlgorithm):
         fix=False,
         use_leaderboard=False,
         policy_memory_size: Optional[int] = 2,
-        linear_phase: bool = True
+        linear_phase: bool = True,
+        parallel_run_num: int = 999
     ):
         self.spirit = spirit
         self.linear_phase = linear_phase
@@ -147,6 +151,7 @@ class A3C_rarl(OnPolicyAlgorithm):
         self.v_learning_rate = v_learning_rate
         self.d_learning_rate = d_learning_rate
         self.learning_rate = [v_learning_rate, c_learning_rate, d_learning_rate]
+        self.learning_rate_decay_phase = [v_learning_rate_decay, c_learning_rate_decay, d_learning_rate_decay]
         self.policy_kwargs['dstb_action_space'] = dstb_action_space
         self.max_v_grad_norm = 0
         self.max_u_grad_norm = 0
@@ -349,7 +354,7 @@ class A3C_rarl(OnPolicyAlgorithm):
                 #                 dim=1).t().chunk(2)
                 #H = torch.cat((x, y), dim=1).t()
                 H = torch.cat((upper_rows, lower_rows), dim=0)
-                reg_param = 5
+                reg_param = 10
                 H = H + torch.eye(H.shape[0], device=self.device) * reg_param
                 #assert torch.allclose(H, H_test)
                 #assert torch.equal(H, H_test)
@@ -449,6 +454,7 @@ class A3C_rarl(OnPolicyAlgorithm):
         self.logger.record("train/u_grad_norm", u_norm.item())
         self.logger.record("train/d_grad_norm",
                            d_norm.item())
+        wandb.log({"v_grad_norm": v_norm.item(), "u_grad_norm": u_norm.item(), "d_grad_norm":d_norm.item()})
         if hasattr(self.policy, "log_std"):
             self.logger.record("train/std", th.exp(self.policy.log_std).mean().item())
 
