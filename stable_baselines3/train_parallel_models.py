@@ -107,7 +107,8 @@ def f(tau2):
     high = 1_000_000_000
     seed_list = np.random.randint(0, high=high, size=20, dtype=int)
 
-    wandb.init(project="pend_stac_inc_u_auth_82_",
+    wandb.init(project="smart_stac_ws2",
+
                entity='jw4406',
                config={"v_lr": v_learning_rate,
                        "u_lr": v_learning_rate * tau_v_c,
@@ -130,7 +131,7 @@ def f(tau2):
                      use_sde=True,use_rms_prop=False,
                      device='auto',
                      seed=int(tau2),
-                     policy_kwargs={'net_arch': dict(pi=[16,16], vf=[64,64])},
+                     policy_kwargs={'net_arch': dict(pi=[16,16,16], vf=[64,64,64])},
                      use_leaderboard=USE_LEADERBOARD,
                      policy_memory_size=LEADERBOARD_SIZE,
                      parallel_run_num=int(tau2))
@@ -196,7 +197,9 @@ def f(tau2):
                 model.policy.policy_memory[i] = clone.policy
                 del clone
 
+
     callback_on_best = StopTrainingOnRewardThreshold(reward_threshold=100000, verbose=1)
+
 
     #model = A3C_rarl("MlPAACPolicy", dstb_action_space=Box(-.3, .3, (2,), dtype=np.float32), use_stackelberg=True,
                      #env=env, verbose=2, n_steps=32, normalize_advantage=False, gae_lambda=.95, ent_coef=0.0,
@@ -222,6 +225,7 @@ if __name__ == '__main__':
     wandb.login(key='d95a51c4001b862123a34a3853fe0306906d2f07')
     with Pool(20) as p:
         p.map(f, np.arange(0, 20))
+
 
 
 '''

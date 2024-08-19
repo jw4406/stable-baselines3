@@ -8,6 +8,9 @@ from stable_baselines3.a2c.my_half_cheetah import my_HalfCheetahEnv
 from stable_baselines3 import SAC, SMART
 from stable_baselines3.common.callbacks import EvalCallback, StopTrainingOnRewardThreshold, CheckpointCallback, CallbackList
 import argparse
+
+import wandb
+
 from gymnasium.spaces import Box
 import numpy as np
 parser = argparse.ArgumentParser()
@@ -89,12 +92,17 @@ seed_list = [564387, 1928054, 67238674, 847859173, 901239586, 87271, 2017656, 90
 #env = gym.make("MountainCarContinuous-v0")
 #env = gym.make("my_half_cheetah", render_mode='human')
 env = gym.make("my_pendulum")
+v_learning_rate = 5e-4
 
+tau_v_c = 0.0066932472422626425 / 0.0005933974267381725
+tau_c_d = 0.01235801572155198 / 0.0066932472422626425
+tau_v_c = 5
+tau_c_d = 10
 #model = A3C_rarl("MlPAACPolicy", use_stackelberg=False, env=env, verbose=2, n_steps=8, normalize_advantage=False,gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,vf_coef=.4,gamma=.9,v_learning_rate=5e-4, c_learning_rate=5e-4,d_learning_rate=5e-4, use_sde=True,use_rms_prop=False, device='cpu')
 
 
 
-model = A3C_rarl("MlPAACPolicy", use_stackelberg=False, env=env, verbose=2, n_steps=8, normalize_advantage=False,gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,vf_coef=.4,gamma=.9,v_learning_rate=linear_schedule(5e-4), c_learning_rate=linear_schedule(5e-4),d_learning_rate=linear_schedule(5e-4), use_sde=True,use_rms_prop=False, device='auto')
+#model = A3C_rarl("MlPAACPolicy", use_stackelberg=False, env=env, verbose=2, n_steps=8, normalize_advantage=False,gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,vf_coef=.4,gamma=.9,v_learning_rate=linear_schedule(5e-4), c_learning_rate=linear_schedule(5e-4),d_learning_rate=linear_schedule(5e-4), use_sde=True,use_rms_prop=False, device='auto')
 #model = A3C_rarl("MlPAACPolicy", use_stackelberg=True, env=env, verbose=2, n_steps=8, normalize_advantage=False,gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,vf_coef=.4,gamma=.9,v_learning_rate=linear_schedule(5e-4), c_learning_rate=linear_schedule(1e-3),d_learning_rate=linear_schedule(5e-3), use_sde=True,use_rms_prop=False, device='auto')
 
 #model = A3C_rarl("MlPAACPolicy", use_stackelberg=True, env=env, verbose=2, n_steps=100, normalize_advantage=False,v_learning_rate=linear_schedule(1e-5), c_learning_rate=linear_schedule(5e-5),d_learning_rate=linear_schedule(1e-4), use_sde=True,use_rms_prop=False, device='auto')
@@ -103,8 +111,34 @@ model = A3C_rarl("MlPAACPolicy", use_stackelberg=False, env=env, verbose=2, n_st
 
 #model = A3C_rarl("MlPAACPolicy", use_stackelberg=True, env=env, verbose=2, n_steps=8, normalize_advantage=False,gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,vf_coef=.4,gamma=.9,v_learning_rate=linear_schedule(0.0005933974267381725), c_learning_rate=linear_schedule(0.0066932472422626425),d_learning_rate=linear_schedule(0.01235801572155198), use_sde=True,use_rms_prop=False, device='auto', seed=42069, policy_kwargs={'net_arch': dict(pi=[32,32,32], vf=[128,128,128])}, use_leaderboard=USE_LEADERBOARD, policy_memory_size=LEADERBOARD_SIZE)
 #model = A3C_rarl("MlPAACPolicy", use_stackelberg=True, env=env, verbose=2, n_steps=8, normalize_advantage=False,gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,vf_coef=.4,gamma=.9,v_learning_rate=linear_schedule(0.0005933974267381725), c_learning_rate=linear_schedule(0.0066932472422626425),d_learning_rate=linear_schedule(0.01235801572155198), use_sde=True,use_rms_prop=False, device='auto', seed=42069, policy_kwargs={'net_arch': dict(pi=[2,2], vf=[4,4])}, use_leaderboard=USE_LEADERBOARD, policy_memory_size=LEADERBOARD_SIZE)
+wandb.init(project="test",
+               entity='jw4406',
+               config={"v_lr": v_learning_rate,
+                       "u_lr": v_learning_rate * tau_v_c,
+                       "d_lr": v_learning_rate * tau_v_c * tau_c_d,
+                       "v_grad_norm": 1.,
+                       "u_grad_norm": 1.,
+                       "d_grad_norm": 1.,
+                       "eval_rew": 0,
+                       "epochs": 0})
 
-model = A3C_rarl("MlPAACPolicy", use_stackelberg=True, env=env, verbose=2, n_steps=8, normalize_advantage=False,gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,vf_coef=.4,gamma=.9,v_learning_rate=critic_decay_schedule(0.1), c_learning_rate=actor_decay_schedule(0.3),d_learning_rate=actor_decay_schedule(0.85), use_sde=True,use_rms_prop=False, device='auto', seed=42069, policy_kwargs={'net_arch': dict(pi=[16,16], vf=[64,64])}, use_leaderboard=USE_LEADERBOARD, policy_memory_size=LEADERBOARD_SIZE)
+model = A3C_rarl("MlPAACPolicy", use_stackelberg=True, env=env, verbose=2, n_steps=8, normalize_advantage=False,
+                 gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,vf_coef=.4,gamma=.9,
+                 v_learning_rate=v_learning_rate,
+                 c_learning_rate=v_learning_rate * tau_v_c,
+                 d_learning_rate=v_learning_rate * tau_v_c * tau_c_d,
+                 v_learning_rate_decay=critic_decay_schedule(v_learning_rate),
+                 c_learning_rate_decay=actor_decay_schedule(v_learning_rate * tau_v_c),
+                 d_learning_rate_decay=actor_decay_schedule(v_learning_rate * tau_v_c * tau_c_d),
+                 linear_phase=True,
+                 use_sde=True,use_rms_prop=False,
+                 device='auto',
+                 seed=1,
+                 policy_kwargs={'net_arch': dict(pi=[16,16], vf=[64,64])},
+                 use_leaderboard=False,
+                 policy_memory_size=10,
+                 parallel_run_num=1)
+#model = A3C_rarl("MlPAACPolicy", use_stackelberg=True, env=env, verbose=2, n_steps=8, normalize_advantage=False,gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,vf_coef=.4,gamma=.9,v_learning_rate=critic_decay_schedule(0.1), c_learning_rate=actor_decay_schedule(0.3),d_learning_rate=actor_decay_schedule(0.85), use_sde=True,use_rms_prop=False, device='auto', seed=42069, policy_kwargs={'net_arch': dict(pi=[16,16], vf=[64,64])}, use_leaderboard=USE_LEADERBOARD, policy_memory_size=LEADERBOARD_SIZE)
 
 if USE_LEADERBOARD is True:
     for i in range(LEADERBOARD_SIZE):

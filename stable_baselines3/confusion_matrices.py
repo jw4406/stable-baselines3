@@ -166,11 +166,13 @@ if model_class == 'pend':
         #smart_model_path = 'stac_completely_new_pretrain_linear_5mil_advpop_10_%d_1120000_steps.zip' % nums[i]
         env.reset(seed=seeds[0])
         #smart = A3C_rarl.load(folder + smart_model_path, env=env)
-        #smart = A3C_rarl.load("/home/jw4406/codebase/stable-baselines3/stable_baselines3/smart_trained_2_%d.zip" % nums[i], env=env)
-        try:
-            smart = A3C_rarl.load("/home/jw4406/codebase/stable-baselines3/stable_baselines3/competitive_models/test_2_%d_150000_steps.zip" % nums[i], env=env)
-        except:
-            continue
+        smart = A3C_rarl.load("/home/jw4406/codebase/stable-baselines3/stable_baselines3/smart_trained_2_%d.zip" % nums[i], env=env)
+        if nums[i] == 3:
+            smart = A3C_rarl.load("/home/jw4406/codebase/stable-baselines3/stable_baselines3/competitive_models/from_beginning_3_1600000_steps.zip", env=env)
+        #try:
+        #    smart = A3C_rarl.load("/home/jw4406/codebase/stable-baselines3/stable_baselines3/competitive_models/test_2_%d_150000_steps.zip" % nums[i], env=env)
+        #except:
+        #    continue
         #smart.save("smart_trained_%d.zip" % nums[i])
         #pretrain_path = "/home/jw4406/codebase/stable-baselines3/stable_baselines3/competitive_models/"
         #pretrain_model_name = "stac_pretrain_pend_parallel_FINISHED_ud_46_%d.zip" % i
