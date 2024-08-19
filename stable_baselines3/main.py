@@ -147,7 +147,7 @@ if USE_LEADERBOARD is True:
 #model = SAC("MlpPolicy", env=env, verbose=2, learning_rate=3e-4,buffer_size=50000, batch_size=512, ent_coef=0.1, train_freq=32, gradient_steps=32, gamma=0.9999, tau=0.01, use_sde=True)
 
 
-#model = SMART("MlPAACPolicy", use_stackelberg=True, dstb_action_space=Box(-.3, .3, (1,), dtype=np.float32), learning_starts=100, env=env, verbose=2, policy_kwargs={'net_arch': dict(pi=[32,32,32], qf=[128,128,128])}, v_learning_rate=linear_schedule(5e-4), c_learning_rate=linear_schedule(7e-4), d_learning_rate=linear_schedule(5e-3),buffer_size=50000, batch_size=64, train_freq=32, gradient_steps=64, gamma=0.999, tau=0.01, use_sde=True)
+model = SMART("MlPAACPolicy", use_stackelberg=True, dstb_action_space=Box(-.3, .3, (1,), dtype=np.float32), learning_starts=100, env=env, verbose=2, policy_kwargs={'net_arch': dict(pi=[32,32,32], qf=[128,128,128])}, v_learning_rate=linear_schedule(5e-4), c_learning_rate=linear_schedule(7e-4), d_learning_rate=linear_schedule(5e-3),buffer_size=50000, batch_size=64, train_freq=32, gradient_steps=64, gamma=0.999, tau=0.01, use_sde=True)
 
 #model = SMART("MlPAACPolicy", use_stackelberg=True, dstb_action_space=Box(-.3, .3, (1,), dtype=np.float32), learning_starts=100, env=env, verbose=2, policy_kwargs={'net_arch': dict(pi=[2,2], qf=[8,8])}, v_learning_rate=linear_schedule(5e-4), c_learning_rate=linear_schedule(7e-4), d_learning_rate=linear_schedule(5e-3),buffer_size=25000, batch_size=64, train_freq=32, gradient_steps=32, gamma=0.99, tau=0.01, use_sde=True)
 

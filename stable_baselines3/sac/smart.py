@@ -369,7 +369,7 @@ class SMART(OffPolicyAlgorithm):
                 #my_array[:] = result[:]
                 #x = pool.apply_async(self.do_gradients_reversed,
                 #                    (f_x_0, replay_data, len(critic_params), num_ctrl_params, num_dstb_params))
-                J = self.do_gradients_reversed_singleshot(surr_q_values, replay_data, len(critic_params), num_ctrl_params, num_dstb_params)
+                #J = self.do_gradients_reversed_singleshot(surr_q_values, replay_data, len(critic_params), num_ctrl_params, num_dstb_params)
                 #h1_upper_grad = torch.hstack([t.flatten() for t in h1_upper_grad_batched])
                 #h1_upper_theta = autograd.grad(h1_upper_grad, self.actor.parameters(), torch.eye(9218), is_grads_batched=True, create_graph=True, retain_graph=True)
                 #self.do_gradients_reversed(surr_q_values, len(critic_params), num_ctrl_params, num_dstb_params)
@@ -458,7 +458,7 @@ class SMART(OffPolicyAlgorithm):
                         continue
                 '''
                 elapsed = time.time() - start
-                #test_imp = autograd.grad(h1_pre_omega, self.critic.parameters(), torch.eye(h1_pre_omega.shape[0], device=self.device), is_grads_batched=True, create_graph=True, retain_graph=True)
+                test_imp = autograd.grad(h1_pre_omega, self.critic.parameters(), ivp_H_h2, is_grads_batched=False, create_graph=True, retain_graph=True)
                 #J = x.get()
                 flat_imp = torch.matmul(torch.transpose(J, 0,1), ivp_H_h2)
                 # imp is the stackelberg part of the total derivative
