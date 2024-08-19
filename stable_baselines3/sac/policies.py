@@ -242,7 +242,7 @@ class SACPolicy(BasePolicy):
         )
 
         if net_arch is None:
-            net_arch = [256, 256]
+            net_arch = [2,2]
 
         actor_arch, critic_arch = get_actor_critic_arch(net_arch)
 

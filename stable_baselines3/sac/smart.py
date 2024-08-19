@@ -302,8 +302,8 @@ class SMART(OffPolicyAlgorithm):
                 next_dstb_actions, next_dstb_log_prob = self.dstb_actor.action_log_prob(replay_data.next_observations)
                 # Compute the next Q values: min over all critics targets
                 next_q_values = th.cat(self.critic_target(replay_data.next_observations, next_actions, next_dstb_actions), dim=1)
-                #next_q_values, _ = th.min(next_q_values, dim=1, keepdim=True)
-                next_q_values = next_q_values[0]
+                next_q_values, _ = th.min(next_q_values, dim=1, keepdim=True)
+                #next_q_values = next_q_values[:, 0, None]
                 # add entropy term
                 #next_q_values = next_q_values - ent_coef * next_log_prob.reshape(-1, 1) + dstb_ent_coef * next_dstb_log_prob.reshape(-1, 1)
                 # td error + entropy term
@@ -351,8 +351,8 @@ class SMART(OffPolicyAlgorithm):
                 #dstb_model_latent_pi, dstb_model_latent_pi_params = make_functional(self.dstb_actor.latent_pi)
 
                 #f_model_dstb, dstb_params, dstb_buffers = make_functional_with_buffers(self.dstb_actor)
-                f_model_critic, batched_critic_params, critic_buffers = make_functional_with_buffers(self.critic)
-                critic_params = torch.hstack([t.flatten() for t in batched_critic_params])
+                #f_model_critic, batched_critic_params, critic_buffers = make_functional_with_buffers(self.critic)
+                #critic_params = torch.hstack([t.flatten() for t in batched_critic_params])
                 #stateless_q_values = self.compute_stateless_q_surr(f_model_critic, critic_params, critic_buffers, replay_data.observations)
 
                 #critic_pred = self.critic(replay_data.observations, actions_pi, dstb_actions_pi)
@@ -373,7 +373,7 @@ class SMART(OffPolicyAlgorithm):
                 #h1_upper_grad = torch.hstack([t.flatten() for t in h1_upper_grad_batched])
                 #h1_upper_theta = autograd.grad(h1_upper_grad, self.actor.parameters(), torch.eye(9218), is_grads_batched=True, create_graph=True, retain_graph=True)
                 #self.do_gradients_reversed(surr_q_values, len(critic_params), num_ctrl_params, num_dstb_params)
-                h1_upper_grad_batched = autograd.grad(surr_q_values, list(self.actor.parameters()),
+                h1_upper_grad_batched = autograd.grad(surr_q_values, self.policy.actor.optimizer.param_groups[0]['params'],
                                                       create_graph=True, retain_graph=True)
                 h1_upper = torch.hstack([t.flatten() for t in h1_upper_grad_batched])
                 #autograd.grad(h1_upper, self.critic.parameters(), torch.eye(4545), is_grads_batched=True, create_graph=True, retain_graph=True)
@@ -458,12 +458,13 @@ class SMART(OffPolicyAlgorithm):
                         continue
                 '''
                 elapsed = time.time() - start
-                test_imp = autograd.grad(h1_pre_omega, self.critic.parameters(), ivp_H_h2, is_grads_batched=False, create_graph=True, retain_graph=True)
+                imp = autograd.grad(h1_pre_omega, self.critic.parameters(), ivp_H_h2, is_grads_batched=False, create_graph=True, retain_graph=True)
                 #J = x.get()
-                flat_imp = torch.matmul(torch.transpose(J, 0,1), ivp_H_h2)
+                #flat_imp = torch.matmul(torch.transpose(J, 0,1), ivp_H_h2)
+                #flat_imp = test_imp
                 # imp is the stackelberg part of the total derivative
 
-                imp = self.critic_param_reshape(flat_imp)
+                #imp = self.critic_param_reshape(flat_imp)
 
             # Optimize the critic
             self.critic.optimizer.zero_grad()
@@ -473,7 +474,7 @@ class SMART(OffPolicyAlgorithm):
                     self.critic.optimizer.param_groups[0]['params'][i].grad = \
                     self.critic.optimizer.param_groups[0]['params'][i].grad - imp[i]
             del imp
-            del flat_imp
+            #del flat_imp
             self.critic.optimizer.step()
 
             # Compute actor loss
