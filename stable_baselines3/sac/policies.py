@@ -430,7 +430,7 @@ class SAACPolicy(BasePolicy):
         )
 
         if net_arch is None:
-            net_arch = {'pi':[2,2], 'qf':[4,4]}
+            net_arch = {'pi':[16,16], 'qf':[64,64]}
 
 
         actor_arch, critic_arch = get_actor_critic_arch(net_arch)

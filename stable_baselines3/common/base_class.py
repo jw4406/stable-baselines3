@@ -316,7 +316,7 @@ class BaseAlgorithm(ABC):
         #for i in range(len(self.lr_schedule)):
             #self.logger.record("train/learning_rate", self.lr_schedule[i](self._current_progress_remaining))
         #warmup = 100
-        explore = 750_000
+        explore = 500_000
         if isinstance(self, A3C_rarl):
 
             if self.num_timesteps < explore:

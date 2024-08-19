@@ -155,7 +155,7 @@ if USE_LEADERBOARD is True:
 #model = A3C_rarl("MlPAACPolicy", dstb_action_space=Box(-.3, .3, (2,), dtype=np.float32), use_stackelberg=False, env=env, verbose=2, n_steps=32, normalize_advantage=False,gae_lambda=.95,ent_coef=0.0,max_grad_norm=.7,vf_coef=.4,gamma=.95,v_learning_rate=linear_schedule(5e-5), c_learning_rate=linear_schedule(5e-5),d_learning_rate=linear_schedule(5e-5), use_sde=True,use_rms_prop=False)
 #model = SAC("MlpPolicy", env=env, verbose=2, learning_rate=3e-4,buffer_size=100, batch_size=64, ent_coef=0.1, train_freq=32, gradient_steps=32, gamma=0.9999, tau=0.01, use_sde=True)
 
-model = SMART("MlPAACPolicy", dstb_action_space=Box(-.3, .3, (1,), dtype=np.float32), learning_starts=100, env=env, verbose=2, v_learning_rate=5e-4, c_learning_rate=1e-3, d_learning_rate=5e-3,buffer_size=50000, batch_size=256, train_freq=32, gradient_steps=16, gamma=0.9999, tau=0.02, use_sde=True, device='auto')
+model = SMART("MlPAACPolicy", dstb_action_space=Box(-.2, .2, (1,), dtype=np.float32), learning_starts=150, env=env, verbose=2, v_learning_rate=5e-4, c_learning_rate=1e-3, d_learning_rate=5e-3,buffer_size=50000, batch_size=256, train_freq=32, gradient_steps=16, gamma=0.9999, tau=0.02, use_sde=True, device='auto')
 
 #model = A3C_rarl("MlPAACPolicy", dstb_action_space=Box(-.3, .3, (2,), dtype=np.float32), use_stackelberg=False, env=env, verbose=2, n_steps=32, normalize_advantage=False,gae_lambda=.95,ent_coef=0.0,max_grad_norm=.7,vf_coef=.4,gamma=.95,v_learning_rate=linear_schedule(5e-4), c_learning_rate=linear_schedule(1e-3),d_learning_rate=linear_schedule(5e-3), use_sde=True,use_rms_prop=False)
 
