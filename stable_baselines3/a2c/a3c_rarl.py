@@ -397,24 +397,25 @@ class A3C_rarl(OnPolicyAlgorithm):
                 for i in range(len(self.policy.value_optimizer.param_groups[0]['params'])):
                     self.policy.value_optimizer.param_groups[0]['params'][i].grad = self.policy.value_optimizer.param_groups[0]['params'][i].grad - imp[i]
                 del imp
+            self.policy.value_optimizer.step()
             #if self.use_stackelberg:
             #    for i in range(len(self.policy.value_optimizer.param_groups[0]['params'])):
             #        self.policy.value_optimizer.param_groups[0]['params'][i] = self.policy.value_optimizer.param_groups[0]['params'][i] - self.v_learning_rate * stackelberg_loss[i]
 
             self.policy.ctrl_optimizer.zero_grad()
             policy_loss.backward()
+            self.policy.ctrl_optimizer.step()
             self.policy.dstb_optimizer.zero_grad()
             if self.use_leaderboard is True:
                 self.policy.policy_memory[self.dstb_model_choice].dstb_optimizer.zero_grad()
             dstb_policy_loss.backward()
             # Clip grad norm
-            th.nn.utils.clip_grad_norm_(self.policy.parameters(), self.max_grad_norm)
-            if self.use_leaderboard is True:
-                th.nn.utils.clip_grad_norm_(self.policy.policy_memory[self.dstb_model_choice].parameters(),self.max_grad_norm)
+            #th.nn.utils.clip_grad_norm_(self.policy.parameters(), self.max_grad_norm)
+            #if self.use_leaderboard is True:
+            #    th.nn.utils.clip_grad_norm_(self.policy.policy_memory[self.dstb_model_choice].parameters(),self.max_grad_norm)
             #th.nn.utils.clip_grad_norm_(self.policy.advantages.parameters(), self.max_grad_norm)
             #self.policy.optimizer.step()
-            self.policy.value_optimizer.step()
-            self.policy.ctrl_optimizer.step()
+            #self.policy.ctrl_optimizer.step()
             if self.use_leaderboard is True:
                 #self.policy.policy_memory[self.dstb_model_choice].dstb_optimizer.step()
                 pass

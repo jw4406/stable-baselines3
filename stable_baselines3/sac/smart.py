@@ -172,9 +172,11 @@ class SMART(OffPolicyAlgorithm):
         self.use_stackelberg = use_stackelberg
         self.target_entropy = target_entropy
         self.log_ent_coef = None  # type: Optional[th.Tensor]
+        self.dstb_log_ent_coef = None
         # Entropy coefficient / Entropy temperature
         # Inverse of the reward scale
         self.ent_coef = ent_coef
+        self.dstb_ent_coef = ent_coef
         self.target_update_interval = target_update_interval
         self.ent_coef_optimizer: Optional[th.optim.Adam] = None
         self.c_learning_rate = c_learning_rate
@@ -184,9 +186,12 @@ class SMART(OffPolicyAlgorithm):
         self.smart = True
         self.use_leaderboard = False
         #TODO: leaderboard
-        self.max_q_grad_norm = 0
-        self.max_u_grad_norm = 0
-        self.max_d_grad_norm = 0
+        self.max_q_grad_norm = 1
+        self.max_u_grad_norm = 1
+        self.max_d_grad_norm = 1
+        self.q_norm = 0
+        self.d_norm = 0
+        self.u_norm = 0
         self.policy_kwargs['dstb_action_space'] = dstb_action_space
         if dstb_action_space is None:
             self.dstb_action_space = env.action_space
@@ -234,6 +239,7 @@ class SMART(OffPolicyAlgorithm):
             # this will throw an error if a malformed string (different from 'auto')
             # is passed
             self.ent_coef_tensor = th.tensor(float(self.ent_coef), device=self.device)
+            self.dstb_ent_coef_tensor = th.tensor(float(self.dstb_ent_coef), device=self.device)
 
     def _create_aliases(self) -> None:
         self.actor = self.policy.actor
@@ -253,7 +259,7 @@ class SMART(OffPolicyAlgorithm):
         # Update learning rate according to lr schedule
         self._update_learning_rate(optimizers)
 
-        ent_coef_losses, ent_coefs = [], []
+        ent_coef_losses, ent_coefs, dstb_ent_coefs = [], [], []
         actor_losses, critic_losses, dstb_actor_losses = [], [], []
         for gradient_step in range(gradient_steps):
             start = time.time()
@@ -268,10 +274,11 @@ class SMART(OffPolicyAlgorithm):
             # Action by the current actor for the sampled state
             actions_pi, log_prob = self.actor.action_log_prob(replay_data.observations)
             dstb_actions_pi, dstb_log_prob = self.dstb_actor.action_log_prob(replay_data.observations)
+            #dstb_actions_pi = th.zeros(dstb_actions_pi.shape, device=self.device)
             log_prob = log_prob.reshape(-1, 1)
             dstb_log_prob = dstb_log_prob.reshape(-1, 1)
 
-            ent_coef_loss = None
+            ent_coef_loss, dstb_ent_coef_loss = None, None
             if self.ent_coef_optimizer is not None and self.log_ent_coef is not None:
                 # Important: detach the variable from the graph
                 # so we don't change it with other losses
@@ -283,9 +290,10 @@ class SMART(OffPolicyAlgorithm):
                 ent_coef_losses.append(ent_coef_loss.item())
             else:
                 ent_coef = self.ent_coef_tensor
+                dstb_ent_coef = self.dstb_ent_coef_tensor
 
             ent_coefs.append(ent_coef.item())
-
+            dstb_ent_coefs.append(dstb_ent_coef.item())
             # Optimize entropy coefficient, also called
             # entropy temperature or alpha in the paper
             if ent_coef_loss is not None and self.ent_coef_optimizer is not None:
@@ -300,12 +308,13 @@ class SMART(OffPolicyAlgorithm):
                 # Select action according to policy
                 next_actions, next_log_prob = self.actor.action_log_prob(replay_data.next_observations)
                 next_dstb_actions, next_dstb_log_prob = self.dstb_actor.action_log_prob(replay_data.next_observations)
+                #next_dstb_actions = th.zeros(next_dstb_actions.shape, device=self.device)
                 # Compute the next Q values: min over all critics targets
                 next_q_values = th.cat(self.critic_target(replay_data.next_observations, next_actions, next_dstb_actions), dim=1)
                 next_q_values, _ = th.min(next_q_values, dim=1, keepdim=True)
                 #next_q_values = next_q_values[:, 0, None]
                 # add entropy term
-                #next_q_values = next_q_values - ent_coef * next_log_prob.reshape(-1, 1) + dstb_ent_coef * next_dstb_log_prob.reshape(-1, 1)
+                #next_q_values = next_q_values - ent_coef * next_log_prob.reshape(-1, 1)# + dstb_ent_coef * next_dstb_log_prob.reshape(-1, 1)
                 # td error + entropy term
                 target_q_values = replay_data.rewards + (1 - replay_data.dones) * self.gamma * next_q_values
 
@@ -335,57 +344,16 @@ class SMART(OffPolicyAlgorithm):
                 #surr_q_value_pre_mean = torch.div(critic_pred_sum, 2)
 
                 surr_q_values = torch.mean(torch.sum(torch.hstack((critic_pred[0], critic_pred[1])), dim=1))
-                #surr_q_values = self.critic.gpt_forward(replay_data.observations, actions_pi, dstb_actions_pi)
-                #surr_q_values = self.critic.q1_forward(replay_data.observations, actions_pi, dstb_actions_pi).mean()
-                #surr_q_values = torch.min(critic_pred, dim=0)
-                #surr_q_values = torch.div(torch.add(critic_pred[0], critic_pred[1]), 2).mean()
 
-                # MAKE STATELESS MODELS
-
-                #ctrl_model_mu, ctrl_model_mu_params = make_functional(self.actor.mu)
-                #ctrl_model_log_std, ctrl_model_log_std_params, ctrl_log_std_buffers = make_functional_with_buffers(self.actor.log_std)
-                #ctrl_model_latent_pi, ctrl_model_latent_pi_params = make_functional(self.actor.latent_pi)
-
-                #dstb_model_mu, dstb_model_mu_params = make_functional(self.dstb_actor.mu)
-                #dstb_model_log_std, dstb_model_log_std_params = make_functional(self.dstb_actor.log_std)
-                #dstb_model_latent_pi, dstb_model_latent_pi_params = make_functional(self.dstb_actor.latent_pi)
-
-                #f_model_dstb, dstb_params, dstb_buffers = make_functional_with_buffers(self.dstb_actor)
-                #f_model_critic, batched_critic_params, critic_buffers = make_functional_with_buffers(self.critic)
-                #critic_params = torch.hstack([t.flatten() for t in batched_critic_params])
-                #stateless_q_values = self.compute_stateless_q_surr(f_model_critic, critic_params, critic_buffers, replay_data.observations)
-
-                #critic_pred = self.critic(replay_data.observations, actions_pi, dstb_actions_pi)
-                #surr_q_values = torch.mean(torch.sum(torch.hstack((critic_pred[0], critic_pred[1])), dim=1))
-                #surr_q_values = ((critic_pred[0] + critic_pred[1]) / 2).mean()
-                #critic_pred = self.critic(replay_data.observations, actions_pi, dstb_actions_pi)
-                #f_x_0_batched = autograd.grad(surr_q_values, self.critic.parameters(), create_graph=True, retain_graph=True)
-                #f_x_0 = torch.hstack([t.flatten() for t in f_x_0_batched])
-                #pool = bitx(processes=1)
-                #global result
-                #result = np.zeros((num_ctrl_params + num_dstb_params, len(critic_params)))
-                #shm = shared_memory.SharedMemory(create=True,size=result.nbytes)
-                #my_array = np.ndarray(result.shape, buffer=shm.buf)
-                #my_array[:] = result[:]
-                #x = pool.apply_async(self.do_gradients_reversed,
-                #                    (f_x_0, replay_data, len(critic_params), num_ctrl_params, num_dstb_params))
-                #J = self.do_gradients_reversed_singleshot(surr_q_values, replay_data, len(critic_params), num_ctrl_params, num_dstb_params)
-                #h1_upper_grad = torch.hstack([t.flatten() for t in h1_upper_grad_batched])
-                #h1_upper_theta = autograd.grad(h1_upper_grad, self.actor.parameters(), torch.eye(9218), is_grads_batched=True, create_graph=True, retain_graph=True)
-                #self.do_gradients_reversed(surr_q_values, len(critic_params), num_ctrl_params, num_dstb_params)
                 h1_upper_grad_batched = autograd.grad(surr_q_values, self.policy.actor.optimizer.param_groups[0]['params'],
                                                       create_graph=True, retain_graph=True)
                 h1_upper = torch.hstack([t.flatten() for t in h1_upper_grad_batched])
-                #autograd.grad(h1_upper, self.critic.parameters(), torch.eye(4545), is_grads_batched=True, create_graph=True, retain_graph=True)
+
                 h1_lower_grad_batched = autograd.grad(surr_q_values, self.policy.dstb_actor.optimizer.param_groups[0]['params'],
                                                       create_graph=True, retain_graph=True)
                 h1_lower = torch.hstack([t.flatten() for t in h1_lower_grad_batched])
                 h1_pre_omega = torch.hstack((h1_upper, h1_lower))
-                #self.jtv(h1_pre_omega, f_model_critic, critic_params, critic_buffers, replay_data.observations,
-                #         actions_pi, dstb_actions_pi, torch.ones(num_ctrl_params + num_dstb_params))
-                #result_dict = self.forward_diff(h1_pre_omega, f_model_critic, critic_params, critic_buffers,
-                #                                replay_data.observations, actions_pi, dstb_actions_pi, num_ctrl_params,
-                #                                num_dstb_params, use_parallel=True)
+
                 surr_critic_loss = 0.5 * sum(F.mse_loss(current_q, target_q_values) for current_q in critic_pred)
                 h2_grad_theta_batched = autograd.grad(
                     surr_critic_loss, self.policy.actor.optimizer.param_groups[0]['params'], create_graph=True, retain_graph=True
@@ -424,40 +392,23 @@ class SMART(OffPolicyAlgorithm):
                                                          self.policy.dstb_actor.optimizer.param_groups[0]['params'],
                                                          torch.eye(num_ctrl_params, device=self.device),
                                                          is_grads_batched=True, create_graph=True, retain_graph=True)
-                #J = self.do_gradients_reversed(f_x_0, replay_data, len(critic_params), num_ctrl_params, num_dstb_params)
+
                 grad_theta_psi_J = self.matrix_unbatch(grad_theta_psi_J_batched,
                                                        num_ctrl_params,
                                                        size2=num_dstb_params)  # this is the 1,2 position
 
                 grad_theta_psi_J_t = torch.transpose(grad_theta_psi_J, 0, 1)  # this is the 2,1 position
-                #pool.close()
+
                 upper_rows = torch.cat((hess_theta_J, grad_theta_psi_J), dim=1)
                 lower_rows = torch.cat((grad_theta_psi_J_t, hess_psi_J), dim=1)
-                # x, y = torch.cat((hess_theta_J, grad_theta_psi_J, grad_theta_psi_J_t, hess_psi_J),
-                #                 dim=1).t().chunk(2)
-                # H = torch.cat((x, y), dim=1).t()
+
                 H = torch.cat((upper_rows, lower_rows), dim=0)
                 reg_param = 5
                 H = H + torch.eye(H.shape[0], device=self.device) * reg_param
                 # assert torch.allclose(H, H_test)
                 # assert torch.equal(H, H_test)
                 ivp_H_h2 = torch.linalg.solve(H, h2)
-                #self.jtv(h1_pre_omega, f_model_critic, critic_params, critic_buffers, replay_data.observations, actions_pi, dstb_actions_pi, ivp_H_h2)
-                #self.jacobian_vector_product(h1_pre_omega, ivp_H_h2)
-                #imp = autograd.grad(h1_pre_omega, list(self.critic.parameters()), ivp_H_h2,
 
-                #                    create_graph=True, retain_graph=True)
-                #t= time.time()
-                #J = self.cent_diff(f_model_critic, critic_params, critic_buffers, replay_data.observations, actions_pi, dstb_actions_pi, num_ctrl_params, num_dstb_params, use_parallel=True)
-                #J = torch.zeros((num_ctrl_params + num_dstb_params, len(critic_params)), device=self.device)
-                '''
-                for i in range(len(critic_params)):
-                    try:
-                        J[:, i] = result_dict.my_dict[i]
-                    except KeyError:
-                        continue
-                '''
-                elapsed = time.time() - start
                 imp = autograd.grad(h1_pre_omega, self.critic.parameters(), ivp_H_h2, is_grads_batched=False, create_graph=True, retain_graph=True)
                 #J = x.get()
                 #flat_imp = torch.matmul(torch.transpose(J, 0,1), ivp_H_h2)
@@ -473,7 +424,7 @@ class SMART(OffPolicyAlgorithm):
                 for i in range(len(self.critic.optimizer.param_groups[0]['params'])):
                     self.critic.optimizer.param_groups[0]['params'][i].grad = \
                     self.critic.optimizer.param_groups[0]['params'][i].grad - imp[i]
-            del imp
+                del imp
             #del flat_imp
             self.critic.optimizer.step()
 
@@ -484,16 +435,30 @@ class SMART(OffPolicyAlgorithm):
             min_qf_pi, _ = th.min(q_values_pi, dim=1, keepdim=True)
             #min_qf_pi = min_qf_pi.detach()
             actor_loss = (ent_coef * log_prob - min_qf_pi).mean()
-            dstb_actor_loss = (dstb_ent_coef * dstb_log_prob + min_qf_pi).mean()
-            actor_losses.append(actor_loss.item())
-            dstb_actor_losses.append(dstb_actor_loss.item())
-
-            # Optimize the actor
             self.actor.optimizer.zero_grad()
             actor_loss.backward(retain_graph=True)
-            self.dstb_actor.optimizer.zero_grad()
-            dstb_actor_loss.backward()
             self.actor.optimizer.step()
+
+            #torch.autograd.set_detect_anomaly(True)
+            q_values_pi = th.cat(self.critic(replay_data.observations, actions_pi, dstb_actions_pi), dim=1)
+            min_qf_pi, _ = th.min(q_values_pi, dim=1, keepdim=True)
+            dstb_actor_loss = (dstb_ent_coef * dstb_log_prob + min_qf_pi).mean()
+            actor_losses.append(actor_loss.item())
+            #dstb_actor_losses.append(dstb_actor_loss.item())
+
+            # Optimize the actor
+
+            #self.dstb_actor.optimizer.zero_grad()
+            #dstb_actor_loss.backward()
+
+            #FOR SOME REASON CALLING backward BREAKS THE CODE
+            # cue the "fine, i'll do it myself" memes
+            grad = autograd.grad(dstb_actor_loss, self.dstb_actor.parameters())
+            self.dstb_actor.optimizer.zero_grad()
+            for i in range(len(grad)):
+                self.dstb_actor.optimizer.param_groups[0]['params'][i].grad = grad[i]
+
+            #self.actor.optimizer.step()
             self.dstb_actor.optimizer.step()
             #self.dstb_actor.optimizer.zero_grad()
             #dstb_actor_loss.backward()
@@ -519,8 +484,9 @@ class SMART(OffPolicyAlgorithm):
                         self.policy.policy_memory[self.dstb_model_choice].dstb_optimizer.param_groups[0]['params'][
                             i].grad)
             else:
-                for i in range(len(self.dstb_actor.optimizer.param_groups[0]['params'])):
-                    d_norm = d_norm + torch.linalg.norm(self.dstb_actor.optimizer.param_groups[0]['params'][i].grad)
+                #for i in range(len(self.dstb_actor.optimizer.param_groups[0]['params'])):
+                #    d_norm = d_norm + torch.linalg.norm(self.dstb_actor.optimizer.param_groups[0]['params'][i].grad)
+                pass
             self.q_norm = q_norm
             self.d_norm = d_norm
             self.u_norm = u_norm
@@ -534,6 +500,7 @@ class SMART(OffPolicyAlgorithm):
 
         self.logger.record("train/n_updates", self._n_updates, exclude="tensorboard")
         self.logger.record("train/ent_coef", np.mean(ent_coefs))
+        self.logger.record("train/dstb_ent_coef", np.mean(dstb_ent_coefs))
         self.logger.record("train/actor_loss", np.mean(actor_losses))
         self.logger.record("train/critic_loss", np.mean(critic_losses))
         if len(ent_coef_losses) > 0:

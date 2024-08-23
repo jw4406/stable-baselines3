@@ -34,6 +34,10 @@ def linear_schedule(initial_value: float):
         return progress_remaining * initial_value
 
     return func
+def const_schedule(initial_value: float):
+    def func(progress_remaining: float) -> float:
+        return initial_value
+    return func
 def critic_decay_schedule(initial_value: float):
     def func(curr_step: int) -> float:
         return initial_value / curr_step
@@ -88,12 +92,12 @@ from stable_baselines3 import A3C_rarl
 #env = gym.make("MountainCarContinuous-v0")
 #env = gym.make("my_half_cheetah", render_mode='human')
 env = gym.make("my_pendulum")
-env = gym.make("my_half_cheetah")
+#env = gym.make("my_half_cheetah")
 v_learning_rate = 5e-4
 
 tau_v_c = 0.0066932472422626425 / 0.0005933974267381725
 tau_c_d = 0.01235801572155198 / 0.0066932472422626425
-tau_v_c = 2
+tau_v_c = 10
 tau_c_d = 5
 use_pretrain = False
 exp_decay_load = False
@@ -105,10 +109,9 @@ np.random.seed(seed=3)
 #model = lambda tau1, tau2: A3C_rarl("MlPAACPolicy", use_stackelberg=False, env=env, verbose=2, n_steps=8, normalize_advantage=False,gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,vf_coef=.4,gamma=.9,v_learning_rate=v_learning_rate, c_learning_rate=v_learning_rate * tau1,d_learning_rate=v_learning_rate * tau1 * tau2, use_sde=True,use_rms_prop=False, device='cpu')
 def f(tau2):
     high = 1_000_000_000
-    seed_list = np.random.randint(0, high=high, size=20, dtype=int)
+    seed_list = np.random.randint(0, high=high, size=15, dtype=int)
 
-    wandb.init(project="smart_stac_ws2",
-
+    wandb.init(project="stac_pend",
                entity='jw4406',
                config={"v_lr": v_learning_rate,
                        "u_lr": v_learning_rate * tau_v_c,
@@ -118,8 +121,8 @@ def f(tau2):
                        "d_grad_norm": 1.,
                        "eval_rew": 0,
                        "epochs": 0})
-    '''
-    model = A3C_rarl("MlPAACPolicy", use_stackelberg=False, env=env, verbose=2, n_steps=8, normalize_advantage=False,
+
+    model = A3C_rarl("MlPAACPolicy", use_stackelberg=True, env=env, verbose=2, n_steps=8, normalize_advantage=False,
                      gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,vf_coef=.4,gamma=.9,
                      v_learning_rate=v_learning_rate,
                      c_learning_rate=v_learning_rate * tau_v_c,
@@ -131,12 +134,12 @@ def f(tau2):
                      use_sde=True,use_rms_prop=False,
                      device='auto',
                      seed=int(tau2),
-                     policy_kwargs={'net_arch': dict(pi=[16,16,16], vf=[64,64,64])},
+                     policy_kwargs={'net_arch': dict(pi=[16,16,16], vf=[128,128,128])},
                      use_leaderboard=USE_LEADERBOARD,
                      policy_memory_size=LEADERBOARD_SIZE,
                      parallel_run_num=int(tau2))
     '''
-    model = A3C_rarl("MlPAACPolicy", dstb_action_space=Box(-.3, .3, (2,), dtype=np.float32), use_stackelberg=True,
+    model = A3C_rarl("MlPAACPolicy", dstb_action_space=Box(-.2, .2, (2,), dtype=np.float32), use_stackelberg=True,
                      env=env, verbose=2, n_steps=8, normalize_advantage=False, gae_lambda=.9, ent_coef=0.0,
                      max_grad_norm=.7, vf_coef=.4, gamma=.99,
                      v_learning_rate=v_learning_rate,
@@ -147,11 +150,18 @@ def f(tau2):
                      d_learning_rate_decay=actor_decay_schedule(v_learning_rate * tau_v_c * tau_c_d),
                      linear_phase=True, use_sde=True,
                      use_rms_prop=False, seed=int(tau2),
-                     policy_kwargs={'net_arch': dict(pi=[16,16,16], vf=[64,64,64])},
+                     policy_kwargs={'net_arch': dict(pi=[16,16], vf=[64,64])},
                      use_leaderboard=USE_LEADERBOARD,
                      policy_memory_size=LEADERBOARD_SIZE,
                      parallel_run_num=int(tau2))
-    
+     '''
+    #model = A3C_rarl.load("/home/jw4406/codebase/stable-baselines3/stable_baselines3/competitive_models/cheetah/half_cheetah_cont_della_2167000_steps.zip", env=env)
+    #model = A3C_rarl.load("/home/jw4406/codebase/stable-baselines3/stable_baselines3/competitive_models/cheetah/cheetah_baseline_2167000_steps.zip", env=env)
+    #model.lr_schedule = [critic_decay_schedule(v_learning_rate), actor_decay_schedule(v_learning_rate * tau_v_c),
+    #                     actor_decay_schedule(v_learning_rate * tau_v_c * tau_c_d)]
+    #model.lr_schedule = [const_schedule(v_learning_rate), const_schedule(v_learning_rate), const_schedule(v_learning_rate)]
+    #model.lr_schedule_decay = [critic_decay_schedule(v_learning_rate), critic_decay_schedule(v_learning_rate),
+    #                     critic_decay_schedule(v_learning_rate)]
     #name = "/home/jw4406/codebase/stable-baselines3/stable_baselines3/competitive_models/baseline_pretrain_parallel_pend_tss_zoo_ud_55_%d_518000_steps.zip" % int(tau2)
     #name = "/home/jw4406/codebase/stable-baselines3/stable_baselines3/competitive_models/adv_pop_ws10cont2_exp_decay_lr25_ud46_%d_777000_steps.zip" % int(
     #    tau2)
@@ -161,6 +171,7 @@ def f(tau2):
         #name = '/home/jw4406/codebase/stable-baselines3/stable_baselines3/competitive_models/ablation_completely_new_pretrain_linear_tautau1010_advpop_10_%d_1000000_steps.zip' % int(tau2)
         #name = '/home/jw4406/codebase/stable-baselines3/stable_baselines3/competitive_models/stac_completely_new_pretrain_linear_5mil_advpop_10_%d_1120000_steps.zip' % int(tau2)
         name = '/home/jw4406/codebase/stable-baselines3/stable_baselines3/smart_trained_2_%d.zip' % int(tau2)
+        name = '/home/jw4406/codebase/stable-baselines3/stable_baselines3/baseline_trained_%d.zip' % int(tau2)
 
         model = A3C_rarl.load(name, env=env)
 
@@ -168,16 +179,16 @@ def f(tau2):
         #model.use_stackelberg = True
         #model.use_leaderboard = USE_LEADERBOARD
         model._n_updates = 0
-        #model.v_learning_rate = critic_decay_schedule(model.policy.value_optimizer.param_groups[0]['lr'])
-        #model.c_learning_rate = actor_decay_schedule(model.policy.ctrl_optimizer.param_groups[0]['lr'])
-        #model.d_learning_rate = actor_decay_schedule(model.policy.dstb_optimizer.param_groups[0]['lr'])
-        #model.lr_schedule = [critic_decay_schedule(model.policy.value_optimizer.param_groups[0]['lr']), actor_decay_schedule(model.policy.ctrl_optimizer.param_groups[0]['lr']), actor_decay_schedule(model.policy.dstb_optimizer.param_groups[0]['lr'])]
-        model.v_learning_rate = critic_decay_schedule(v_learning_rate)
-        model.c_learning_rate = actor_decay_schedule(v_learning_rate * tau_v_c)
-        model.d_learning_rate = actor_decay_schedule(v_learning_rate * tau_v_c * tau_c_d)
-        model.lr_schedule = [critic_decay_schedule(v_learning_rate),
-                             actor_decay_schedule(v_learning_rate * tau_v_c),
-                             actor_decay_schedule(v_learning_rate * tau_v_c * tau_c_d)]
+        model.v_learning_rate = const_schedule(v_learning_rate)
+        model.c_learning_rate = const_schedule(v_learning_rate)
+        model.d_learning_rate = const_schedule(v_learning_rate)
+        model.lr_schedule = [const_schedule(v_learning_rate), const_schedule(v_learning_rate), const_schedule(v_learning_rate)]
+        model.v_learning_rate_decay = critic_decay_schedule(v_learning_rate)
+        model.c_learning_rate_decay = critic_decay_schedule(v_learning_rate)
+        model.d_learning_rate_decay = critic_decay_schedule(v_learning_rate)
+        model.lr_schedule_decay = [critic_decay_schedule(v_learning_rate),
+                             critic_decay_schedule(v_learning_rate),
+                             critic_decay_schedule(v_learning_rate)]
 
     if USE_LEADERBOARD is True:
         for i in range(LEADERBOARD_SIZE):
@@ -211,7 +222,7 @@ def f(tau2):
         save_freq=1000,
         save_path="./competitive_models/",
         #stac_train_sweep_pend_competitive_%d % int(tau2)
-        name_prefix="lr_twostep_cheetah_stac_161616646464_ud_82_%d" % int(tau2),
+        name_prefix="stac_pend_pog_%d" % int(tau2),
         save_replay_buffer=True,
         save_vecnormalize=True,
         jobid=args.jobid
@@ -219,12 +230,12 @@ def f(tau2):
     callback_list = CallbackList([eval_callback, checkpoint_callback])  # , checkpoint_callback])
     # model.learn(total_timesteps=1_000_000, callback=callback_list)
     model.learn(total_timesteps=5_500_000, callback=callback_list)
-    model.save("./competitive_models/cheetah_lr_twostep_161616646464_stac_ud_82_finished_%d.zip" % int(tau2))
+    model.save("./competitive_models/stac_pend_pog_%d.zip" % int(tau2))
     print("HI IM DONE")
 if __name__ == '__main__':
     wandb.login(key='d95a51c4001b862123a34a3853fe0306906d2f07')
-    with Pool(20) as p:
-        p.map(f, np.arange(0, 20))
+    with Pool(15) as p:
+        p.map(f, np.arange(0, 15))
 
 
 

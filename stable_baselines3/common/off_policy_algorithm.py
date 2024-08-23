@@ -400,6 +400,7 @@ class OffPolicyAlgorithm(BaseAlgorithm):
             unscaled_action = np.array([self.action_space.sample() for _ in range(n_envs)])
             if hasattr(self, "smart") and self.smart is True:
                 unscaled_dstb_action = np.array([self.dstb_action_space.sample() for _ in range(n_envs)])
+                #unscaled_dstb_action = 0
         else:
             # Note: when using continuous actions,
             # we assume that the policy uses tanh to scale the action
@@ -407,6 +408,7 @@ class OffPolicyAlgorithm(BaseAlgorithm):
             assert self._last_obs is not None, "self._last_obs was not set"
             if hasattr(self, "smart") and self.smart is True:
                 unscaled_action, unscaled_dstb_action, _ = self.predict(self._last_obs, deterministic=False)
+                #unscaled_dstb_action = 0
             else:
                 unscaled_action, _ = self.predict(self._last_obs, deterministic=False)
 
@@ -662,7 +664,9 @@ class OffPolicyAlgorithm(BaseAlgorithm):
             # Select action randomly or according to policy
             if hasattr(self, "smart") and self.smart == True:
                 actions, dstb_actions, buffer_actions, buffer_dstb_actions = self._sample_action(learning_starts, action_noise, env.num_envs)
-                new_obs, rewards, dones, infos = env.step([[actions, dstb_actions*0, num_collected_steps]])
+                #if dstb_actions[0] != 0 or buffer_dstb_actions != 0:
+                #    print("dstb action nonzero")
+                new_obs, rewards, dones, infos = env.step([[actions, dstb_actions, num_collected_steps]])
                 self.num_timesteps += env.num_envs
                 num_collected_steps += 1
 

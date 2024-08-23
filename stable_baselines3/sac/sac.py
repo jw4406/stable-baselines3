@@ -184,7 +184,7 @@ class SAC(OffPolicyAlgorithm):
             # Note: we optimize the log of the entropy coeff which is slightly different from the paper
             # as discussed in https://github.com/rail-berkeley/softlearning/issues/37
             self.log_ent_coef = th.log(th.ones(1, device=self.device) * init_value).requires_grad_(True)
-            self.ent_coef_optimizer = th.optim.Adam([self.log_ent_coef], lr=self.lr_schedule(1))
+            self.ent_coef_optimizer = th.optim.Adam([self.log_ent_coef], lr=self.lr_schedule[0](1))
         else:
             # Force conversion to float
             # this will throw an error if a malformed string (different from 'auto')
@@ -247,8 +247,8 @@ class SAC(OffPolicyAlgorithm):
                 next_actions, next_log_prob = self.actor.action_log_prob(replay_data.next_observations)
                 # Compute the next Q values: min over all critics targets
                 next_q_values = th.cat(self.critic_target(replay_data.next_observations, next_actions), dim=1)
-                #next_q_values, _ = th.min(next_q_values, dim=1, keepdim=True)
-                next_q_values = next_q_values[0]
+                next_q_values, _ = th.min(next_q_values, dim=1, keepdim=True)
+                #next_q_values = next_q_values[0]
                 # add entropy term
                 next_q_values = next_q_values - ent_coef * next_log_prob.reshape(-1, 1)
                 # td error + entropy term

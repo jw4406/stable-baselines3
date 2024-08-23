@@ -39,7 +39,10 @@ def critic_decay_schedule(initial_value: float):
     def func(curr_step: int) -> float:
         return initial_value / curr_step
     return func
-
+def const_schedule(initial_value: float):
+    def func(progress_remaining: float) -> float:
+        return initial_value
+    return func
 def actor_decay_schedule(initial_value: float):
     def func(curr_step: int) -> float:
         return initial_value / (curr_step ** (2/3))
@@ -52,7 +55,7 @@ register(
     # Note: entry_point also accept a class as input (and not only a string)
     entry_point=my_PendulumEnv,
     # Max number of steps per episode, using a `TimeLimitWrapper`
-    max_episode_steps=500,
+    max_episode_steps=200,
 )
 register(# unique identifier for the env `name-version`
     id="my_walker2d_v4",
@@ -90,7 +93,7 @@ LEADERBOARD_SIZE = 10
 use_pretrain = True
 seed_list = [564387, 1928054, 67238674, 847859173, 901239586, 87271, 2017656, 90265, 82375,54157628]
 #env = gym.make("MountainCarContinuous-v0")
-#env = gym.make("my_half_cheetah", render_mode='human')
+env = gym.make("Pendulum-v1")
 env = gym.make("my_pendulum")
 v_learning_rate = 5e-4
 
@@ -121,7 +124,7 @@ wandb.init(project="test",
                        "d_grad_norm": 1.,
                        "eval_rew": 0,
                        "epochs": 0})
-
+'''
 model = A3C_rarl("MlPAACPolicy", use_stackelberg=True, env=env, verbose=2, n_steps=8, normalize_advantage=False,
                  gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,vf_coef=.4,gamma=.9,
                  v_learning_rate=v_learning_rate,
@@ -138,7 +141,8 @@ model = A3C_rarl("MlPAACPolicy", use_stackelberg=True, env=env, verbose=2, n_ste
                  use_leaderboard=False,
                  policy_memory_size=10,
                  parallel_run_num=1)
-#model = A3C_rarl("MlPAACPolicy", use_stackelberg=True, env=env, verbose=2, n_steps=8, normalize_advantage=False,gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,vf_coef=.4,gamma=.9,v_learning_rate=critic_decay_schedule(0.1), c_learning_rate=actor_decay_schedule(0.3),d_learning_rate=actor_decay_schedule(0.85), use_sde=True,use_rms_prop=False, device='auto', seed=42069, policy_kwargs={'net_arch': dict(pi=[16,16], vf=[64,64])}, use_leaderboard=USE_LEADERBOARD, policy_memory_size=LEADERBOARD_SIZE)
+                 '''
+model = A3C_rarl("MlPAACPolicy", use_stackelberg=True, env=env, verbose=2, n_steps=8, normalize_advantage=False,gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,vf_coef=.4,gamma=.9,v_learning_rate=critic_decay_schedule(0.1), c_learning_rate=actor_decay_schedule(0.3),d_learning_rate=actor_decay_schedule(0.85), use_sde=True,use_rms_prop=False, device='auto', seed=42069, policy_kwargs={'net_arch': dict(pi=[16,16], vf=[64,64])}, use_leaderboard=USE_LEADERBOARD, policy_memory_size=LEADERBOARD_SIZE)
 
 if USE_LEADERBOARD is True:
     for i in range(LEADERBOARD_SIZE):
@@ -178,7 +182,7 @@ if USE_LEADERBOARD is True:
 #model = A3C_rarl("MlPAACPolicy", dstb_action_space=Box(-.3, .3, (2,), dtype=np.float32), use_stackelberg=True, env=env, verbose=2, n_steps=512, normalize_advantage=False,gae_lambda=.92,ent_coef=0.0,max_grad_norm=.8,vf_coef=.4,gamma=.98,v_learning_rate=5e-4, c_learning_rate=1e-3,d_learning_rate=5e-3, use_sde=True,use_rms_prop=False)
 #model=A2C("MlpPolicy", normalize_advantage=True, verbose=2, env=env, n_steps=100, learning_rate=linear_schedule(3e-4), use_sde=True, use_rms_prop=False)
 #model = A3C_rarl("MlPAACPolicy", dstb_action_space=Box(-.3, .3, (2,), dtype=np.float32), use_stackelberg=True, env=env, verbose=2, n_steps=512, normalize_advantage=False,gae_lambda=.92,ent_coef=0.0,max_grad_norm=.8,vf_coef=.4,gamma=.98,v_learning_rate=5e-3, c_learning_rate=1e-2,d_learning_rate=5e-2, use_sde=True,use_rms_prop=False)
-#model = SAC("MlpPolicy", env=env, verbose=2, learning_rate=3e-4,buffer_size=50000, batch_size=512, ent_coef=0.1, train_freq=32, gradient_steps=32, gamma=0.9999, tau=0.01, use_sde=True)
+#model = SAC("MlpPolicy", env=env, verbose=2, learning_rate=3e-4,buffer_size=50000, learning_starts=50000, batch_size=512, ent_coef='auto', train_freq=32, gradient_steps=32, gamma=0.9999, tau=0.01, use_sde=True)
 
 
 #model = SMART("MlPAACPolicy", use_stackelberg=True, dstb_action_space=Box(-.3, .3, (1,), dtype=np.float32), learning_starts=100, env=env, verbose=2, policy_kwargs={'net_arch': dict(pi=[32,32,32], qf=[128,128,128])}, v_learning_rate=linear_schedule(5e-4), c_learning_rate=linear_schedule(7e-4), d_learning_rate=linear_schedule(5e-3),buffer_size=50000, batch_size=64, train_freq=32, gradient_steps=64, gamma=0.999, tau=0.01, use_sde=True)
@@ -189,8 +193,32 @@ if USE_LEADERBOARD is True:
 #model = A3C_rarl("MlPAACPolicy", dstb_action_space=Box(-.3, .3, (2,), dtype=np.float32), use_stackelberg=False, env=env, verbose=2, n_steps=32, normalize_advantage=False,gae_lambda=.95,ent_coef=0.0,max_grad_norm=.7,vf_coef=.4,gamma=.95,v_learning_rate=linear_schedule(5e-5), c_learning_rate=linear_schedule(5e-5),d_learning_rate=linear_schedule(5e-5), use_sde=True,use_rms_prop=False)
 #model = SAC("MlpPolicy", env=env, verbose=2, learning_rate=3e-4,buffer_size=100, batch_size=64, ent_coef=0.1, train_freq=32, gradient_steps=32, gamma=0.9999, tau=0.01, use_sde=True)
 
-model = SMART("MlPAACPolicy", dstb_action_space=Box(-.2, .2, (1,), dtype=np.float32), learning_starts=150, env=env, verbose=2, v_learning_rate=5e-4, c_learning_rate=1e-3, d_learning_rate=5e-3,buffer_size=50000, batch_size=256, train_freq=32, gradient_steps=16, gamma=0.9999, tau=0.02, use_sde=True, device='auto')
-
+#model = SMART("MlPAACPolicy", dstb_action_space=Box(-.3, .3, (2,), dtype=np.float32), learning_starts=500, env=env, verbose=2, v_learning_rate=v_learning_rate, c_learning_rate=v_learning_rate * tau_v_c, d_learning_rate=v_learning_rate * tau_v_c * tau_c_d,buffer_size=10000, batch_size=128, train_freq=16, gradient_steps=8, gamma=0.9, tau=0.02, use_sde=True, device='auto')
+#model = SMART("MlPAACPolicy", dstb_action_space=Box(-.2, .2, (1,), dtype=np.float32), learning_starts=50000, env=env, verbose=2, v_learning_rate=5e-4, c_learning_rate=1e-3, d_learning_rate=5e-3,buffer_size=50000, batch_size=256, train_freq=32, gradient_steps=16, gamma=0.9, tau=0.02, use_sde=True, device='auto')
+#model = A3C_rarl.load("/home/jw4406/codebase/stable-baselines3/stable_baselines3/confusion_models/true_pend_baseline_230000_steps.zip",env=env)
+wandb.init(project="baseline_pretrain",
+               entity='jw4406',
+               config={"v_lr": v_learning_rate,
+                       "u_lr": v_learning_rate,
+                       "d_lr": v_learning_rate,
+                       "v_grad_norm": 1.,
+                       "u_grad_norm": 1.,
+                       "d_grad_norm": 1.,
+                       "eval_rew": 0,
+                       "epochs": 0})
+#model = SMART("MlPAACPolicy", dstb_action_space=Box(-.3, .3, (1,), dtype=np.float32), ent_coef='auto', learning_starts=50000, env=env, verbose=2, v_learning_rate=3e-4, c_learning_rate=4e-4, d_learning_rate=5e-3,buffer_size=50000, batch_size=512, train_freq=32, gradient_steps=32, gamma=0.9, tau=0.01, use_sde=True, use_stackelberg=False,device='auto')
+#model = A3C_rarl.load("/home/jw4406/codebase/stable-baselines3/stable_baselines3/competitive_models/true_pend_baseline_230000_steps.zip",env=env)
+#v_learning_rate = 5e-4
+#model.v_learning_rate = const_schedule(v_learning_rate)
+#model.c_learning_rate = const_schedule(v_learning_rate)
+#model.d_learning_rate = const_schedule(v_learning_rate)
+#model.lr_schedule = [const_schedule(v_learning_rate), const_schedule(v_learning_rate), const_schedule(v_learning_rate)]
+#model.v_learning_rate_decay = critic_decay_schedule(v_learning_rate)
+#model.c_learning_rate_decay = critic_decay_schedule(v_learning_rate)
+#model.d_learning_rate_decay = critic_decay_schedule(v_learning_rate)
+#model.lr_schedule_decay = [critic_decay_schedule(v_learning_rate),
+#                     critic_decay_schedule(v_learning_rate),
+#                     critic_decay_schedule(v_learning_rate)]
 #model = A3C_rarl("MlPAACPolicy", dstb_action_space=Box(-.3, .3, (2,), dtype=np.float32), use_stackelberg=False, env=env, verbose=2, n_steps=32, normalize_advantage=False,gae_lambda=.95,ent_coef=0.0,max_grad_norm=.7,vf_coef=.4,gamma=.95,v_learning_rate=linear_schedule(5e-4), c_learning_rate=linear_schedule(1e-3),d_learning_rate=linear_schedule(5e-3), use_sde=True,use_rms_prop=False)
 
 #model = A3C_rarl("MlPAACPolicy", dstb_action_space=Box(-.3, .3, (2,), dtype=np.float32), use_stackelberg=False, env=env, verbose=2, n_steps=32, normalize_advantage=False,gae_lambda=.95,ent_coef=0.0,max_grad_norm=.7,vf_coef=.4,gamma=.95,v_learning_rate=linear_schedule(1e-3), c_learning_rate=linear_schedule(5e-3),d_learning_rate=linear_schedule(2.5e-2), use_sde=True,use_rms_prop=False)
@@ -202,7 +230,8 @@ model = SMART("MlPAACPolicy", dstb_action_space=Box(-.2, .2, (1,), dtype=np.floa
 
 
 #model = A3C_rarl.load("./models/pend_smart_388000_steps.zip", env=env)
-#model = A3C_rarl.load("./half_cheetah_", env=env)
+#model = A3C_rarl.load("/home/jw4406/codebase/stable-baselines3/stable_baselines3/competitive_models/cheetah/cheetah_baseline_2167000_steps.zip", env=env)
+#model.lr_schedule = [critic_decay_schedule(v_learning_rate), actor_decay_schedule(v_learning_rate*tau_v_c),actor_decay_schedule(v_learning_rate*tau_v_c*tau_c_d)]
 #model = A3C_rarl("MlPAACPolicy", use_stackelberg=False,env=env, verbose=2, normalize_advantage=False, n_steps=100,v_learning_rate=linear_schedule(3e-4), c_learning_rate=linear_schedule(6e-4),d_learning_rate=linear_schedule(1.2e-3), use_sde=True, use_rms_prop=False)
 #model = A3C_rarl.load("./cheetah_model/half_cheetah_della_stac_finished.zip", env=env)
 #model = A3C_rarl.load("./half_cheetah_baseline/half_cheetah_baseline.zip", env=env)
@@ -239,16 +268,16 @@ model.spirit=False
 
 
 
-callback_on_best = StopTrainingOnRewardThreshold(reward_threshold=-175, verbose=1)
+callback_on_best = StopTrainingOnRewardThreshold(reward_threshold=10000, verbose=1)
 eval_callback = EvalCallback(env, callback_on_new_best=callback_on_best, verbose=1, eval_freq=10000, n_eval_episodes=10, jobid=args.jobid)
 
 checkpoint_callback = CheckpointCallback(
   save_freq=1000,
   save_path="./logs/",
-  name_prefix='test',
+  name_prefix='baseline_pretrain_55',
 )
 
-callback_list = CallbackList([eval_callback, checkpoint_callback])
+callback_list = CallbackList([checkpoint_callback])
 
 #model.learn(total_timesteps=7_500_000, callback=callback_list)
 
@@ -259,7 +288,7 @@ model.learn(total_timesteps=7_500_000, callback=callback_list)
 
 #callback_on_best = StopTrainingOnRewardThreshold(reward_threshold=-200, verbose=1)
 #eval_callback = EvalCallback(env, callback_on_new_best=callback_on_best, verbose=1)
-model.save("exp_decay_ac3_test.zip")
+model.save("baseline_pretrain_55_end.zip")
 
 
 vec_env = model.get_env()

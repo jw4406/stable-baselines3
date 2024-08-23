@@ -138,15 +138,14 @@ class my_PendulumEnv(gym.Env):
         dt = self.dt
 
         #u = np.clip(u, -self.max_torque, self.max_torque)[0]
-        u = np.clip(u, -1.8, 1.8)[0]
-        d = np.clip(d, -.2, .2)[0]
+        u = np.clip(u, -2, 2)[0]
+        d = np.clip(d, -.5, .5)[0]
         #d = 0
         try:
             len(d)
             d = d[0]
         except:
             pass
-
         self.last_u = u  # for rendering
         self.last_d = d
         costs = angle_normalize(th) ** 2 + 0.1 * thdot**2 + 0.001 * ((u+d)**2)

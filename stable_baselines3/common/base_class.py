@@ -291,7 +291,10 @@ class BaseAlgorithm(ABC):
             assert len([self.learning_rate]) == 1
             self.learning_rate = [self.learning_rate]
         for i in range(len(self.lr_schedule)):
-            self.lr_schedule[i] = get_schedule_fn(self.learning_rate[i])
+            try:
+                self.lr_schedule[i] = get_schedule_fn(self.learning_rate[i])
+            except IndexError:
+                self.lr_schedule[i] = get_schedule_fn(self.learning_rate[0])
             if hasattr(self, "learning_rate_decay_phase"):
                 self.lr_schedule_decay[i] = get_schedule_fn(self.learning_rate_decay_phase[i])
     def _update_current_progress_remaining(self, num_timesteps: int, total_timesteps: int) -> None:
