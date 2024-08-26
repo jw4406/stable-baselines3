@@ -360,8 +360,7 @@ class A3C_rarl(OnPolicyAlgorithm):
                 #assert torch.equal(H, H_test)
                 ivp_H_h2 = torch.linalg.solve(H, h2)
 
-                # TODO: need to test if doing a grad omega on h1 and then multiply that to ivpH_H2 is the same as
-                # TODO: doing h1 times ivp_H_h2 and then doing a grad (basically whether grad is first or last)
+
                 imp = autograd.grad(h1_pre_omega, self.policy.value_optimizer.param_groups[0]['params'], ivp_H_h2,
                                     create_graph=True, retain_graph=True)
                 # imp is the stackelberg part of the total derivative
@@ -392,11 +391,11 @@ class A3C_rarl(OnPolicyAlgorithm):
 
             self.policy.value_optimizer.zero_grad()
             value_loss.backward()
-
             if self.use_stackelberg is True:
                 for i in range(len(self.policy.value_optimizer.param_groups[0]['params'])):
                     self.policy.value_optimizer.param_groups[0]['params'][i].grad = self.policy.value_optimizer.param_groups[0]['params'][i].grad - imp[i]
                 del imp
+            th.nn.utils.clip_grad_norm_(self.policy.value_optimizer.param_groups[0]['params'], self.max_grad_norm)
             self.policy.value_optimizer.step()
             #if self.use_stackelberg:
             #    for i in range(len(self.policy.value_optimizer.param_groups[0]['params'])):
@@ -404,13 +403,16 @@ class A3C_rarl(OnPolicyAlgorithm):
 
             self.policy.ctrl_optimizer.zero_grad()
             policy_loss.backward()
+            # clip the only the relevant params after each backward
+            # otherwise the gradient magnitudes will swing wildly and training will not progress
+            th.nn.utils.clip_grad_norm_(self.policy.ctrl_optimizer.param_groups[0]['params'], self.max_grad_norm)
             self.policy.ctrl_optimizer.step()
             self.policy.dstb_optimizer.zero_grad()
             if self.use_leaderboard is True:
                 self.policy.policy_memory[self.dstb_model_choice].dstb_optimizer.zero_grad()
             dstb_policy_loss.backward()
             # Clip grad norm
-            #th.nn.utils.clip_grad_norm_(self.policy.parameters(), self.max_grad_norm)
+            th.nn.utils.clip_grad_norm_(self.policy.dstb_optimizer.param_groups[0]['params'], self.max_grad_norm)
             #if self.use_leaderboard is True:
             #    th.nn.utils.clip_grad_norm_(self.policy.policy_memory[self.dstb_model_choice].parameters(),self.max_grad_norm)
             #th.nn.utils.clip_grad_norm_(self.policy.advantages.parameters(), self.max_grad_norm)

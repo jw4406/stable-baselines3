@@ -1,0 +1,2858 @@
+nohup: ignoring input
+wandb: Currently logged in as: jw4406 (safe-princeton). Use `wandb login --relogin` to force relogin
+wandb: Appending key for api.wandb.ai to your netrc file: /home/jw4406/.netrc
+wandb: Currently logged in as: jw4406. Use `wandb login --relogin` to force relogin
+wandb: Currently logged in as: jw4406. Use `wandb login --relogin` to force relogin
+wandb: Currently logged in as: jw4406. Use `wandb login --relogin` to force relogin
+wandb: wandb version 0.17.7 is available!  To upgrade, please run:
+wandb:  $ pip install wandb --upgrade
+wandb: Tracking run with wandb version 0.17.6
+wandb: Run data is saved locally in /home/jw4406/codebase/stable-baselines3/stable_baselines3/wandb/run-20240823_235956-8temnkfp
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run polar-tree-101
+wandb: ⭐️ View project at https://wandb.ai/jw4406/stac_pend
+wandb: 🚀 View run at https://wandb.ai/jw4406/stac_pend/runs/8temnkfp
+wandb: wandb version 0.17.7 is available!  To upgrade, please run:
+wandb:  $ pip install wandb --upgrade
+wandb: Tracking run with wandb version 0.17.6
+wandb: Run data is saved locally in /home/jw4406/codebase/stable-baselines3/stable_baselines3/wandb/run-20240823_235956-osojkhfc
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run feasible-wind-101
+wandb: ⭐️ View project at https://wandb.ai/jw4406/stac_pend
+wandb: 🚀 View run at https://wandb.ai/jw4406/stac_pend/runs/osojkhfc
+wandb: wandb version 0.17.7 is available!  To upgrade, please run:
+wandb:  $ pip install wandb --upgrade
+wandb: Tracking run with wandb version 0.17.6
+wandb: Run data is saved locally in /home/jw4406/codebase/stable-baselines3/stable_baselines3/wandb/run-20240823_235956-vap6hkar
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run colorful-salad-101
+wandb: ⭐️ View project at https://wandb.ai/jw4406/stac_pend
+wandb: 🚀 View run at https://wandb.ai/jw4406/stac_pend/runs/vap6hkar
+Using cuda device
+Wrapping the env with a `Monitor` wrapper
+Wrapping the env in a DummyVecEnv.
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.17e+03 |
+| time/              |           |
+|    episodes        | 4         |
+|    fps             | 1017      |
+|    time_elapsed    | 0         |
+|    total_timesteps | 800       |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+Using cuda device
+Wrapping the env with a `Monitor` wrapper
+Wrapping the env in a DummyVecEnv.
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.16e+03 |
+| time/              |           |
+|    episodes        | 4         |
+|    fps             | 1004      |
+|    time_elapsed    | 0         |
+|    total_timesteps | 800       |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+Using cuda device
+Wrapping the env with a `Monitor` wrapper
+Wrapping the env in a DummyVecEnv.
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.25e+03 |
+| time/              |           |
+|    episodes        | 4         |
+|    fps             | 1002      |
+|    time_elapsed    | 0         |
+|    total_timesteps | 800       |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_0_replay_buffer_1000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_1_replay_buffer_1000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_2_replay_buffer_1000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.29e+03 |
+| time/              |           |
+|    episodes        | 8         |
+|    fps             | 973       |
+|    time_elapsed    | 1         |
+|    total_timesteps | 1600      |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.26e+03 |
+| time/              |           |
+|    episodes        | 8         |
+|    fps             | 947       |
+|    time_elapsed    | 1         |
+|    total_timesteps | 1600      |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.17e+03 |
+| time/              |           |
+|    episodes        | 8         |
+|    fps             | 955       |
+|    time_elapsed    | 1         |
+|    total_timesteps | 1600      |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_0_replay_buffer_2000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_1_replay_buffer_2000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_2_replay_buffer_2000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.37e+03 |
+| time/              |           |
+|    episodes        | 12        |
+|    fps             | 1005      |
+|    time_elapsed    | 2         |
+|    total_timesteps | 2400      |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.24e+03 |
+| time/              |           |
+|    episodes        | 12        |
+|    fps             | 984       |
+|    time_elapsed    | 2         |
+|    total_timesteps | 2400      |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 200      |
+|    ep_rew_mean     | -1.1e+03 |
+| time/              |          |
+|    episodes        | 12       |
+|    fps             | 990      |
+|    time_elapsed    | 2        |
+|    total_timesteps | 2400     |
+| train/             |          |
+|    std             | 1        |
+---------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_0_replay_buffer_3000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_1_replay_buffer_3000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_2_replay_buffer_3000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.41e+03 |
+| time/              |           |
+|    episodes        | 16        |
+|    fps             | 1022      |
+|    time_elapsed    | 3         |
+|    total_timesteps | 3200      |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.31e+03 |
+| time/              |           |
+|    episodes        | 16        |
+|    fps             | 1004      |
+|    time_elapsed    | 3         |
+|    total_timesteps | 3200      |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.17e+03 |
+| time/              |           |
+|    episodes        | 16        |
+|    fps             | 1008      |
+|    time_elapsed    | 3         |
+|    total_timesteps | 3200      |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_0_replay_buffer_4000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.34e+03 |
+| time/              |           |
+|    episodes        | 20        |
+|    fps             | 1029      |
+|    time_elapsed    | 3         |
+|    total_timesteps | 4000      |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_1_replay_buffer_4000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_2_replay_buffer_4000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.24e+03 |
+| time/              |           |
+|    episodes        | 20        |
+|    fps             | 1015      |
+|    time_elapsed    | 3         |
+|    total_timesteps | 4000      |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.16e+03 |
+| time/              |           |
+|    episodes        | 20        |
+|    fps             | 1019      |
+|    time_elapsed    | 3         |
+|    total_timesteps | 4000      |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.36e+03 |
+| time/              |           |
+|    episodes        | 24        |
+|    fps             | 1038      |
+|    time_elapsed    | 4         |
+|    total_timesteps | 4800      |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.24e+03 |
+| time/              |           |
+|    episodes        | 24        |
+|    fps             | 1024      |
+|    time_elapsed    | 4         |
+|    total_timesteps | 4800      |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.17e+03 |
+| time/              |           |
+|    episodes        | 24        |
+|    fps             | 1028      |
+|    time_elapsed    | 4         |
+|    total_timesteps | 4800      |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_0_replay_buffer_5000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_1_replay_buffer_5000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_2_replay_buffer_5000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.32e+03 |
+| time/              |           |
+|    episodes        | 28        |
+|    fps             | 1043      |
+|    time_elapsed    | 5         |
+|    total_timesteps | 5600      |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.25e+03 |
+| time/              |           |
+|    episodes        | 28        |
+|    fps             | 1030      |
+|    time_elapsed    | 5         |
+|    total_timesteps | 5600      |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.15e+03 |
+| time/              |           |
+|    episodes        | 28        |
+|    fps             | 1033      |
+|    time_elapsed    | 5         |
+|    total_timesteps | 5600      |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_0_replay_buffer_6000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_1_replay_buffer_6000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_2_replay_buffer_6000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.32e+03 |
+| time/              |           |
+|    episodes        | 32        |
+|    fps             | 1047      |
+|    time_elapsed    | 6         |
+|    total_timesteps | 6400      |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.23e+03 |
+| time/              |           |
+|    episodes        | 32        |
+|    fps             | 1035      |
+|    time_elapsed    | 6         |
+|    total_timesteps | 6400      |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.16e+03 |
+| time/              |           |
+|    episodes        | 32        |
+|    fps             | 1037      |
+|    time_elapsed    | 6         |
+|    total_timesteps | 6400      |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_0_replay_buffer_7000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_1_replay_buffer_7000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_2_replay_buffer_7000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.34e+03 |
+| time/              |           |
+|    episodes        | 36        |
+|    fps             | 1050      |
+|    time_elapsed    | 6         |
+|    total_timesteps | 7200      |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.23e+03 |
+| time/              |           |
+|    episodes        | 36        |
+|    fps             | 1038      |
+|    time_elapsed    | 6         |
+|    total_timesteps | 7200      |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.14e+03 |
+| time/              |           |
+|    episodes        | 36        |
+|    fps             | 1040      |
+|    time_elapsed    | 6         |
+|    total_timesteps | 7200      |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_0_replay_buffer_8000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.32e+03 |
+| time/              |           |
+|    episodes        | 40        |
+|    fps             | 1051      |
+|    time_elapsed    | 7         |
+|    total_timesteps | 8000      |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_1_replay_buffer_8000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_2_replay_buffer_8000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.23e+03 |
+| time/              |           |
+|    episodes        | 40        |
+|    fps             | 1041      |
+|    time_elapsed    | 7         |
+|    total_timesteps | 8000      |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.14e+03 |
+| time/              |           |
+|    episodes        | 40        |
+|    fps             | 1043      |
+|    time_elapsed    | 7         |
+|    total_timesteps | 8000      |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 200      |
+|    ep_rew_mean     | -1.3e+03 |
+| time/              |          |
+|    episodes        | 44       |
+|    fps             | 1054     |
+|    time_elapsed    | 8        |
+|    total_timesteps | 8800     |
+| train/             |          |
+|    std             | 1        |
+---------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.23e+03 |
+| time/              |           |
+|    episodes        | 44        |
+|    fps             | 1044      |
+|    time_elapsed    | 8         |
+|    total_timesteps | 8800      |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.12e+03 |
+| time/              |           |
+|    episodes        | 44        |
+|    fps             | 1046      |
+|    time_elapsed    | 8         |
+|    total_timesteps | 8800      |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_0_replay_buffer_9000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_1_replay_buffer_9000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_2_replay_buffer_9000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.28e+03 |
+| time/              |           |
+|    episodes        | 48        |
+|    fps             | 1056      |
+|    time_elapsed    | 9         |
+|    total_timesteps | 9600      |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.24e+03 |
+| time/              |           |
+|    episodes        | 48        |
+|    fps             | 1046      |
+|    time_elapsed    | 9         |
+|    total_timesteps | 9600      |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.14e+03 |
+| time/              |           |
+|    episodes        | 48        |
+|    fps             | 1047      |
+|    time_elapsed    | 9         |
+|    total_timesteps | 9600      |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/evaluation.py:67: UserWarning: Evaluation environment is not wrapped with a ``Monitor`` wrapper. This may result in reporting modified episode lengths and rewards, if other wrappers happen to modify these. Consider wrapping environment first with ``Monitor`` wrapper.
+  warnings.warn(
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/evaluation.py:67: UserWarning: Evaluation environment is not wrapped with a ``Monitor`` wrapper. This may result in reporting modified episode lengths and rewards, if other wrappers happen to modify these. Consider wrapping environment first with ``Monitor`` wrapper.
+  warnings.warn(
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/evaluation.py:67: UserWarning: Evaluation environment is not wrapped with a ``Monitor`` wrapper. This may result in reporting modified episode lengths and rewards, if other wrappers happen to modify these. Consider wrapping environment first with ``Monitor`` wrapper.
+  warnings.warn(
+Eval num_timesteps=10000, episode_reward=-1374.02 +/- 296.53
+Episode length: 200.00 +/- 0.00
+----------------------------------
+| eval/              |           |
+|    mean_ep_length  | 200       |
+|    mean_reward     | -1.37e+03 |
+| time/              |           |
+|    total_timesteps | 10000     |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_0_replay_buffer_10000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+Eval num_timesteps=10000, episode_reward=-1359.38 +/- 171.87
+Episode length: 200.00 +/- 0.00
+----------------------------------
+| eval/              |           |
+|    mean_ep_length  | 200       |
+|    mean_reward     | -1.36e+03 |
+| time/              |           |
+|    total_timesteps | 10000     |
+----------------------------------
+Eval num_timesteps=10000, episode_reward=-1478.84 +/- 277.16
+Episode length: 200.00 +/- 0.00
+----------------------------------
+| eval/              |           |
+|    mean_ep_length  | 200       |
+|    mean_reward     | -1.48e+03 |
+| time/              |           |
+|    total_timesteps | 10000     |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_1_replay_buffer_10000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_2_replay_buffer_10000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+New best mean reward!
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.27e+03 |
+| time/              |           |
+|    episodes        | 52        |
+|    fps             | 852       |
+|    time_elapsed    | 12        |
+|    total_timesteps | 10400     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+New best mean reward!
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.25e+03 |
+| time/              |           |
+|    episodes        | 52        |
+|    fps             | 842       |
+|    time_elapsed    | 12        |
+|    total_timesteps | 10400     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+New best mean reward!
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.16e+03 |
+| time/              |           |
+|    episodes        | 52        |
+|    fps             | 843       |
+|    time_elapsed    | 12        |
+|    total_timesteps | 10400     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_0_replay_buffer_11000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_1_replay_buffer_11000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_2_replay_buffer_11000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.24e+03 |
+| time/              |           |
+|    episodes        | 56        |
+|    fps             | 865       |
+|    time_elapsed    | 12        |
+|    total_timesteps | 11200     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.23e+03 |
+| time/              |           |
+|    episodes        | 56        |
+|    fps             | 855       |
+|    time_elapsed    | 13        |
+|    total_timesteps | 11200     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.16e+03 |
+| time/              |           |
+|    episodes        | 56        |
+|    fps             | 856       |
+|    time_elapsed    | 13        |
+|    total_timesteps | 11200     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_0_replay_buffer_12000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.23e+03 |
+| time/              |           |
+|    episodes        | 60        |
+|    fps             | 875       |
+|    time_elapsed    | 13        |
+|    total_timesteps | 12000     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_1_replay_buffer_12000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_2_replay_buffer_12000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.22e+03 |
+| time/              |           |
+|    episodes        | 60        |
+|    fps             | 866       |
+|    time_elapsed    | 13        |
+|    total_timesteps | 12000     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.16e+03 |
+| time/              |           |
+|    episodes        | 60        |
+|    fps             | 867       |
+|    time_elapsed    | 13        |
+|    total_timesteps | 12000     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.23e+03 |
+| time/              |           |
+|    episodes        | 64        |
+|    fps             | 886       |
+|    time_elapsed    | 14        |
+|    total_timesteps | 12800     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.21e+03 |
+| time/              |           |
+|    episodes        | 64        |
+|    fps             | 877       |
+|    time_elapsed    | 14        |
+|    total_timesteps | 12800     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.19e+03 |
+| time/              |           |
+|    episodes        | 64        |
+|    fps             | 877       |
+|    time_elapsed    | 14        |
+|    total_timesteps | 12800     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_0_replay_buffer_13000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_1_replay_buffer_13000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_2_replay_buffer_13000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.24e+03 |
+| time/              |           |
+|    episodes        | 68        |
+|    fps             | 896       |
+|    time_elapsed    | 15        |
+|    total_timesteps | 13600     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.21e+03 |
+| time/              |           |
+|    episodes        | 68        |
+|    fps             | 886       |
+|    time_elapsed    | 15        |
+|    total_timesteps | 13600     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 200      |
+|    ep_rew_mean     | -1.2e+03 |
+| time/              |          |
+|    episodes        | 68       |
+|    fps             | 887      |
+|    time_elapsed    | 15       |
+|    total_timesteps | 13600    |
+| train/             |          |
+|    std             | 1        |
+---------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_0_replay_buffer_14000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_1_replay_buffer_14000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_2_replay_buffer_14000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.24e+03 |
+| time/              |           |
+|    episodes        | 72        |
+|    fps             | 904       |
+|    time_elapsed    | 15        |
+|    total_timesteps | 14400     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 200      |
+|    ep_rew_mean     | -1.2e+03 |
+| time/              |          |
+|    episodes        | 72       |
+|    fps             | 894      |
+|    time_elapsed    | 16       |
+|    total_timesteps | 14400    |
+| train/             |          |
+|    std             | 1        |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 200      |
+|    ep_rew_mean     | -1.2e+03 |
+| time/              |          |
+|    episodes        | 72       |
+|    fps             | 895      |
+|    time_elapsed    | 16       |
+|    total_timesteps | 14400    |
+| train/             |          |
+|    std             | 1        |
+---------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_0_replay_buffer_15000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_1_replay_buffer_15000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_2_replay_buffer_15000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.23e+03 |
+| time/              |           |
+|    episodes        | 76        |
+|    fps             | 912       |
+|    time_elapsed    | 16        |
+|    total_timesteps | 15200     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.19e+03 |
+| time/              |           |
+|    episodes        | 76        |
+|    fps             | 902       |
+|    time_elapsed    | 16        |
+|    total_timesteps | 15200     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.21e+03 |
+| time/              |           |
+|    episodes        | 76        |
+|    fps             | 903       |
+|    time_elapsed    | 16        |
+|    total_timesteps | 15200     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_0_replay_buffer_16000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.24e+03 |
+| time/              |           |
+|    episodes        | 80        |
+|    fps             | 918       |
+|    time_elapsed    | 17        |
+|    total_timesteps | 16000     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_1_replay_buffer_16000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_2_replay_buffer_16000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 200      |
+|    ep_rew_mean     | -1.2e+03 |
+| time/              |          |
+|    episodes        | 80       |
+|    fps             | 909      |
+|    time_elapsed    | 17       |
+|    total_timesteps | 16000    |
+| train/             |          |
+|    std             | 1        |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 200      |
+|    ep_rew_mean     | -1.2e+03 |
+| time/              |          |
+|    episodes        | 80       |
+|    fps             | 910      |
+|    time_elapsed    | 17       |
+|    total_timesteps | 16000    |
+| train/             |          |
+|    std             | 1        |
+---------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.24e+03 |
+| time/              |           |
+|    episodes        | 84        |
+|    fps             | 925       |
+|    time_elapsed    | 18        |
+|    total_timesteps | 16800     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.19e+03 |
+| time/              |           |
+|    episodes        | 84        |
+|    fps             | 915       |
+|    time_elapsed    | 18        |
+|    total_timesteps | 16800     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 200      |
+|    ep_rew_mean     | -1.2e+03 |
+| time/              |          |
+|    episodes        | 84       |
+|    fps             | 916      |
+|    time_elapsed    | 18       |
+|    total_timesteps | 16800    |
+| train/             |          |
+|    std             | 1        |
+---------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_0_replay_buffer_17000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_1_replay_buffer_17000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_2_replay_buffer_17000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.23e+03 |
+| time/              |           |
+|    episodes        | 88        |
+|    fps             | 931       |
+|    time_elapsed    | 18        |
+|    total_timesteps | 17600     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.19e+03 |
+| time/              |           |
+|    episodes        | 88        |
+|    fps             | 921       |
+|    time_elapsed    | 19        |
+|    total_timesteps | 17600     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 200      |
+|    ep_rew_mean     | -1.2e+03 |
+| time/              |          |
+|    episodes        | 88       |
+|    fps             | 922      |
+|    time_elapsed    | 19       |
+|    total_timesteps | 17600    |
+| train/             |          |
+|    std             | 1        |
+---------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_0_replay_buffer_18000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_1_replay_buffer_18000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_2_replay_buffer_18000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.23e+03 |
+| time/              |           |
+|    episodes        | 92        |
+|    fps             | 937       |
+|    time_elapsed    | 19        |
+|    total_timesteps | 18400     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 200      |
+|    ep_rew_mean     | -1.2e+03 |
+| time/              |          |
+|    episodes        | 92       |
+|    fps             | 927      |
+|    time_elapsed    | 19       |
+|    total_timesteps | 18400    |
+| train/             |          |
+|    std             | 1        |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 200      |
+|    ep_rew_mean     | -1.2e+03 |
+| time/              |          |
+|    episodes        | 92       |
+|    fps             | 928      |
+|    time_elapsed    | 19       |
+|    total_timesteps | 18400    |
+| train/             |          |
+|    std             | 1        |
+---------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_0_replay_buffer_19000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.23e+03 |
+| time/              |           |
+|    episodes        | 96        |
+|    fps             | 941       |
+|    time_elapsed    | 20        |
+|    total_timesteps | 19200     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_1_replay_buffer_19000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_2_replay_buffer_19000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.19e+03 |
+| time/              |           |
+|    episodes        | 96        |
+|    fps             | 932       |
+|    time_elapsed    | 20        |
+|    total_timesteps | 19200     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.21e+03 |
+| time/              |           |
+|    episodes        | 96        |
+|    fps             | 933       |
+|    time_elapsed    | 20        |
+|    total_timesteps | 19200     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+Eval num_timesteps=20000, episode_reward=-1287.50 +/- 275.66
+Episode length: 200.00 +/- 0.00
+----------------------------------
+| eval/              |           |
+|    mean_ep_length  | 200       |
+|    mean_reward     | -1.29e+03 |
+| time/              |           |
+|    total_timesteps | 20000     |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_0_replay_buffer_20000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+New best mean reward!
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.23e+03 |
+| time/              |           |
+|    episodes        | 100       |
+|    fps             | 850       |
+|    time_elapsed    | 23        |
+|    total_timesteps | 20000     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+Eval num_timesteps=20000, episode_reward=-1403.74 +/- 230.76
+Episode length: 200.00 +/- 0.00
+---------------------------------
+| eval/              |          |
+|    mean_ep_length  | 200      |
+|    mean_reward     | -1.4e+03 |
+| time/              |          |
+|    total_timesteps | 20000    |
+---------------------------------
+Eval num_timesteps=20000, episode_reward=-1365.98 +/- 319.56
+Episode length: 200.00 +/- 0.00
+----------------------------------
+| eval/              |           |
+|    mean_ep_length  | 200       |
+|    mean_reward     | -1.37e+03 |
+| time/              |           |
+|    total_timesteps | 20000     |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_1_replay_buffer_20000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_2_replay_buffer_20000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.19e+03 |
+| time/              |           |
+|    episodes        | 100       |
+|    fps             | 843       |
+|    time_elapsed    | 23        |
+|    total_timesteps | 20000     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+New best mean reward!
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.21e+03 |
+| time/              |           |
+|    episodes        | 100       |
+|    fps             | 843       |
+|    time_elapsed    | 23        |
+|    total_timesteps | 20000     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.24e+03 |
+| time/              |           |
+|    episodes        | 104       |
+|    fps             | 857       |
+|    time_elapsed    | 24        |
+|    total_timesteps | 20800     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_0_replay_buffer_21000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 200      |
+|    ep_rew_mean     | -1.2e+03 |
+| time/              |          |
+|    episodes        | 104      |
+|    fps             | 850      |
+|    time_elapsed    | 24       |
+|    total_timesteps | 20800    |
+| train/             |          |
+|    std             | 1        |
+---------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.21e+03 |
+| time/              |           |
+|    episodes        | 104       |
+|    fps             | 850       |
+|    time_elapsed    | 24        |
+|    total_timesteps | 20800     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_1_replay_buffer_21000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_2_replay_buffer_21000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.22e+03 |
+| time/              |           |
+|    episodes        | 108       |
+|    fps             | 864       |
+|    time_elapsed    | 24        |
+|    total_timesteps | 21600     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.19e+03 |
+| time/              |           |
+|    episodes        | 108       |
+|    fps             | 856       |
+|    time_elapsed    | 25        |
+|    total_timesteps | 21600     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.22e+03 |
+| time/              |           |
+|    episodes        | 108       |
+|    fps             | 857       |
+|    time_elapsed    | 25        |
+|    total_timesteps | 21600     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_0_replay_buffer_22000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_1_replay_buffer_22000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_2_replay_buffer_22000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.21e+03 |
+| time/              |           |
+|    episodes        | 112       |
+|    fps             | 870       |
+|    time_elapsed    | 25        |
+|    total_timesteps | 22400     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 200      |
+|    ep_rew_mean     | -1.2e+03 |
+| time/              |          |
+|    episodes        | 112      |
+|    fps             | 862      |
+|    time_elapsed    | 25       |
+|    total_timesteps | 22400    |
+| train/             |          |
+|    std             | 1        |
+---------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.22e+03 |
+| time/              |           |
+|    episodes        | 112       |
+|    fps             | 863       |
+|    time_elapsed    | 25        |
+|    total_timesteps | 22400     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_0_replay_buffer_23000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.19e+03 |
+| time/              |           |
+|    episodes        | 116       |
+|    fps             | 875       |
+|    time_elapsed    | 26        |
+|    total_timesteps | 23200     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_1_replay_buffer_23000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_2_replay_buffer_23000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.18e+03 |
+| time/              |           |
+|    episodes        | 116       |
+|    fps             | 868       |
+|    time_elapsed    | 26        |
+|    total_timesteps | 23200     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.22e+03 |
+| time/              |           |
+|    episodes        | 116       |
+|    fps             | 868       |
+|    time_elapsed    | 26        |
+|    total_timesteps | 23200     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_0_replay_buffer_24000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.19e+03 |
+| time/              |           |
+|    episodes        | 120       |
+|    fps             | 881       |
+|    time_elapsed    | 27        |
+|    total_timesteps | 24000     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_1_replay_buffer_24000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_2_replay_buffer_24000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.19e+03 |
+| time/              |           |
+|    episodes        | 120       |
+|    fps             | 873       |
+|    time_elapsed    | 27        |
+|    total_timesteps | 24000     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.23e+03 |
+| time/              |           |
+|    episodes        | 120       |
+|    fps             | 874       |
+|    time_elapsed    | 27        |
+|    total_timesteps | 24000     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.18e+03 |
+| time/              |           |
+|    episodes        | 124       |
+|    fps             | 886       |
+|    time_elapsed    | 27        |
+|    total_timesteps | 24800     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_0_replay_buffer_25000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.19e+03 |
+| time/              |           |
+|    episodes        | 124       |
+|    fps             | 879       |
+|    time_elapsed    | 28        |
+|    total_timesteps | 24800     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.23e+03 |
+| time/              |           |
+|    episodes        | 124       |
+|    fps             | 879       |
+|    time_elapsed    | 28        |
+|    total_timesteps | 24800     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_1_replay_buffer_25000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_2_replay_buffer_25000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 200      |
+|    ep_rew_mean     | -1.2e+03 |
+| time/              |          |
+|    episodes        | 128      |
+|    fps             | 891      |
+|    time_elapsed    | 28       |
+|    total_timesteps | 25600    |
+| train/             |          |
+|    std             | 1        |
+---------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.19e+03 |
+| time/              |           |
+|    episodes        | 128       |
+|    fps             | 884       |
+|    time_elapsed    | 28        |
+|    total_timesteps | 25600     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.23e+03 |
+| time/              |           |
+|    episodes        | 128       |
+|    fps             | 884       |
+|    time_elapsed    | 28        |
+|    total_timesteps | 25600     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_0_replay_buffer_26000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_1_replay_buffer_26000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_2_replay_buffer_26000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 200      |
+|    ep_rew_mean     | -1.2e+03 |
+| time/              |          |
+|    episodes        | 132      |
+|    fps             | 896      |
+|    time_elapsed    | 29       |
+|    total_timesteps | 26400    |
+| train/             |          |
+|    std             | 1        |
+---------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.19e+03 |
+| time/              |           |
+|    episodes        | 132       |
+|    fps             | 888       |
+|    time_elapsed    | 29        |
+|    total_timesteps | 26400     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.24e+03 |
+| time/              |           |
+|    episodes        | 132       |
+|    fps             | 889       |
+|    time_elapsed    | 29        |
+|    total_timesteps | 26400     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_0_replay_buffer_27000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 200      |
+|    ep_rew_mean     | -1.2e+03 |
+| time/              |          |
+|    episodes        | 136      |
+|    fps             | 900      |
+|    time_elapsed    | 30       |
+|    total_timesteps | 27200    |
+| train/             |          |
+|    std             | 1        |
+---------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_1_replay_buffer_27000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_2_replay_buffer_27000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 200      |
+|    ep_rew_mean     | -1.2e+03 |
+| time/              |          |
+|    episodes        | 136      |
+|    fps             | 893      |
+|    time_elapsed    | 30       |
+|    total_timesteps | 27200    |
+| train/             |          |
+|    std             | 1        |
+---------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.24e+03 |
+| time/              |           |
+|    episodes        | 136       |
+|    fps             | 893       |
+|    time_elapsed    | 30        |
+|    total_timesteps | 27200     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_0_replay_buffer_28000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.21e+03 |
+| time/              |           |
+|    episodes        | 140       |
+|    fps             | 904       |
+|    time_elapsed    | 30        |
+|    total_timesteps | 28000     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_1_replay_buffer_28000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 200      |
+|    ep_rew_mean     | -1.2e+03 |
+| time/              |          |
+|    episodes        | 140      |
+|    fps             | 897      |
+|    time_elapsed    | 31       |
+|    total_timesteps | 28000    |
+| train/             |          |
+|    std             | 1        |
+---------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_2_replay_buffer_28000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.25e+03 |
+| time/              |           |
+|    episodes        | 140       |
+|    fps             | 897       |
+|    time_elapsed    | 31        |
+|    total_timesteps | 28000     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.21e+03 |
+| time/              |           |
+|    episodes        | 144       |
+|    fps             | 908       |
+|    time_elapsed    | 31        |
+|    total_timesteps | 28800     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_0_replay_buffer_29000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.21e+03 |
+| time/              |           |
+|    episodes        | 144       |
+|    fps             | 901       |
+|    time_elapsed    | 31        |
+|    total_timesteps | 28800     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.27e+03 |
+| time/              |           |
+|    episodes        | 144       |
+|    fps             | 901       |
+|    time_elapsed    | 31        |
+|    total_timesteps | 28800     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_1_replay_buffer_29000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_2_replay_buffer_29000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.22e+03 |
+| time/              |           |
+|    episodes        | 148       |
+|    fps             | 912       |
+|    time_elapsed    | 32        |
+|    total_timesteps | 29600     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 200      |
+|    ep_rew_mean     | -1.2e+03 |
+| time/              |          |
+|    episodes        | 148      |
+|    fps             | 905      |
+|    time_elapsed    | 32       |
+|    total_timesteps | 29600    |
+| train/             |          |
+|    std             | 1        |
+---------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.28e+03 |
+| time/              |           |
+|    episodes        | 148       |
+|    fps             | 905       |
+|    time_elapsed    | 32        |
+|    total_timesteps | 29600     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+Eval num_timesteps=30000, episode_reward=-1318.54 +/- 252.86
+Episode length: 200.00 +/- 0.00
+----------------------------------
+| eval/              |           |
+|    mean_ep_length  | 200       |
+|    mean_reward     | -1.32e+03 |
+| time/              |           |
+|    total_timesteps | 30000     |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_0_replay_buffer_30000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+Eval num_timesteps=30000, episode_reward=-1366.90 +/- 300.04
+Episode length: 200.00 +/- 0.00
+----------------------------------
+| eval/              |           |
+|    mean_ep_length  | 200       |
+|    mean_reward     | -1.37e+03 |
+| time/              |           |
+|    total_timesteps | 30000     |
+----------------------------------
+Eval num_timesteps=30000, episode_reward=-1271.21 +/- 296.67
+Episode length: 200.00 +/- 0.00
+----------------------------------
+| eval/              |           |
+|    mean_ep_length  | 200       |
+|    mean_reward     | -1.27e+03 |
+| time/              |           |
+|    total_timesteps | 30000     |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_1_replay_buffer_30000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_2_replay_buffer_30000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.22e+03 |
+| time/              |           |
+|    episodes        | 152       |
+|    fps             | 854       |
+|    time_elapsed    | 35        |
+|    total_timesteps | 30400     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 200      |
+|    ep_rew_mean     | -1.2e+03 |
+| time/              |          |
+|    episodes        | 152      |
+|    fps             | 848      |
+|    time_elapsed    | 35       |
+|    total_timesteps | 30400    |
+| train/             |          |
+|    std             | 1        |
+---------------------------------
+New best mean reward!
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.28e+03 |
+| time/              |           |
+|    episodes        | 152       |
+|    fps             | 848       |
+|    time_elapsed    | 35        |
+|    total_timesteps | 30400     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_0_replay_buffer_31000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.23e+03 |
+| time/              |           |
+|    episodes        | 156       |
+|    fps             | 859       |
+|    time_elapsed    | 36        |
+|    total_timesteps | 31200     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_1_replay_buffer_31000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_2_replay_buffer_31000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 200      |
+|    ep_rew_mean     | -1.2e+03 |
+| time/              |          |
+|    episodes        | 156      |
+|    fps             | 852      |
+|    time_elapsed    | 36       |
+|    total_timesteps | 31200    |
+| train/             |          |
+|    std             | 1        |
+---------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.28e+03 |
+| time/              |           |
+|    episodes        | 156       |
+|    fps             | 853       |
+|    time_elapsed    | 36        |
+|    total_timesteps | 31200     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_0_replay_buffer_32000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.25e+03 |
+| time/              |           |
+|    episodes        | 160       |
+|    fps             | 863       |
+|    time_elapsed    | 37        |
+|    total_timesteps | 32000     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_1_replay_buffer_32000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.22e+03 |
+| time/              |           |
+|    episodes        | 160       |
+|    fps             | 857       |
+|    time_elapsed    | 37        |
+|    total_timesteps | 32000     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_2_replay_buffer_32000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.29e+03 |
+| time/              |           |
+|    episodes        | 160       |
+|    fps             | 857       |
+|    time_elapsed    | 37        |
+|    total_timesteps | 32000     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.25e+03 |
+| time/              |           |
+|    episodes        | 164       |
+|    fps             | 867       |
+|    time_elapsed    | 37        |
+|    total_timesteps | 32800     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_0_replay_buffer_33000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.22e+03 |
+| time/              |           |
+|    episodes        | 164       |
+|    fps             | 861       |
+|    time_elapsed    | 38        |
+|    total_timesteps | 32800     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.27e+03 |
+| time/              |           |
+|    episodes        | 164       |
+|    fps             | 861       |
+|    time_elapsed    | 38        |
+|    total_timesteps | 32800     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_1_replay_buffer_33000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_2_replay_buffer_33000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.23e+03 |
+| time/              |           |
+|    episodes        | 168       |
+|    fps             | 871       |
+|    time_elapsed    | 38        |
+|    total_timesteps | 33600     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.23e+03 |
+| time/              |           |
+|    episodes        | 168       |
+|    fps             | 865       |
+|    time_elapsed    | 38        |
+|    total_timesteps | 33600     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.27e+03 |
+| time/              |           |
+|    episodes        | 168       |
+|    fps             | 865       |
+|    time_elapsed    | 38        |
+|    total_timesteps | 33600     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_0_replay_buffer_34000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_1_replay_buffer_34000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_2_replay_buffer_34000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.22e+03 |
+| time/              |           |
+|    episodes        | 172       |
+|    fps             | 875       |
+|    time_elapsed    | 39        |
+|    total_timesteps | 34400     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.23e+03 |
+| time/              |           |
+|    episodes        | 172       |
+|    fps             | 869       |
+|    time_elapsed    | 39        |
+|    total_timesteps | 34400     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.27e+03 |
+| time/              |           |
+|    episodes        | 172       |
+|    fps             | 869       |
+|    time_elapsed    | 39        |
+|    total_timesteps | 34400     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_0_replay_buffer_35000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.24e+03 |
+| time/              |           |
+|    episodes        | 176       |
+|    fps             | 879       |
+|    time_elapsed    | 40        |
+|    total_timesteps | 35200     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_1_replay_buffer_35000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_2_replay_buffer_35000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.24e+03 |
+| time/              |           |
+|    episodes        | 176       |
+|    fps             | 872       |
+|    time_elapsed    | 40        |
+|    total_timesteps | 35200     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.27e+03 |
+| time/              |           |
+|    episodes        | 176       |
+|    fps             | 873       |
+|    time_elapsed    | 40        |
+|    total_timesteps | 35200     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_0_replay_buffer_36000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.23e+03 |
+| time/              |           |
+|    episodes        | 180       |
+|    fps             | 882       |
+|    time_elapsed    | 40        |
+|    total_timesteps | 36000     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_1_replay_buffer_36000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.22e+03 |
+| time/              |           |
+|    episodes        | 180       |
+|    fps             | 876       |
+|    time_elapsed    | 41        |
+|    total_timesteps | 36000     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_2_replay_buffer_36000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.28e+03 |
+| time/              |           |
+|    episodes        | 180       |
+|    fps             | 876       |
+|    time_elapsed    | 41        |
+|    total_timesteps | 36000     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.23e+03 |
+| time/              |           |
+|    episodes        | 184       |
+|    fps             | 886       |
+|    time_elapsed    | 41        |
+|    total_timesteps | 36800     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_0_replay_buffer_37000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.24e+03 |
+| time/              |           |
+|    episodes        | 184       |
+|    fps             | 880       |
+|    time_elapsed    | 41        |
+|    total_timesteps | 36800     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.28e+03 |
+| time/              |           |
+|    episodes        | 184       |
+|    fps             | 880       |
+|    time_elapsed    | 41        |
+|    total_timesteps | 36800     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_1_replay_buffer_37000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_2_replay_buffer_37000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.23e+03 |
+| time/              |           |
+|    episodes        | 188       |
+|    fps             | 889       |
+|    time_elapsed    | 42        |
+|    total_timesteps | 37600     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.24e+03 |
+| time/              |           |
+|    episodes        | 188       |
+|    fps             | 883       |
+|    time_elapsed    | 42        |
+|    total_timesteps | 37600     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.28e+03 |
+| time/              |           |
+|    episodes        | 188       |
+|    fps             | 883       |
+|    time_elapsed    | 42        |
+|    total_timesteps | 37600     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_0_replay_buffer_38000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_1_replay_buffer_38000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_2_replay_buffer_38000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.24e+03 |
+| time/              |           |
+|    episodes        | 192       |
+|    fps             | 893       |
+|    time_elapsed    | 43        |
+|    total_timesteps | 38400     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.22e+03 |
+| time/              |           |
+|    episodes        | 192       |
+|    fps             | 886       |
+|    time_elapsed    | 43        |
+|    total_timesteps | 38400     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.28e+03 |
+| time/              |           |
+|    episodes        | 192       |
+|    fps             | 886       |
+|    time_elapsed    | 43        |
+|    total_timesteps | 38400     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_0_replay_buffer_39000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.24e+03 |
+| time/              |           |
+|    episodes        | 196       |
+|    fps             | 895       |
+|    time_elapsed    | 43        |
+|    total_timesteps | 39200     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_1_replay_buffer_39000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_2_replay_buffer_39000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.23e+03 |
+| time/              |           |
+|    episodes        | 196       |
+|    fps             | 889       |
+|    time_elapsed    | 44        |
+|    total_timesteps | 39200     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.26e+03 |
+| time/              |           |
+|    episodes        | 196       |
+|    fps             | 889       |
+|    time_elapsed    | 44        |
+|    total_timesteps | 39200     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+Eval num_timesteps=40000, episode_reward=-1369.07 +/- 195.96
+Episode length: 200.00 +/- 0.00
+----------------------------------
+| eval/              |           |
+|    mean_ep_length  | 200       |
+|    mean_reward     | -1.37e+03 |
+| time/              |           |
+|    total_timesteps | 40000     |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_0_replay_buffer_40000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.24e+03 |
+| time/              |           |
+|    episodes        | 200       |
+|    fps             | 853       |
+|    time_elapsed    | 46        |
+|    total_timesteps | 40000     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+Eval num_timesteps=40000, episode_reward=-1335.18 +/- 269.73
+Episode length: 200.00 +/- 0.00
+----------------------------------
+| eval/              |           |
+|    mean_ep_length  | 200       |
+|    mean_reward     | -1.34e+03 |
+| time/              |           |
+|    total_timesteps | 40000     |
+----------------------------------
+Eval num_timesteps=40000, episode_reward=-1334.52 +/- 280.68
+Episode length: 200.00 +/- 0.00
+----------------------------------
+| eval/              |           |
+|    mean_ep_length  | 200       |
+|    mean_reward     | -1.33e+03 |
+| time/              |           |
+|    total_timesteps | 40000     |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_1_replay_buffer_40000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+New best mean reward!
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.24e+03 |
+| time/              |           |
+|    episodes        | 200       |
+|    fps             | 847       |
+|    time_elapsed    | 47        |
+|    total_timesteps | 40000     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_2_replay_buffer_40000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.25e+03 |
+| time/              |           |
+|    episodes        | 200       |
+|    fps             | 847       |
+|    time_elapsed    | 47        |
+|    total_timesteps | 40000     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.23e+03 |
+| time/              |           |
+|    episodes        | 204       |
+|    fps             | 856       |
+|    time_elapsed    | 47        |
+|    total_timesteps | 40800     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_0_replay_buffer_41000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.23e+03 |
+| time/              |           |
+|    episodes        | 204       |
+|    fps             | 851       |
+|    time_elapsed    | 47        |
+|    total_timesteps | 40800     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.24e+03 |
+| time/              |           |
+|    episodes        | 204       |
+|    fps             | 851       |
+|    time_elapsed    | 47        |
+|    total_timesteps | 40800     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_1_replay_buffer_41000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_2_replay_buffer_41000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.23e+03 |
+| time/              |           |
+|    episodes        | 208       |
+|    fps             | 860       |
+|    time_elapsed    | 48        |
+|    total_timesteps | 41600     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.23e+03 |
+| time/              |           |
+|    episodes        | 208       |
+|    fps             | 854       |
+|    time_elapsed    | 48        |
+|    total_timesteps | 41600     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.24e+03 |
+| time/              |           |
+|    episodes        | 208       |
+|    fps             | 854       |
+|    time_elapsed    | 48        |
+|    total_timesteps | 41600     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_0_replay_buffer_42000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_1_replay_buffer_42000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_2_replay_buffer_42000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.24e+03 |
+| time/              |           |
+|    episodes        | 212       |
+|    fps             | 863       |
+|    time_elapsed    | 49        |
+|    total_timesteps | 42400     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.23e+03 |
+| time/              |           |
+|    episodes        | 212       |
+|    fps             | 857       |
+|    time_elapsed    | 49        |
+|    total_timesteps | 42400     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.24e+03 |
+| time/              |           |
+|    episodes        | 212       |
+|    fps             | 857       |
+|    time_elapsed    | 49        |
+|    total_timesteps | 42400     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_0_replay_buffer_43000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.24e+03 |
+| time/              |           |
+|    episodes        | 216       |
+|    fps             | 866       |
+|    time_elapsed    | 49        |
+|    total_timesteps | 43200     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_1_replay_buffer_43000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_2_replay_buffer_43000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.23e+03 |
+| time/              |           |
+|    episodes        | 216       |
+|    fps             | 860       |
+|    time_elapsed    | 50        |
+|    total_timesteps | 43200     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.26e+03 |
+| time/              |           |
+|    episodes        | 216       |
+|    fps             | 861       |
+|    time_elapsed    | 50        |
+|    total_timesteps | 43200     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_0_replay_buffer_44000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.24e+03 |
+| time/              |           |
+|    episodes        | 220       |
+|    fps             | 869       |
+|    time_elapsed    | 50        |
+|    total_timesteps | 44000     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_1_replay_buffer_44000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.23e+03 |
+| time/              |           |
+|    episodes        | 220       |
+|    fps             | 863       |
+|    time_elapsed    | 50        |
+|    total_timesteps | 44000     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_2_replay_buffer_44000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.26e+03 |
+| time/              |           |
+|    episodes        | 220       |
+|    fps             | 864       |
+|    time_elapsed    | 50        |
+|    total_timesteps | 44000     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.25e+03 |
+| time/              |           |
+|    episodes        | 224       |
+|    fps             | 872       |
+|    time_elapsed    | 51        |
+|    total_timesteps | 44800     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_0_replay_buffer_45000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.23e+03 |
+| time/              |           |
+|    episodes        | 224       |
+|    fps             | 866       |
+|    time_elapsed    | 51        |
+|    total_timesteps | 44800     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.26e+03 |
+| time/              |           |
+|    episodes        | 224       |
+|    fps             | 867       |
+|    time_elapsed    | 51        |
+|    total_timesteps | 44800     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_1_replay_buffer_45000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_2_replay_buffer_45000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.24e+03 |
+| time/              |           |
+|    episodes        | 228       |
+|    fps             | 875       |
+|    time_elapsed    | 52        |
+|    total_timesteps | 45600     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.22e+03 |
+| time/              |           |
+|    episodes        | 228       |
+|    fps             | 869       |
+|    time_elapsed    | 52        |
+|    total_timesteps | 45600     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.26e+03 |
+| time/              |           |
+|    episodes        | 228       |
+|    fps             | 870       |
+|    time_elapsed    | 52        |
+|    total_timesteps | 45600     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_0_replay_buffer_46000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_1_replay_buffer_46000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_2_replay_buffer_46000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.23e+03 |
+| time/              |           |
+|    episodes        | 232       |
+|    fps             | 878       |
+|    time_elapsed    | 52        |
+|    total_timesteps | 46400     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.23e+03 |
+| time/              |           |
+|    episodes        | 232       |
+|    fps             | 872       |
+|    time_elapsed    | 53        |
+|    total_timesteps | 46400     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.26e+03 |
+| time/              |           |
+|    episodes        | 232       |
+|    fps             | 872       |
+|    time_elapsed    | 53        |
+|    total_timesteps | 46400     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_0_replay_buffer_47000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.21e+03 |
+| time/              |           |
+|    episodes        | 236       |
+|    fps             | 880       |
+|    time_elapsed    | 53        |
+|    total_timesteps | 47200     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_1_replay_buffer_47000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_2_replay_buffer_47000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.24e+03 |
+| time/              |           |
+|    episodes        | 236       |
+|    fps             | 875       |
+|    time_elapsed    | 53        |
+|    total_timesteps | 47200     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.26e+03 |
+| time/              |           |
+|    episodes        | 236       |
+|    fps             | 875       |
+|    time_elapsed    | 53        |
+|    total_timesteps | 47200     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_0_replay_buffer_48000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.21e+03 |
+| time/              |           |
+|    episodes        | 240       |
+|    fps             | 883       |
+|    time_elapsed    | 54        |
+|    total_timesteps | 48000     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_1_replay_buffer_48000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_2_replay_buffer_48000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.22e+03 |
+| time/              |           |
+|    episodes        | 240       |
+|    fps             | 877       |
+|    time_elapsed    | 54        |
+|    total_timesteps | 48000     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.25e+03 |
+| time/              |           |
+|    episodes        | 240       |
+|    fps             | 878       |
+|    time_elapsed    | 54        |
+|    total_timesteps | 48000     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.21e+03 |
+| time/              |           |
+|    episodes        | 244       |
+|    fps             | 886       |
+|    time_elapsed    | 55        |
+|    total_timesteps | 48800     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_0_replay_buffer_49000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.22e+03 |
+| time/              |           |
+|    episodes        | 244       |
+|    fps             | 880       |
+|    time_elapsed    | 55        |
+|    total_timesteps | 48800     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.25e+03 |
+| time/              |           |
+|    episodes        | 244       |
+|    fps             | 880       |
+|    time_elapsed    | 55        |
+|    total_timesteps | 48800     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_1_replay_buffer_49000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_2_replay_buffer_49000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 200      |
+|    ep_rew_mean     | -1.2e+03 |
+| time/              |          |
+|    episodes        | 248      |
+|    fps             | 888      |
+|    time_elapsed    | 55       |
+|    total_timesteps | 49600    |
+| train/             |          |
+|    std             | 1        |
+---------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.21e+03 |
+| time/              |           |
+|    episodes        | 248       |
+|    fps             | 882       |
+|    time_elapsed    | 56        |
+|    total_timesteps | 49600     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.23e+03 |
+| time/              |           |
+|    episodes        | 248       |
+|    fps             | 883       |
+|    time_elapsed    | 56        |
+|    total_timesteps | 49600     |
+| train/             |           |
+|    std             | 1         |
+----------------------------------
+Eval num_timesteps=50000, episode_reward=-1388.17 +/- 225.71
+Episode length: 200.00 +/- 0.00
+----------------------------------
+| eval/              |           |
+|    mean_ep_length  | 200       |
+|    mean_reward     | -1.39e+03 |
+| time/              |           |
+|    total_timesteps | 50000     |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_0_replay_buffer_50000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+Eval num_timesteps=50000, episode_reward=-1250.67 +/- 198.51
+Episode length: 200.00 +/- 0.00
+----------------------------------
+| eval/              |           |
+|    mean_ep_length  | 200       |
+|    mean_reward     | -1.25e+03 |
+| time/              |           |
+|    total_timesteps | 50000     |
+----------------------------------
+Eval num_timesteps=50000, episode_reward=-1447.80 +/- 275.30
+Episode length: 200.00 +/- 0.00
+----------------------------------
+| eval/              |           |
+|    mean_ep_length  | 200       |
+|    mean_reward     | -1.45e+03 |
+| time/              |           |
+|    total_timesteps | 50000     |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_1_replay_buffer_50000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_2_replay_buffer_50000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.22e+03 |
+| time/              |           |
+|    episodes        | 252       |
+|    fps             | 5         |
+|    time_elapsed    | 8726      |
+|    total_timesteps | 50400     |
+| train/             |           |
+|    actor_loss      | 62.4      |
+|    critic_loss     | 2.19      |
+|    dstb_ent_coef   | 0.089     |
+|    ent_coef        | 0.0322    |
+|    ent_coef_loss   | 1.55      |
+|    n_updates       | 12768     |
+|    std             | 0.644     |
+----------------------------------
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.21e+03 |
+| time/              |           |
+|    episodes        | 252       |
+|    fps             | 5         |
+|    time_elapsed    | 8752      |
+|    total_timesteps | 50400     |
+| train/             |           |
+|    actor_loss      | 60.5      |
+|    critic_loss     | 1.19      |
+|    dstb_ent_coef   | 0.0807    |
+|    ent_coef        | 0.0636    |
+|    ent_coef_loss   | 1.08      |
+|    n_updates       | 12768     |
+|    std             | 0.655     |
+----------------------------------
+New best mean reward!
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.22e+03 |
+| time/              |           |
+|    episodes        | 252       |
+|    fps             | 5         |
+|    time_elapsed    | 8761      |
+|    total_timesteps | 50400     |
+| train/             |           |
+|    actor_loss      | 59.6      |
+|    critic_loss     | 0.975     |
+|    dstb_ent_coef   | 0.0838    |
+|    ent_coef        | 0.0544    |
+|    ent_coef_loss   | -0.545    |
+|    n_updates       | 12768     |
+|    std             | 0.654     |
+----------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_2_replay_buffer_51000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_0_replay_buffer_51000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_pend_hl3_len200_55_1_replay_buffer_51000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+----------------------------------
+| rollout/           |           |
+|    ep_len_mean     | 200       |
+|    ep_rew_mean     | -1.22e+03 |
+| time/              |           |
+|    episodes        | 256       |
+|    fps             | 1         |
+|    time_elapsed    | 26148     |
+|    total_timesteps | 51200     |
+| train/             |           |
+|    actor_loss      | 59.5      |
+|    critic_loss     | 0.308     |
+|    dstb_ent_coef   | 0.0975    |
+|    ent_coef        | 0.0735    |
+|    ent_coef_loss   | 0.0307    |
+|    n_updates       | 38368     |
+|    std             | 0.467     |
+----------------------------------
+multiprocessing.pool.RemoteTraceback: 
+"""
+Traceback (most recent call last):
+  File "/home/jw4406/anaconda3/envs/mujoco_sb3_parallel/lib/python3.11/multiprocessing/pool.py", line 125, in worker
+    result = (True, func(*args, **kwds))
+                    ^^^^^^^^^^^^^^^^^^^
+  File "/home/jw4406/anaconda3/envs/mujoco_sb3_parallel/lib/python3.11/multiprocessing/pool.py", line 48, in mapstar
+    return list(map(*args))
+           ^^^^^^^^^^^^^^^^
+  File "/home/jw4406/codebase/stable-baselines3/stable_baselines3/train_parallel_models.py", line 237, in f
+    model.learn(total_timesteps=5_500_000, callback=callback_list)
+  File "/home/jw4406/codebase/stable-baselines3/stable_baselines3/sac/smart.py", line 518, in learn
+    return super().learn(
+           ^^^^^^^^^^^^^^
+  File "/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/off_policy_algorithm.py", line 361, in learn
+    self.train(batch_size=self.batch_size, gradient_steps=gradient_steps)
+  File "/home/jw4406/codebase/stable-baselines3/stable_baselines3/sac/smart.py", line 374, in train
+    hess_theta_J_batched = autograd.grad(h1_upper, self.policy.actor.optimizer.param_groups[0]['params'],
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jw4406/anaconda3/envs/mujoco_sb3_parallel/lib/python3.11/site-packages/torch/autograd/__init__.py", line 408, in grad
+    result = _vmap_internals._vmap(vjp, 0, 0, allow_none_pass_through=True)(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jw4406/anaconda3/envs/mujoco_sb3_parallel/lib/python3.11/site-packages/torch/_vmap_internals.py", line 223, in wrapped
+    batched_outputs = func(*batched_inputs)
+                      ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jw4406/anaconda3/envs/mujoco_sb3_parallel/lib/python3.11/site-packages/torch/autograd/__init__.py", line 398, in vjp
+    return _engine_run_backward(
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jw4406/anaconda3/envs/mujoco_sb3_parallel/lib/python3.11/site-packages/torch/autograd/graph.py", line 744, in _engine_run_backward
+    return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 82.00 MiB. GPU 
+"""
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/jw4406/codebase/stable-baselines3/stable_baselines3/train_parallel_models.py", line 243, in <module>
+    p.map(f, np.arange(0, 3))
+  File "/home/jw4406/anaconda3/envs/mujoco_sb3_parallel/lib/python3.11/multiprocessing/pool.py", line 367, in map
+    return self._map_async(func, iterable, mapstar, chunksize).get()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jw4406/anaconda3/envs/mujoco_sb3_parallel/lib/python3.11/multiprocessing/pool.py", line 774, in get
+    raise self._value
+torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 82.00 MiB. GPU 
+wandb: - Processing 3 runs with 3 files (0.01 MB/0.01 MB)wandb: \ Processing 3 runs with 13 files (0.01 MB/0.11 MB)wandb: | Processing 3 runs with 13 files (0.06 MB/0.11 MB)wandb: / Processing 3 runs with 13 files (0.06 MB/0.11 MB)wandb: - Processing 3 runs with 18 files (0.06 MB/0.15 MB)wandb: \ Processing 3 runs with 18 files (0.11 MB/0.15 MB)wandb: | Processing 3 runs with 18 files (0.11 MB/0.15 MB)wandb: / Processing 3 runs with 18 files (0.11 MB/0.15 MB)wandb: - Processing 3 runs with 18 files (0.11 MB/0.15 MB)wandb: \ Processing 3 runs with 18 files (0.11 MB/0.15 MB)wandb: | Processing 3 runs with 18 files (0.11 MB/0.15 MB)wandb: / Processing 3 runs with 18 files (0.11 MB/0.15 MB)wandb: - Processing 3 runs with 18 files (0.11 MB/0.15 MB)wandb: \ Processing 3 runs with 18 files (0.11 MB/0.15 MB)wandb: | Processing 3 runs with 18 files (0.11 MB/0.15 MB)wandb: / Processing 3 runs with 18 files (0.15 MB/0.15 MB)wandb: 🚀 View run colorful-salad-101 at: https://wandb.ai/jw4406/stac_pend/runs/vap6hkar
+wandb: ⭐️ View project at: https://wandb.ai/jw4406/stac_pend
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240823_235956-vap6hkar/logs
+wandb: WARNING The new W&B backend becomes opt-out in version 0.18.0; try it out with `wandb.require("core")`! See https://wandb.me/wandb-core for more information.
+wandb: 🚀 View run feasible-wind-101 at: https://wandb.ai/jw4406/stac_pend/runs/osojkhfc
+wandb: ⭐️ View project at: https://wandb.ai/jw4406/stac_pend
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240823_235956-osojkhfc/logs
+wandb: WARNING The new W&B backend becomes opt-out in version 0.18.0; try it out with `wandb.require("core")`! See https://wandb.me/wandb-core for more information.
+wandb: 🚀 View run polar-tree-101 at: https://wandb.ai/jw4406/stac_pend/runs/8temnkfp
+wandb: ⭐️ View project at: https://wandb.ai/jw4406/stac_pend
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240823_235956-8temnkfp/logs
+wandb: WARNING The new W&B backend becomes opt-out in version 0.18.0; try it out with `wandb.require("core")`! See https://wandb.me/wandb-core for more information.

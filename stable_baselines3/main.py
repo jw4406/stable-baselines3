@@ -206,7 +206,7 @@ wandb.init(project="baseline_pretrain",
                        "d_grad_norm": 1.,
                        "eval_rew": 0,
                        "epochs": 0})
-#model = SMART("MlPAACPolicy", dstb_action_space=Box(-.3, .3, (1,), dtype=np.float32), ent_coef='auto', learning_starts=50000, env=env, verbose=2, v_learning_rate=3e-4, c_learning_rate=4e-4, d_learning_rate=5e-3,buffer_size=50000, batch_size=512, train_freq=32, gradient_steps=32, gamma=0.9, tau=0.01, use_sde=True, use_stackelberg=False,device='auto')
+model = SMART("MlPAACPolicy", dstb_action_space=Box(-.3, .3, (1,), dtype=np.float32), ent_coef='auto', learning_starts=50000, env=env, verbose=2, v_learning_rate=3e-4, c_learning_rate=4e-4, d_learning_rate=5e-3,buffer_size=50000, batch_size=512, train_freq=32, gradient_steps=32, gamma=0.9, tau=0.01, use_sde=True, use_stackelberg=True,device='auto')
 #model = A3C_rarl.load("/home/jw4406/codebase/stable-baselines3/stable_baselines3/competitive_models/true_pend_baseline_230000_steps.zip",env=env)
 #v_learning_rate = 5e-4
 #model.v_learning_rate = const_schedule(v_learning_rate)

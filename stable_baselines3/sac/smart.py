@@ -140,7 +140,8 @@ class SMART(OffPolicyAlgorithm):
         device: Union[th.device, str] = "auto",
         _init_setup_model: bool = True,
         use_stackelberg: bool = True,
-        dstb_action_space: spaces.Space = None
+        dstb_action_space: spaces.Space = None,
+        use_ef=True
     ):
         super().__init__(
             policy,
@@ -170,6 +171,7 @@ class SMART(OffPolicyAlgorithm):
             support_multi_env=True,
         )
         self.use_stackelberg = use_stackelberg
+        self.use_ef = use_ef
         self.target_entropy = target_entropy
         self.log_ent_coef = None  # type: Optional[th.Tensor]
         self.dstb_log_ent_coef = None
@@ -371,38 +373,87 @@ class SMART(OffPolicyAlgorithm):
                 # We assemble it block by block.
 
                 # Diagonal terms (Hessians) first
-                hess_theta_J_batched = autograd.grad(h1_upper, self.policy.actor.optimizer.param_groups[0]['params'],
-                                                     torch.eye(h1_upper.shape[0], device=self.device),
-                                                     is_grads_batched=True, create_graph=True, retain_graph=True)
-                hess_psi_J_batched = autograd.grad(h1_lower, self.policy.dstb_actor.optimizer.param_groups[0]['params'],
-                                                   torch.eye(h1_lower.shape[0], device=self.device),
-                                                   is_grads_batched=True, create_graph=True, retain_graph=True)
-
-                hess_theta_J = self.matrix_unbatch(hess_theta_J_batched,
-                                                   num_ctrl_params)  # this is the 1,1 position
-                hess_psi_J = self.matrix_unbatch(hess_psi_J_batched, num_dstb_params)  # this is the 2,2 position
-
-                # Cross terms next. This is the harder part
-                #cross_pre = self.prep_grad_theta_psi_J(advantages, ctrl_log_prob, dstb_log_prob)
-                #grad_theta_J_batched = autograd.grad(cross_pre,
-                #                                     self.policy.ctrl_optimizer.param_groups[0]['params'],
-                #                                     create_graph=True, retain_graph=True)
-                #grad_theta_J = torch.hstack([t.flatten() for t in grad_theta_J_batched])
-                grad_theta_psi_J_batched = autograd.grad(h1_upper,
-                                                         self.policy.dstb_actor.optimizer.param_groups[0]['params'],
-                                                         torch.eye(num_ctrl_params, device=self.device),
+                if self.use_ef is False: #compute true hessians
+                    time_start = time.time()
+                    hess_theta_J_batched = autograd.grad(h1_upper, self.policy.actor.optimizer.param_groups[0]['params'],
+                                                         torch.eye(h1_upper.shape[0], device=self.device),
                                                          is_grads_batched=True, create_graph=True, retain_graph=True)
+                    hess_psi_J_batched = autograd.grad(h1_lower, self.policy.dstb_actor.optimizer.param_groups[0]['params'],
+                                                       torch.eye(h1_lower.shape[0], device=self.device),
+                                                       is_grads_batched=True, create_graph=True, retain_graph=True)
 
-                grad_theta_psi_J = self.matrix_unbatch(grad_theta_psi_J_batched,
-                                                       num_ctrl_params,
-                                                       size2=num_dstb_params)  # this is the 1,2 position
+                    hess_theta_J = self.matrix_unbatch(hess_theta_J_batched,
+                                                       num_ctrl_params)  # this is the 1,1 position
+                    hess_psi_J = self.matrix_unbatch(hess_psi_J_batched, num_dstb_params)  # this is the 2,2 position
 
-                grad_theta_psi_J_t = torch.transpose(grad_theta_psi_J, 0, 1)  # this is the 2,1 position
+                    # Cross terms next. This is the harder part
+                    #cross_pre = self.prep_grad_theta_psi_J(advantages, ctrl_log_prob, dstb_log_prob)
+                    #grad_theta_J_batched = autograd.grad(cross_pre,
+                    #                                     self.policy.ctrl_optimizer.param_groups[0]['params'],
+                    #                                     create_graph=True, retain_graph=True)
+                    #grad_theta_J = torch.hstack([t.flatten() for t in grad_theta_J_batched])
+                    grad_theta_psi_J_batched = autograd.grad(h1_upper,
+                                                             self.policy.dstb_actor.optimizer.param_groups[0]['params'],
+                                                             torch.eye(num_ctrl_params, device=self.device),
+                                                             is_grads_batched=True, create_graph=True, retain_graph=True)
 
-                upper_rows = torch.cat((hess_theta_J, grad_theta_psi_J), dim=1)
-                lower_rows = torch.cat((grad_theta_psi_J_t, hess_psi_J), dim=1)
+                    grad_theta_psi_J = self.matrix_unbatch(grad_theta_psi_J_batched,
+                                                           num_ctrl_params,
+                                                           size2=num_dstb_params)  # this is the 1,2 position
 
-                H = torch.cat((upper_rows, lower_rows), dim=0)
+                    grad_theta_psi_J_t = torch.transpose(grad_theta_psi_J, 0, 1)  # this is the 2,1 position
+
+                    upper_rows = torch.cat((hess_theta_J, grad_theta_psi_J), dim=1)
+                    lower_rows = torch.cat((grad_theta_psi_J_t, hess_psi_J), dim=1)
+
+                    H = torch.cat((upper_rows, lower_rows), dim=0)
+                else:
+                    time_start = time.time()
+
+                    # Step 1: Compute batched gradients using autograd with is_grads_batched=True
+                    def compute_batched_grads(arb_log_probs, params):
+                        batch_size = arb_log_probs.shape[0]
+                        identity = torch.eye(batch_size, device=log_prob.device)  # Identity matrix for batching
+                        batched_grads = torch.autograd.grad(
+                            arb_log_probs,
+                            params,
+                            identity,  # Batching through the identity matrix
+                            is_grads_batched=True,  # Enable batched gradient computation
+                            create_graph=False,
+                            retain_graph=False
+                        )
+                        # return torch.hstack([t.flatten() for t in batched_grads])
+                        flattened_grads = [g.view(batch_size, -1) for g in batched_grads]
+                        return torch.cat(flattened_grads, dim=1)
+
+                    # Step 2: Calculate the gradients for the entire batch
+                    actions_pi, log_prob = self.actor.action_log_prob(replay_data.observations)
+                    dstb_actions_pi, dstb_log_prob = self.dstb_actor.action_log_prob(replay_data.observations)
+                    critic_pred = self.critic(replay_data.observations, actions_pi, dstb_actions_pi)
+                    grad_theta_flattened_batch = compute_batched_grads(log_prob,
+                                                                       self.policy.actor.optimizer.param_groups[0][
+                                                                           'params'])
+                    grad_psi_flattened_batch = compute_batched_grads(dstb_log_prob,
+                                                                     self.policy.dstb_actor.optimizer.param_groups[0][
+                                                                         'params'])
+                    # grad_theta_flattened_batch = torch.cat([g.view(log_prob.shape[0], -1) for g in grad_theta_batch], dim=1)
+                    # grad_psi_flattened_batch = torch.cat([g.view(dstb_log_prob.shape[0], -1) for g in grad_psi_batch],
+                    #                                     dim=1)
+
+                    # Step 3: Compute the empirical Fisher Information Matrices using outer products
+                    fim_theta = torch.einsum('bi,bj->ij', grad_theta_flattened_batch,
+                                             grad_theta_flattened_batch) / batch_size
+                    fim_psi = torch.einsum('bi,bj->ij', grad_psi_flattened_batch, grad_psi_flattened_batch) / batch_size
+                    fim_theta_psi = torch.einsum('bi,bj->ij', grad_theta_flattened_batch,
+                                                 grad_psi_flattened_batch) / batch_size
+
+                    # Step 4: Assemble the big H matrix
+                    grad_theta_psi_J_t = torch.transpose(fim_theta_psi, 0, 1)  # this is the 2,1 position
+
+                    upper_rows = torch.cat((fim_theta, fim_theta_psi), dim=1)
+                    lower_rows = torch.cat((grad_theta_psi_J_t, fim_psi), dim=1)
+
+                    H = torch.cat((upper_rows, lower_rows), dim=0)
                 reg_param = 5
                 H = H + torch.eye(H.shape[0], device=self.device) * reg_param
                 # assert torch.allclose(H, H_test)
@@ -410,13 +461,145 @@ class SMART(OffPolicyAlgorithm):
                 ivp_H_h2 = torch.linalg.solve(H, h2)
 
                 imp = autograd.grad(h1_pre_omega, self.critic.parameters(), ivp_H_h2, is_grads_batched=False, create_graph=True, retain_graph=True)
+                true_elapsed = time.time() - time_start
+
+                '''# ======================================================================
+
+                #import torch
+                fisher_start = time.time()
+                # Assuming replay_data.observations is a batch of observations
+                batch_size = replay_data.observations.shape[0]
+
+                # Step 1: Calculate log probabilities and gradients
+                actions_pi, log_prob = self.actor.action_log_prob(replay_data.observations)
+                dstb_actions_pi, dstb_log_prob = self.dstb_actor.action_log_prob(replay_data.observations)
+                critic_pred = self.critic(replay_data.observations, actions_pi, dstb_actions_pi)
+
+                # Initialize the FIM approximations for diagonal and off-diagonal blocks
+                fim_theta = torch.zeros((num_ctrl_params, num_ctrl_params), device=self.device)
+                fim_psi = torch.zeros((num_dstb_params, num_dstb_params), device=self.device)
+                fim_theta_psi = torch.zeros((num_ctrl_params, num_dstb_params), device=self.device)
+
+                # Step 2: Accumulate FIM using outer products of gradients
+                for i in range(batch_size):
+                    # Compute gradient wrt player 1's parameters
+                    grad_theta_log_prob = torch.autograd.grad(
+                        log_prob[i], self.policy.actor.optimizer.param_groups[0]['params'],
+                        create_graph=True, retain_graph=True
+                    )
+                    grad_theta_flattened = torch.hstack([t.flatten() for t in grad_theta_log_prob])
+
+                    # Compute FIM for player 1 (Diagonal Block)
+                    fim_theta += grad_theta_flattened.outer(grad_theta_flattened)
+
+                    # Compute gradient wrt player 2's parameters
+                    grad_psi_log_prob = torch.autograd.grad(
+                        dstb_log_prob[i], self.policy.dstb_actor.optimizer.param_groups[0]['params'],
+                        create_graph=True, retain_graph=True
+                    )
+                    grad_psi_flattened = torch.hstack([t.flatten() for t in grad_psi_log_prob])
+
+                    # Compute FIM for player 2 (Diagonal Block)
+                    fim_psi += grad_psi_flattened.outer(grad_psi_flattened)
+
+                    # Compute FIM for cross terms (Off-Diagonal Blocks)
+                    fim_theta_psi += grad_theta_flattened.outer(grad_psi_flattened)
+
+                # Average over the batch size
+                fim_theta /= batch_size
+                fim_psi /= batch_size
+                fim_theta_psi /= batch_size
+
+                # Step 3: Assemble the big H matrix
+                grad_theta_psi_J_t = torch.transpose(fim_theta_psi, 0, 1)  # this is the 2,1 position
+
+                upper_rows = torch.cat((fim_theta, fim_theta_psi), dim=1)
+                lower_rows = torch.cat((grad_theta_psi_J_t, fim_psi), dim=1)
+
+                H = torch.cat((upper_rows, lower_rows), dim=0)
+
+                # Optional: Add regularization (to ensure H is positive definite)
+                reg_param = 5
+                H += torch.eye(H.shape[0], device=self.device) * reg_param
+
+                # Step 4: Solve the system H * ivp_H_h2 = h2
+                ivp_H_h2 = torch.linalg.solve(H, h2)
+
+                # Final Step: Calculate the final gradient
+                imp = torch.autograd.grad(h1_pre_omega, self.critic.parameters(), ivp_H_h2, create_graph=True,
+                                          retain_graph=True)
+                fisher_elapsed = time.time() - fisher_start
+                '''
+                #=======================
+            '''
+            elif self.use_stackelberg is True and self.use_ef is True:
+                vmap_fisher_start = time.time()
+
+                # Step 1: Compute batched gradients using autograd with is_grads_batched=True
+                def compute_batched_grads(arb_log_probs, params):
+                    batch_size = arb_log_probs.shape[0]
+                    identity = torch.eye(batch_size, device=log_prob.device)  # Identity matrix for batching
+                    batched_grads = torch.autograd.grad(
+                        arb_log_probs,
+                        params,
+                        identity,  # Batching through the identity matrix
+                        is_grads_batched=True,  # Enable batched gradient computation
+                        create_graph=False,
+                        retain_graph=False
+                    )
+                    #return torch.hstack([t.flatten() for t in batched_grads])
+                    flattened_grads = [g.view(batch_size, -1) for g in batched_grads]
+                    return torch.cat(flattened_grads, dim=1)
+
+                # Step 2: Calculate the gradients for the entire batch
+                actions_pi, log_prob = self.actor.action_log_prob(replay_data.observations)
+                dstb_actions_pi, dstb_log_prob = self.dstb_actor.action_log_prob(replay_data.observations)
+                critic_pred = self.critic(replay_data.observations, actions_pi, dstb_actions_pi)
+                grad_theta_flattened_batch = compute_batched_grads(log_prob,
+                                                                   self.policy.actor.optimizer.param_groups[0][
+                                                                       'params'])
+                grad_psi_flattened_batch = compute_batched_grads(dstb_log_prob,
+                                                                 self.policy.dstb_actor.optimizer.param_groups[0][
+                                                                     'params'])
+                #grad_theta_flattened_batch = torch.cat([g.view(log_prob.shape[0], -1) for g in grad_theta_batch], dim=1)
+                #grad_psi_flattened_batch = torch.cat([g.view(dstb_log_prob.shape[0], -1) for g in grad_psi_batch],
+                #                                     dim=1)
+
+                # Step 3: Compute the empirical Fisher Information Matrices using outer products
+                fim_theta = torch.einsum('bi,bj->ij', grad_theta_flattened_batch,
+                                         grad_theta_flattened_batch) / batch_size
+                fim_psi = torch.einsum('bi,bj->ij', grad_psi_flattened_batch, grad_psi_flattened_batch) / batch_size
+                fim_theta_psi = torch.einsum('bi,bj->ij', grad_theta_flattened_batch,
+                                             grad_psi_flattened_batch) / batch_size
+
+                # Step 4: Assemble the big H matrix
+                grad_theta_psi_J_t = torch.transpose(fim_theta_psi, 0, 1)  # this is the 2,1 position
+
+                upper_rows = torch.cat((fim_theta, fim_theta_psi), dim=1)
+                lower_rows = torch.cat((grad_theta_psi_J_t, fim_psi), dim=1)
+
+                H = torch.cat((upper_rows, lower_rows), dim=0)
+
+                # Optional: Add regularization (to ensure H is positive definite)
+                reg_param = 5
+                H += torch.eye(H.shape[0], device=self.device) * reg_param
+
+                # Step 5: Solve the system H * ivp_H_h2 = h2
+                ivp_H_h2 = torch.linalg.solve(H, h2)
+
+                # Final Step: Calculate the final gradient
+                imp = torch.autograd.grad(h1_pre_omega, self.critic.parameters(), ivp_H_h2, create_graph=True,
+                                          retain_graph=True)
+
+                vmap_elapsed = time.time() - vmap_fisher_start
+                #=======================
                 #J = x.get()
                 #flat_imp = torch.matmul(torch.transpose(J, 0,1), ivp_H_h2)
                 #flat_imp = test_imp
                 # imp is the stackelberg part of the total derivative
 
                 #imp = self.critic_param_reshape(flat_imp)
-
+            '''
             # Optimize the critic
             self.critic.optimizer.zero_grad()
             critic_loss.backward()

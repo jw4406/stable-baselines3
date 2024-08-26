@@ -55,7 +55,7 @@ register(
     # Note: entry_point also accept a class as input (and not only a string)
     entry_point=my_PendulumEnv,
     # Max number of steps per episode, using a `TimeLimitWrapper`
-    max_episode_steps=500,
+    max_episode_steps=200,
 )
 register(# unique identifier for the env `name-version`
     id="my_walker2d_v4",
@@ -109,7 +109,7 @@ np.random.seed(seed=3)
 #model = lambda tau1, tau2: A3C_rarl("MlPAACPolicy", use_stackelberg=False, env=env, verbose=2, n_steps=8, normalize_advantage=False,gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,vf_coef=.4,gamma=.9,v_learning_rate=v_learning_rate, c_learning_rate=v_learning_rate * tau1,d_learning_rate=v_learning_rate * tau1 * tau2, use_sde=True,use_rms_prop=False, device='cpu')
 def f(tau2):
     high = 1_000_000_000
-    seed_list = np.random.randint(0, high=high, size=15, dtype=int)
+    seed_list = np.random.randint(0, high=high, size=2, dtype=int)
 
     wandb.init(project="stac_pend",
                entity='jw4406',
@@ -121,7 +121,7 @@ def f(tau2):
                        "d_grad_norm": 1.,
                        "eval_rew": 0,
                        "epochs": 0})
-
+    '''
     model = A3C_rarl("MlPAACPolicy", use_stackelberg=True, env=env, verbose=2, n_steps=8, normalize_advantage=False,
                      gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,vf_coef=.4,gamma=.9,
                      v_learning_rate=v_learning_rate,
@@ -139,6 +139,7 @@ def f(tau2):
                      policy_memory_size=LEADERBOARD_SIZE,
                      parallel_run_num=int(tau2))
     '''
+    '''
     model = A3C_rarl("MlPAACPolicy", dstb_action_space=Box(-.2, .2, (2,), dtype=np.float32), use_stackelberg=True,
                      env=env, verbose=2, n_steps=8, normalize_advantage=False, gae_lambda=.9, ent_coef=0.0,
                      max_grad_norm=.7, vf_coef=.4, gamma=.99,
@@ -154,7 +155,11 @@ def f(tau2):
                      use_leaderboard=USE_LEADERBOARD,
                      policy_memory_size=LEADERBOARD_SIZE,
                      parallel_run_num=int(tau2))
-     '''
+    '''
+    model = SMART("MlPAACPolicy", dstb_action_space=Box(-.5, .5, (1,), dtype=np.float32), ent_coef='auto',
+                  learning_starts=50000, env=env, verbose=2, v_learning_rate=5e-4, c_learning_rate=1e-3,
+                  d_learning_rate=5e-3, buffer_size=50000, batch_size=512, train_freq=32, gradient_steps=32, gamma=0.9,
+                  tau=0.01, use_sde=True, use_stackelberg=True, device='auto')
     #model = A3C_rarl.load("/home/jw4406/codebase/stable-baselines3/stable_baselines3/competitive_models/cheetah/half_cheetah_cont_della_2167000_steps.zip", env=env)
     #model = A3C_rarl.load("/home/jw4406/codebase/stable-baselines3/stable_baselines3/competitive_models/cheetah/cheetah_baseline_2167000_steps.zip", env=env)
     #model.lr_schedule = [critic_decay_schedule(v_learning_rate), actor_decay_schedule(v_learning_rate * tau_v_c),
@@ -222,7 +227,7 @@ def f(tau2):
         save_freq=1000,
         save_path="./competitive_models/",
         #stac_train_sweep_pend_competitive_%d % int(tau2)
-        name_prefix="stac_pend_pog_%d" % int(tau2),
+        name_prefix="stsac_pend_hl3_len200_55_%d" % int(tau2),
         save_replay_buffer=True,
         save_vecnormalize=True,
         jobid=args.jobid
@@ -230,12 +235,12 @@ def f(tau2):
     callback_list = CallbackList([eval_callback, checkpoint_callback])  # , checkpoint_callback])
     # model.learn(total_timesteps=1_000_000, callback=callback_list)
     model.learn(total_timesteps=5_500_000, callback=callback_list)
-    model.save("./competitive_models/stac_pend_pog_%d.zip" % int(tau2))
+    model.save("./competitive_models/stsac_pend_%d.zip" % int(tau2))
     print("HI IM DONE")
 if __name__ == '__main__':
     wandb.login(key='d95a51c4001b862123a34a3853fe0306906d2f07')
-    with Pool(15) as p:
-        p.map(f, np.arange(0, 15))
+    with Pool(os.cpu_count()) as p:
+        p.map(f, np.arange(0, 2))
 
 
 
