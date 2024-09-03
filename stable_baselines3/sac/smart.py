@@ -177,6 +177,7 @@ class SMART(OffPolicyAlgorithm):
         self.use_stackelberg = use_stackelberg
         self.linear_phase = linear_phase
         self.use_ef = use_ef
+        print("using e-fim: %r" % self.use_ef, flush=True)
         self.target_entropy = target_entropy
         self.log_ent_coef = None  # type: Optional[th.Tensor]
         self.dstb_log_ent_coef = None
@@ -460,7 +461,7 @@ class SMART(OffPolicyAlgorithm):
                     lower_rows = torch.cat((grad_theta_psi_J_t, fim_psi), dim=1)
 
                     H = torch.cat((upper_rows, lower_rows), dim=0)
-                reg_param = 5
+                reg_param = 10
                 H = H + torch.eye(H.shape[0], device=self.device) * reg_param
                 # assert torch.allclose(H, H_test)
                 # assert torch.equal(H, H_test)

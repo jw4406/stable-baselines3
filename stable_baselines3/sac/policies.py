@@ -430,6 +430,7 @@ class SAACPolicy(BasePolicy):
         )
 
         if net_arch is None:
+            #net_arch = {'pi':[16,16,16], 'qf':[64,64,64]}
             net_arch = {'pi':[16,16,16], 'qf':[64,64,64]}
 
 
