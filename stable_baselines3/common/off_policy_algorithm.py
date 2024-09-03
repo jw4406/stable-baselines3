@@ -262,7 +262,7 @@ class OffPolicyAlgorithm(BaseAlgorithm):
         self,
         total_timesteps: int,
         callback: MaybeCallback = None,
-        reset_num_timesteps: bool = True,
+        reset_num_timesteps: bool = False,
         tb_log_name: str = "run",
         progress_bar: bool = False,
     ) -> Tuple[int, BaseCallback]:
@@ -327,7 +327,10 @@ class OffPolicyAlgorithm(BaseAlgorithm):
             tb_log_name,
             progress_bar,
         )
-
+        if self._num_timesteps_at_start != 0:
+            loaded_model = True
+        else:
+            loaded_model = False
         callback.on_training_start(locals(), globals())
 
         assert self.env is not None, "You must set the environment before calling learn()"
@@ -346,7 +349,9 @@ class OffPolicyAlgorithm(BaseAlgorithm):
 
             if not rollout.continue_training:
                 break
-
+            if loaded_model is True:
+                if self.num_timesteps <= self._num_timesteps_at_start + self.learning_starts:
+                    continue
             if self.num_timesteps > 0 and self.num_timesteps > self.learning_starts:
                 # If no `gradient_steps` is specified,
                 # do as many gradients steps as steps performed during the rollout

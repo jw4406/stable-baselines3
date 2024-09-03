@@ -115,6 +115,9 @@ class SMART(OffPolicyAlgorithm):
         c_learning_rate: Union[float, Schedule] = 1e-4,
         d_learning_rate: Union[float, Schedule] = 7e-4,
         v_learning_rate: Union[float, Schedule] = 7e-4,
+        c_learning_rate_decay: Union[float, Schedule] = 1e-4,
+        d_learning_rate_decay: Union[float, Schedule] = 7e-4,
+        v_learning_rate_decay: Union[float, Schedule] = 7e-4,
         buffer_size: int = 1_000_000,  # 1e6
         learning_starts: int = 100,
         batch_size: int = 256,
@@ -141,6 +144,7 @@ class SMART(OffPolicyAlgorithm):
         _init_setup_model: bool = True,
         use_stackelberg: bool = True,
         dstb_action_space: spaces.Space = None,
+        linear_phase: bool = True,
         use_ef=True
     ):
         super().__init__(
@@ -171,6 +175,7 @@ class SMART(OffPolicyAlgorithm):
             support_multi_env=True,
         )
         self.use_stackelberg = use_stackelberg
+        self.linear_phase = linear_phase
         self.use_ef = use_ef
         self.target_entropy = target_entropy
         self.log_ent_coef = None  # type: Optional[th.Tensor]
@@ -185,6 +190,7 @@ class SMART(OffPolicyAlgorithm):
         self.v_learning_rate = v_learning_rate
         self.d_learning_rate = d_learning_rate
         self.learning_rate = [v_learning_rate, c_learning_rate, d_learning_rate]
+        self.learning_rate_decay_phase = [v_learning_rate_decay, c_learning_rate_decay, d_learning_rate_decay]
         self.smart = True
         self.use_leaderboard = False
         #TODO: leaderboard
@@ -419,8 +425,8 @@ class SMART(OffPolicyAlgorithm):
                             params,
                             identity,  # Batching through the identity matrix
                             is_grads_batched=True,  # Enable batched gradient computation
-                            create_graph=False,
-                            retain_graph=False
+                            create_graph=True,
+                            retain_graph=True
                         )
                         # return torch.hstack([t.flatten() for t in batched_grads])
                         flattened_grads = [g.view(batch_size, -1) for g in batched_grads]
@@ -440,7 +446,7 @@ class SMART(OffPolicyAlgorithm):
                     # grad_psi_flattened_batch = torch.cat([g.view(dstb_log_prob.shape[0], -1) for g in grad_psi_batch],
                     #                                     dim=1)
 
-                    # Step 3: Compute the empirical Fisher Information Matrices using outer products
+                    # Step 3: Compute e-FIM using outer products
                     fim_theta = torch.einsum('bi,bj->ij', grad_theta_flattened_batch,
                                              grad_theta_flattened_batch) / batch_size
                     fim_psi = torch.einsum('bi,bj->ij', grad_psi_flattened_batch, grad_psi_flattened_batch) / batch_size
@@ -615,6 +621,10 @@ class SMART(OffPolicyAlgorithm):
             # Alternative: actor_loss = th.mean(log_prob - qf1_pi)
             # Min over all critic networks
             q_values_pi = th.cat(self.critic(replay_data.observations, actions_pi, dstb_actions_pi), dim=1)
+            if self.use_ef is True:
+                _, log_prob = self.actor.action_log_prob(replay_data.observations)
+                _, dstb_log_prob = self.dstb_actor.action_log_prob(replay_data.observations)
+
             min_qf_pi, _ = th.min(q_values_pi, dim=1, keepdim=True)
             #min_qf_pi = min_qf_pi.detach()
             actor_loss = (ent_coef * log_prob - min_qf_pi).mean()
@@ -695,7 +705,7 @@ class SMART(OffPolicyAlgorithm):
         callback: MaybeCallback = None,
         log_interval: int = 4,
         tb_log_name: str = "SAC",
-        reset_num_timesteps: bool = True,
+        reset_num_timesteps: bool = False,
         progress_bar: bool = False,
     ) -> SelfSAC:
         return super().learn(

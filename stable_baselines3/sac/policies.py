@@ -481,7 +481,7 @@ class SAACPolicy(BasePolicy):
         self.actor = self.make_actor()
         self.dstb_actor = self.make_dstb_actor()
         # the order will ALWAYS be v_lr, c_lr, d_lr
-        assert lr_schedule[0](1) < lr_schedule[1](1) and lr_schedule[1](1) < lr_schedule[2](1)
+        assert lr_schedule[0](1) <= lr_schedule[1](1) and lr_schedule[1](1) <= lr_schedule[2](1)
         self.actor.optimizer = self.optimizer_class(
             self.actor.parameters(),
             lr=lr_schedule[1](1),  # type: ignore[call-arg]

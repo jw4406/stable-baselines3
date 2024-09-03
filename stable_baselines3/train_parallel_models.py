@@ -55,7 +55,7 @@ register(
     # Note: entry_point also accept a class as input (and not only a string)
     entry_point=my_PendulumEnv,
     # Max number of steps per episode, using a `TimeLimitWrapper`
-    max_episode_steps=200,
+    max_episode_steps=500,
 )
 register(# unique identifier for the env `name-version`
     id="my_walker2d_v4",
@@ -93,14 +93,14 @@ from stable_baselines3 import A3C_rarl
 #env = gym.make("my_half_cheetah", render_mode='human')
 env = gym.make("my_pendulum")
 #env = gym.make("my_half_cheetah")
-v_learning_rate = 5e-4
+v_learning_rate = 5e-5
 
 tau_v_c = 0.0066932472422626425 / 0.0005933974267381725
 tau_c_d = 0.01235801572155198 / 0.0066932472422626425
 tau_v_c = 10
 tau_c_d = 5
 use_pretrain = False
-exp_decay_load = False
+exp_decay_load = True
 USE_LEADERBOARD = False
 LEADERBOARD_SIZE = 1
 np.random.seed(seed=3)
@@ -109,7 +109,7 @@ np.random.seed(seed=3)
 #model = lambda tau1, tau2: A3C_rarl("MlPAACPolicy", use_stackelberg=False, env=env, verbose=2, n_steps=8, normalize_advantage=False,gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,vf_coef=.4,gamma=.9,v_learning_rate=v_learning_rate, c_learning_rate=v_learning_rate * tau1,d_learning_rate=v_learning_rate * tau1 * tau2, use_sde=True,use_rms_prop=False, device='cpu')
 def f(tau2):
     high = 1_000_000_000
-    seed_list = np.random.randint(0, high=high, size=2, dtype=int)
+    seed_list = np.random.randint(0, high=high, size=5, dtype=int)
 
     wandb.init(project="stac_pend",
                entity='jw4406',
@@ -156,13 +156,17 @@ def f(tau2):
                      policy_memory_size=LEADERBOARD_SIZE,
                      parallel_run_num=int(tau2))
     '''
-    model = SMART("MlPAACPolicy", dstb_action_space=Box(-.5, .5, (1,), dtype=np.float32), ent_coef='auto',
-                  learning_starts=50000, env=env, verbose=2, v_learning_rate=5e-4, c_learning_rate=1e-3,
-                  d_learning_rate=5e-3, buffer_size=50000, batch_size=512, train_freq=32, gradient_steps=32, gamma=0.9,
-                  tau=0.01, use_sde=True, use_stackelberg=True, device='auto')
+    model = SMART("MlPAACPolicy", dstb_action_space=Box(-.8, .8, (1,), dtype=np.float32), ent_coef='auto',
+                  learning_starts=50000, env=env, verbose=2, v_learning_rate=5e-5, c_learning_rate=10e-5,
+                  d_learning_rate=50e-5, v_learning_rate_decay=critic_decay_schedule(5e-5),
+                  c_learning_rate_decay=actor_decay_schedule(10e-5),
+                  d_learning_rate_decay=actor_decay_schedule(50e-5),
+                  buffer_size=50000, batch_size=512, train_freq=32, gradient_steps=16, gamma=0.9,
+                  tau=0.01, use_sde=True, use_stackelberg=True, device='auto', use_ef=True)
     #model = A3C_rarl.load("/home/jw4406/codebase/stable-baselines3/stable_baselines3/competitive_models/cheetah/half_cheetah_cont_della_2167000_steps.zip", env=env)
     #model = A3C_rarl.load("/home/jw4406/codebase/stable-baselines3/stable_baselines3/competitive_models/cheetah/cheetah_baseline_2167000_steps.zip", env=env)
     #model.lr_schedule = [critic_decay_schedule(v_learning_rate), actor_decay_schedule(v_learning_rate * tau_v_c),
+    #model = SMART.load("/home/jw4406/codebase/stable-baselines3/stable_baselines3/competitive_models/stsac_pend_hl3_len200_28_ef_%d_92000_steps.zip" % tau2, env=env)
     #                     actor_decay_schedule(v_learning_rate * tau_v_c * tau_c_d)]
     #model.lr_schedule = [const_schedule(v_learning_rate), const_schedule(v_learning_rate), const_schedule(v_learning_rate)]
     #model.lr_schedule_decay = [critic_decay_schedule(v_learning_rate), critic_decay_schedule(v_learning_rate),
@@ -177,10 +181,14 @@ def f(tau2):
         #name = '/home/jw4406/codebase/stable-baselines3/stable_baselines3/competitive_models/stac_completely_new_pretrain_linear_5mil_advpop_10_%d_1120000_steps.zip' % int(tau2)
         name = '/home/jw4406/codebase/stable-baselines3/stable_baselines3/smart_trained_2_%d.zip' % int(tau2)
         name = '/home/jw4406/codebase/stable-baselines3/stable_baselines3/baseline_trained_%d.zip' % int(tau2)
-
-        model = A3C_rarl.load(name, env=env)
+        model = SMART.load(
+            "/home/jw4406/codebase/stable-baselines3/stable_baselines3/competitive_models/stsac_pend_hl3_len200_28_ef_%d_88000_steps.zip" % int(tau2),env=env)
+        #model = A3C_rarl.load(name, env=env)
 
         model.linear_phase = False
+        if isinstance(model, SMART):
+            pass
+            #model.learning_starts= =
         #model.use_stackelberg = True
         #model.use_leaderboard = USE_LEADERBOARD
         model._n_updates = 0
@@ -189,11 +197,11 @@ def f(tau2):
         model.d_learning_rate = const_schedule(v_learning_rate)
         model.lr_schedule = [const_schedule(v_learning_rate), const_schedule(v_learning_rate), const_schedule(v_learning_rate)]
         model.v_learning_rate_decay = critic_decay_schedule(v_learning_rate)
-        model.c_learning_rate_decay = critic_decay_schedule(v_learning_rate)
-        model.d_learning_rate_decay = critic_decay_schedule(v_learning_rate)
+        model.c_learning_rate_decay = actor_decay_schedule(v_learning_rate * tau_v_c)
+        model.d_learning_rate_decay = actor_decay_schedule(v_learning_rate * tau_v_c * tau_c_d)
         model.lr_schedule_decay = [critic_decay_schedule(v_learning_rate),
-                             critic_decay_schedule(v_learning_rate),
-                             critic_decay_schedule(v_learning_rate)]
+                             actor_decay_schedule(v_learning_rate * tau_v_c),
+                             actor_decay_schedule(v_learning_rate * tau_v_c * tau_c_d)]
 
     if USE_LEADERBOARD is True:
         for i in range(LEADERBOARD_SIZE):
@@ -227,7 +235,7 @@ def f(tau2):
         save_freq=1000,
         save_path="./competitive_models/",
         #stac_train_sweep_pend_competitive_%d % int(tau2)
-        name_prefix="stsac_pend_hl3_len200_55_%d" % int(tau2),
+        name_prefix="stsac_baseline_pend_hl3_len200_28_ef_%d" % int(tau2),
         save_replay_buffer=True,
         save_vecnormalize=True,
         jobid=args.jobid
@@ -235,12 +243,12 @@ def f(tau2):
     callback_list = CallbackList([eval_callback, checkpoint_callback])  # , checkpoint_callback])
     # model.learn(total_timesteps=1_000_000, callback=callback_list)
     model.learn(total_timesteps=5_500_000, callback=callback_list)
-    model.save("./competitive_models/stsac_pend_%d.zip" % int(tau2))
+    model.save("./competitive_models/stsac_baseline_pend_ef_ud_28_%d.zip" % int(tau2))
     print("HI IM DONE")
 if __name__ == '__main__':
     wandb.login(key='d95a51c4001b862123a34a3853fe0306906d2f07')
-    with Pool(os.cpu_count()) as p:
-        p.map(f, np.arange(0, 2))
+    with Pool(4) as p:
+        p.map(f, [0,1,3,4])
 
 
 

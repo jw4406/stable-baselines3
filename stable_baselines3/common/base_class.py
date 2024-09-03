@@ -271,6 +271,7 @@ class BaseAlgorithm(ABC):
         return self._logger
 
     def _setup_lr_schedule(self) -> None:
+        from stable_baselines3.sac.smart import SMART
         """Transform to callable if needed."""
         try:
             if hasattr(self, 'ent_coef') and self.ent_coef == 'auto':
@@ -279,6 +280,7 @@ class BaseAlgorithm(ABC):
                 temp.append(self.learning_rate[0])
                 temp.append(self.learning_rate[0])
                 self.learning_rate = np.asarray(temp)
+                self.lr_schedule_decay = np.zeros((len(self.learning_rate),), dtype=object)
             else:
 
                 self.lr_schedule = np.zeros((len(self.learning_rate),), dtype=object)
@@ -296,6 +298,8 @@ class BaseAlgorithm(ABC):
             except IndexError:
                 self.lr_schedule[i] = get_schedule_fn(self.learning_rate[0])
             if hasattr(self, "learning_rate_decay_phase"):
+                if isinstance(self, SMART) and i >= len(self.learning_rate_decay_phase):
+                    continue
                 self.lr_schedule_decay[i] = get_schedule_fn(self.learning_rate_decay_phase[i])
     def _update_current_progress_remaining(self, num_timesteps: int, total_timesteps: int) -> None:
         """
@@ -308,6 +312,7 @@ class BaseAlgorithm(ABC):
 
     def _update_learning_rate(self, optimizers: Union[List[th.optim.Optimizer], th.optim.Optimizer]) -> None:
         from stable_baselines3.a2c.a3c_rarl import A3C_rarl
+        from stable_baselines3.sac.smart import SMART
         """
         Update the optimizers learning rate using the current learning rate schedule
         and the current progress remaining (from 1 to 0).
@@ -319,15 +324,20 @@ class BaseAlgorithm(ABC):
         #for i in range(len(self.lr_schedule)):
             #self.logger.record("train/learning_rate", self.lr_schedule[i](self._current_progress_remaining))
         #warmup = 100
-        explore = 500_000
-        if isinstance(self, A3C_rarl):
-
-            if self.num_timesteps < explore:
+        explore = 500_000 # do NOT use this for SMART
+        if isinstance(self, A3C_rarl) or isinstance(self, SMART):
+            if isinstance(self, SMART):
+                explore = 90_000 # heuristic
+            if self.num_timesteps < explore and self.linear_phase == True:
                 self.linear_phase = True
             else:
                 self.linear_phase = False
-                if (self.num_timesteps == explore) or (self.num_timesteps - explore <= self.n_steps):
-                    self._n_updates = 0 # new phase: hyperbolic decay time!
+                if isinstance(self, A3C_rarl):
+                    if (self.num_timesteps == explore) or (self.num_timesteps - explore <= self.n_steps):
+                        self._n_updates = 0 # new phase: hyperbolic decay time!
+                elif isinstance(self, SMART):
+                    if (self.num_timesteps >= explore) and (self.num_timesteps - self._num_timesteps_at_start == 1):
+                        self._n_updates = 0
 
             if self.linear_phase is True:
                 self.logger.record("train/v_learning_rate", self.lr_schedule[0](self._current_progress_remaining))
@@ -349,11 +359,18 @@ class BaseAlgorithm(ABC):
             optimizers = [optimizers]
         count = 0
         for optimizer in optimizers:
-            if isinstance(self, A3C_rarl):
+            if isinstance(self, A3C_rarl) or isinstance(self, SMART):
                 if self.linear_phase is True:
                     update_learning_rate(optimizer, self.lr_schedule[count](self._current_progress_remaining))
                 else: # we are in exp decay phase
-                    update_learning_rate(optimizer, self.lr_schedule[count](self._n_updates+1))
+                    if count >= len(self.lr_schedule):
+                        if count == 3:
+                            update_learning_rate(optimizer, self.lr_schedule_decay[1](self._n_updates+1))
+                            continue
+                        if count == 4:
+                            update_learning_rate(optimizer, self.lr_schedule_decay[2](self._n_updates + 1))
+                            continue
+                    update_learning_rate(optimizer, self.lr_schedule_decay[count](self._n_updates+1))
             count = count + 1
 
     def _excluded_save_params(self) -> List[str]:
