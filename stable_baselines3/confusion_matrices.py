@@ -170,7 +170,7 @@ if model_class == 'pend':
         env.reset(seed=seeds[0])
         #smart = A3C_rarl.load(folder + smart_model_path, env=env)
         smart = A3C_rarl.load("/home/jw4406/codebase/stable-baselines3/stable_baselines3/smart_trained_%d.zip" % nums[i], env=env)
-        smart = SMART.load("/home/jw4406/codebase/stable-baselines3/stable_baselines3/competitive_models/stsac_pend_hl3_len200_28_ef_%d_92000_steps.zip" % nums[i], env=env, device='cpu')
+        smart = SMART.load("/home/jw4406/codebase/stable-baselines3/stable_baselines3/competitive_models/stsac_baseline_pend_hl3_len200_28_ef_%d_90000_steps.zip" % nums[i], env=env, device='cuda')
         #smart = A3C_rarl.load("/home/jw4406/codebase/stable-baselines3/stable_baselines3/competitive_models/pend_stac_cont_%d_73000_steps.zip" % nums[i], env=env)
         #smart = A3C_rarl.load("/home/jw4406/codebase/stable-baselines3/stable_baselines3/competitive_models/stac_55_corrected/stac_pend_len200_ud_55_%d_267000_steps.zip" % nums[i], env=env)
         #try:
@@ -206,7 +206,7 @@ if model_class == 'pend':
         #baseline = A3C_rarl.load(folder + baseline_model_path, env=env)
         baseline = A3C_rarl.load("/home/jw4406/codebase/stable-baselines3/stable_baselines3/baseline_trained_%d.zip" % nums[i], env=env)
         #baseline = SMART.load("/home/jw4406/codebase/stable-baselines3/stable_baselines3/competitive_models/stsac_models/stsac_baseline_pend_hl3_len200_64_%d_73000_steps.zip" % nums[i], env=env, device='cpu')
-        baseline = SMART.load("/home/jw4406/codebase/stable-baselines3/stable_baselines3/competitive_models/stsac_baseline_pend_hl3_len200_28_ef_%d_92000_steps.zip" % nums[i], env=env, device='cpu')
+        baseline = SMART.load("/home/jw4406/codebase/stable-baselines3/stable_baselines3/competitive_models/stsac_baseline_pend_hl3_len200_28_ef_%d_90000_steps.zip" % nums[i], env=env, device='cuda')
         #baseline = A3C_rarl.load(
         #    "/home/jw4406/codebase/stable-baselines3/stable_baselines3/competitive_models/pend_baseline_cont_%d_73000_steps.zip" % nums[i], env=env)
         baseline.spirit = False
@@ -230,7 +230,7 @@ if model_class == 'pend':
         #except:
         #    continue
         #ablation.seed = baseline_model_list[i].seed
-        ablation = SMART.load("/home/jw4406/codebase/stable-baselines3/stable_baselines3/competitive_models/stsac_ablation_pend_hl3_len200_28_ef_%d_92000_steps.zip" % nums[i], env=env, device='cpu')
+        ablation = SMART.load("/home/jw4406/codebase/stable-baselines3/stable_baselines3/competitive_models/stsac_ablation_pend_hl3_len200_28_ef_%d_90000_steps.zip" % nums[i], env=env, device='cuda')
         ablation.spirit = False
         ablation_model_list.append(ablation)
 elif model_class == 'cheetah':
@@ -265,8 +265,8 @@ for i in range(1):
     baselinec_smartd_win, smartd_baselinec_win = duel_models(baseline_model_list, smart_model_list, smart.get_env(),
                                                              num_episodes=rounds, model_class=model_class, sd=False) #!!
     #b_s.append(baselinec_smartd_win)
-    smartc_smartd_win, smartd_smartc_win = duel_models(smart_model_list, smart_model_list, smart.get_env(),
-                                                       num_episodes=rounds, model_class=model_class, sd=True)
+    #smartc_smartd_win, smartd_smartc_win = duel_models(smart_model_list, smart_model_list, smart.get_env(),
+    #                                                   num_episodes=rounds, model_class=model_class, sd=True)
     #s_s.append(smartc_smartd_win)
 
     baselinec_baselind_win, baselined_baselinec_win = duel_models(baseline_model_list, baseline_model_list,

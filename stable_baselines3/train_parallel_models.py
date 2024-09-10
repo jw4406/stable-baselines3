@@ -92,15 +92,15 @@ from stable_baselines3 import A3C_rarl
 #env = gym.make("MountainCarContinuous-v0")
 #env = gym.make("my_half_cheetah", render_mode='human')
 env = gym.make("my_pendulum")
-#env = gym.make("my_half_cheetah")
-v_learning_rate = 5e-5
+env = gym.make("my_half_cheetah")
+v_learning_rate = 5e-4
 
 tau_v_c = 0.0066932472422626425 / 0.0005933974267381725
 tau_c_d = 0.01235801572155198 / 0.0066932472422626425
 tau_v_c = 10
 tau_c_d = 5
 use_pretrain = False
-exp_decay_load = True
+exp_decay_load = False
 USE_LEADERBOARD = False
 LEADERBOARD_SIZE = 1
 np.random.seed(seed=3)
@@ -156,12 +156,12 @@ def f(tau2):
                      policy_memory_size=LEADERBOARD_SIZE,
                      parallel_run_num=int(tau2))
     '''
-    model = SMART("MlPAACPolicy", dstb_action_space=Box(-.8, .8, (1,), dtype=np.float32), ent_coef='auto',
-                  learning_starts=50000, env=env, verbose=2, v_learning_rate=5e-5, c_learning_rate=10e-5,
-                  d_learning_rate=50e-5, v_learning_rate_decay=critic_decay_schedule(5e-5),
-                  c_learning_rate_decay=actor_decay_schedule(10e-5),
-                  d_learning_rate_decay=actor_decay_schedule(50e-5),
-                  buffer_size=50000, batch_size=512, train_freq=32, gradient_steps=16, gamma=0.9,
+    model = SMART("MlPAACPolicy", dstb_action_space=Box(-.3, .3, (2,), dtype=np.float32), ent_coef='auto',
+                  learning_starts=50000, env=env, verbose=2, v_learning_rate=5e-6, c_learning_rate=10e-6,
+                  d_learning_rate=50e-6, v_learning_rate_decay=critic_decay_schedule(5e-6),
+                  c_learning_rate_decay=critic_decay_schedule(10e-6),
+                  d_learning_rate_decay=critic_decay_schedule(50e-6),
+                  buffer_size=50000, batch_size=512, train_freq=32, gradient_steps=32, gamma=0.9,
                   tau=0.01, use_sde=True, use_stackelberg=True, device='auto', use_ef=True)
     #model = A3C_rarl.load("/home/jw4406/codebase/stable-baselines3/stable_baselines3/competitive_models/cheetah/half_cheetah_cont_della_2167000_steps.zip", env=env)
     #model = A3C_rarl.load("/home/jw4406/codebase/stable-baselines3/stable_baselines3/competitive_models/cheetah/cheetah_baseline_2167000_steps.zip", env=env)
@@ -235,7 +235,7 @@ def f(tau2):
         save_freq=1000,
         save_path="./competitive_models/",
         #stac_train_sweep_pend_competitive_%d % int(tau2)
-        name_prefix="stsac_baseline_pend_hl3_len200_28_ef_%d" % int(tau2),
+        name_prefix="stsac_cheetah_decay_active_%d" % int(tau2),
         save_replay_buffer=True,
         save_vecnormalize=True,
         jobid=args.jobid
@@ -243,7 +243,7 @@ def f(tau2):
     callback_list = CallbackList([eval_callback, checkpoint_callback])  # , checkpoint_callback])
     # model.learn(total_timesteps=1_000_000, callback=callback_list)
     model.learn(total_timesteps=5_500_000, callback=callback_list)
-    model.save("./competitive_models/stsac_baseline_pend_ef_ud_28_%d.zip" % int(tau2))
+    model.save("./competitive_models/stsac_cheetah_decay_active_%d.zip" % int(tau2))
     print("HI IM DONE")
 if __name__ == '__main__':
     wandb.login(key='d95a51c4001b862123a34a3853fe0306906d2f07')

@@ -460,7 +460,7 @@ class SMART(OffPolicyAlgorithm):
                     lower_rows = torch.cat((grad_theta_psi_J_t, fim_psi), dim=1)
 
                     H = torch.cat((upper_rows, lower_rows), dim=0)
-                reg_param = 5
+                reg_param = 10
                 H = H + torch.eye(H.shape[0], device=self.device) * reg_param
                 # assert torch.allclose(H, H_test)
                 # assert torch.equal(H, H_test)
