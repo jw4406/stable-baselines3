@@ -177,6 +177,7 @@ class SMART(OffPolicyAlgorithm):
         self.use_stackelberg = use_stackelberg
         self.linear_phase = linear_phase
         self.use_ef = use_ef
+        print("using e-fim: %r" % self.use_ef, flush=True)
         self.target_entropy = target_entropy
         self.log_ent_coef = None  # type: Optional[th.Tensor]
         self.dstb_log_ent_coef = None

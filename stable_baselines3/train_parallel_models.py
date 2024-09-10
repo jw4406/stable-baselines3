@@ -103,7 +103,7 @@ use_pretrain = False
 exp_decay_load = False
 USE_LEADERBOARD = False
 LEADERBOARD_SIZE = 1
-np.random.seed(seed=3)
+np.random.seed(seed=4)
 #model = A3C_rarl("MlPAACPolicy", use_stackelberg=False, env=env, verbose=2, n_steps=8, normalize_advantage=False,gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,vf_coef=.4,gamma=.9,v_learning_rate=5e-4, c_learning_rate=5e-4,d_learning_rate=5e-4, use_sde=True,use_rms_prop=False, device='cpu')
 
 #model = lambda tau1, tau2: A3C_rarl("MlPAACPolicy", use_stackelberg=False, env=env, verbose=2, n_steps=8, normalize_advantage=False,gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,vf_coef=.4,gamma=.9,v_learning_rate=v_learning_rate, c_learning_rate=v_learning_rate * tau1,d_learning_rate=v_learning_rate * tau1 * tau2, use_sde=True,use_rms_prop=False, device='cpu')
@@ -111,7 +111,7 @@ def f(tau2):
     high = 1_000_000_000
     seed_list = np.random.randint(0, high=high, size=5, dtype=int)
 
-    wandb.init(project="stac_pend",
+    wandb.init(project="efim_pend",
                entity='jw4406',
                config={"v_lr": v_learning_rate,
                        "u_lr": v_learning_rate * tau_v_c,
@@ -163,6 +163,15 @@ def f(tau2):
                   d_learning_rate_decay=critic_decay_schedule(50e-6),
                   buffer_size=50000, batch_size=512, train_freq=32, gradient_steps=32, gamma=0.9,
                   tau=0.01, use_sde=True, use_stackelberg=True, device='auto', use_ef=True)
+    '''
+    model = SMART("MlPAACPolicy", dstb_action_space=Box(-.7, .7, (1,), dtype=np.float32), ent_coef='auto',
+                  learning_starts=50000, env=env, verbose=2, v_learning_rate=5e-4, c_learning_rate=1e-3,
+                  d_learning_rate=5e-3, buffer_size=50000, batch_size=512, train_freq=32, gradient_steps=32, gamma=0.9,
+                  tau=0.01, use_sde=True, use_stackelberg=True, device='auto', use_ef=True)
+    ''' 
+
+    
+
     #model = A3C_rarl.load("/home/jw4406/codebase/stable-baselines3/stable_baselines3/competitive_models/cheetah/half_cheetah_cont_della_2167000_steps.zip", env=env)
     #model = A3C_rarl.load("/home/jw4406/codebase/stable-baselines3/stable_baselines3/competitive_models/cheetah/cheetah_baseline_2167000_steps.zip", env=env)
     #model.lr_schedule = [critic_decay_schedule(v_learning_rate), actor_decay_schedule(v_learning_rate * tau_v_c),
@@ -245,10 +254,11 @@ def f(tau2):
     model.learn(total_timesteps=5_500_000, callback=callback_list)
     model.save("./competitive_models/stsac_cheetah_decay_active_%d.zip" % int(tau2))
     print("HI IM DONE")
+
 if __name__ == '__main__':
     wandb.login(key='d95a51c4001b862123a34a3853fe0306906d2f07')
-    with Pool(4) as p:
-        p.map(f, [0,1,3,4])
+    with Pool(os.cpu_count()) as p:
+        p.map(f, np.arange(0, 5))
 
 
 
