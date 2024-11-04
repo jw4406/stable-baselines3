@@ -1,0 +1,1057 @@
+nohup: ignoring input
+wandb: Currently logged in as: jw4406 (safe-princeton). Use `wandb login --relogin` to force relogin
+wandb: Appending key for api.wandb.ai to your netrc file: /home/jw4406/.netrc
+wandb: Currently logged in as: jw4406. Use `wandb login --relogin` to force relogin
+wandb: Currently logged in as: jw4406. Use `wandb login --relogin` to force relogin
+wandb: Currently logged in as: jw4406. Use `wandb login --relogin` to force relogin
+wandb: wandb version 0.18.1 is available!  To upgrade, please run:
+wandb:  $ pip install wandb --upgrade
+wandb: Tracking run with wandb version 0.17.6
+wandb: Run data is saved locally in /home/jw4406/codebase/stable-baselines3/stable_baselines3/wandb/run-20240917_161048-tpa79shq
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run dandy-wind-23
+wandb: ⭐️ View project at https://wandb.ai/jw4406/stac_pend_graph_baseline_6_1010
+wandb: 🚀 View run at https://wandb.ai/jw4406/stac_pend_graph_baseline_6_1010/runs/tpa79shq
+wandb: wandb version 0.18.1 is available!  To upgrade, please run:
+wandb:  $ pip install wandb --upgrade
+wandb: Tracking run with wandb version 0.17.6
+wandb: Run data is saved locally in /home/jw4406/codebase/stable-baselines3/stable_baselines3/wandb/run-20240917_161047-42okyhxq
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run exalted-frost-21
+wandb: ⭐️ View project at https://wandb.ai/jw4406/stac_pend_graph_baseline_6_1010
+wandb: 🚀 View run at https://wandb.ai/jw4406/stac_pend_graph_baseline_6_1010/runs/42okyhxq
+wandb: wandb version 0.18.1 is available!  To upgrade, please run:
+wandb:  $ pip install wandb --upgrade
+wandb: Tracking run with wandb version 0.17.6
+wandb: Run data is saved locally in /home/jw4406/codebase/stable-baselines3/stable_baselines3/wandb/run-20240917_161048-7t73kg1k
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run apricot-dragon-21
+wandb: ⭐️ View project at https://wandb.ai/jw4406/stac_pend_graph_baseline_6_1010
+wandb: 🚀 View run at https://wandb.ai/jw4406/stac_pend_graph_baseline_6_1010/runs/7t73kg1k
+Using cuda device
+Wrapping the env with a `Monitor` wrapper
+Wrapping the env in a DummyVecEnv.
+using e-fim: False
+Using cuda device
+Wrapping the env with a `Monitor` wrapper
+Wrapping the env in a DummyVecEnv.
+using e-fim: False
+Using cuda device
+Wrapping the env with a `Monitor` wrapper
+Wrapping the env in a DummyVecEnv.
+using e-fim: False
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_2_replay_buffer_1000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_1_replay_buffer_1000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_0_replay_buffer_1000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_2_replay_buffer_2000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_0_replay_buffer_2000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_1_replay_buffer_2000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_2_replay_buffer_3000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_0_replay_buffer_3000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_1_replay_buffer_3000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_2_replay_buffer_4000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 1e+03    |
+|    ep_rew_mean     | -313     |
+| time/              |          |
+|    episodes        | 4        |
+|    fps             | 1045     |
+|    time_elapsed    | 3        |
+|    total_timesteps | 4000     |
+| train/             |          |
+|    std             | 1        |
+---------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_0_replay_buffer_4000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_1_replay_buffer_4000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 1e+03    |
+|    ep_rew_mean     | -359     |
+| time/              |          |
+|    episodes        | 4        |
+|    fps             | 1032     |
+|    time_elapsed    | 3        |
+|    total_timesteps | 4000     |
+| train/             |          |
+|    std             | 1        |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 1e+03    |
+|    ep_rew_mean     | -237     |
+| time/              |          |
+|    episodes        | 4        |
+|    fps             | 1030     |
+|    time_elapsed    | 3        |
+|    total_timesteps | 4000     |
+| train/             |          |
+|    std             | 1        |
+---------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_2_replay_buffer_5000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_0_replay_buffer_5000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_1_replay_buffer_5000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_2_replay_buffer_6000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_0_replay_buffer_6000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_1_replay_buffer_6000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_2_replay_buffer_7000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_0_replay_buffer_7000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_1_replay_buffer_7000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_2_replay_buffer_8000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 1e+03    |
+|    ep_rew_mean     | -272     |
+| time/              |          |
+|    episodes        | 8        |
+|    fps             | 1058     |
+|    time_elapsed    | 7        |
+|    total_timesteps | 8000     |
+| train/             |          |
+|    std             | 1        |
+---------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_0_replay_buffer_8000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_1_replay_buffer_8000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 1e+03    |
+|    ep_rew_mean     | -366     |
+| time/              |          |
+|    episodes        | 8        |
+|    fps             | 1043     |
+|    time_elapsed    | 7        |
+|    total_timesteps | 8000     |
+| train/             |          |
+|    std             | 1        |
+---------------------------------
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 1e+03    |
+|    ep_rew_mean     | -280     |
+| time/              |          |
+|    episodes        | 8        |
+|    fps             | 1041     |
+|    time_elapsed    | 7        |
+|    total_timesteps | 8000     |
+| train/             |          |
+|    std             | 1        |
+---------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_2_replay_buffer_9000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_0_replay_buffer_9000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_1_replay_buffer_9000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/evaluation.py:67: UserWarning: Evaluation environment is not wrapped with a ``Monitor`` wrapper. This may result in reporting modified episode lengths and rewards, if other wrappers happen to modify these. Consider wrapping environment first with ``Monitor`` wrapper.
+  warnings.warn(
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/evaluation.py:67: UserWarning: Evaluation environment is not wrapped with a ``Monitor`` wrapper. This may result in reporting modified episode lengths and rewards, if other wrappers happen to modify these. Consider wrapping environment first with ``Monitor`` wrapper.
+  warnings.warn(
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/evaluation.py:67: UserWarning: Evaluation environment is not wrapped with a ``Monitor`` wrapper. This may result in reporting modified episode lengths and rewards, if other wrappers happen to modify these. Consider wrapping environment first with ``Monitor`` wrapper.
+  warnings.warn(
+Eval num_timesteps=10000, episode_reward=-10.90 +/- 0.66
+Episode length: 1000.00 +/- 0.00
+---------------------------------
+| eval/              |          |
+|    mean_ep_length  | 1e+03    |
+|    mean_reward     | -10.9    |
+| time/              |          |
+|    total_timesteps | 10000    |
+---------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_2_replay_buffer_10000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+Eval num_timesteps=10000, episode_reward=-10.89 +/- 0.59
+Episode length: 1000.00 +/- 0.00
+---------------------------------
+| eval/              |          |
+|    mean_ep_length  | 1e+03    |
+|    mean_reward     | -10.9    |
+| time/              |          |
+|    total_timesteps | 10000    |
+---------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_0_replay_buffer_10000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+Eval num_timesteps=10000, episode_reward=-11.08 +/- 0.42
+Episode length: 1000.00 +/- 0.00
+---------------------------------
+| eval/              |          |
+|    mean_ep_length  | 1e+03    |
+|    mean_reward     | -11.1    |
+| time/              |          |
+|    total_timesteps | 10000    |
+---------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_1_replay_buffer_10000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_2_replay_buffer_11000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_0_replay_buffer_11000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_1_replay_buffer_11000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_2_replay_buffer_12000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+New best mean reward!
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 1e+03    |
+|    ep_rew_mean     | -272     |
+| time/              |          |
+|    episodes        | 12       |
+|    fps             | 511      |
+|    time_elapsed    | 23       |
+|    total_timesteps | 12000    |
+| train/             |          |
+|    std             | 1        |
+---------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_0_replay_buffer_12000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+New best mean reward!
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 1e+03    |
+|    ep_rew_mean     | -347     |
+| time/              |          |
+|    episodes        | 12       |
+|    fps             | 509      |
+|    time_elapsed    | 23       |
+|    total_timesteps | 12000    |
+| train/             |          |
+|    std             | 1        |
+---------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_1_replay_buffer_12000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+New best mean reward!
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 1e+03    |
+|    ep_rew_mean     | -266     |
+| time/              |          |
+|    episodes        | 12       |
+|    fps             | 508      |
+|    time_elapsed    | 23       |
+|    total_timesteps | 12000    |
+| train/             |          |
+|    std             | 1        |
+---------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_2_replay_buffer_13000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_0_replay_buffer_13000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_1_replay_buffer_13000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_2_replay_buffer_14000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_0_replay_buffer_14000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_1_replay_buffer_14000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_2_replay_buffer_15000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_0_replay_buffer_15000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_1_replay_buffer_15000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_2_replay_buffer_16000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 1e+03    |
+|    ep_rew_mean     | -285     |
+| time/              |          |
+|    episodes        | 16       |
+|    fps             | 588      |
+|    time_elapsed    | 27       |
+|    total_timesteps | 16000    |
+| train/             |          |
+|    std             | 1        |
+---------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_0_replay_buffer_16000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 1e+03    |
+|    ep_rew_mean     | -312     |
+| time/              |          |
+|    episodes        | 16       |
+|    fps             | 585      |
+|    time_elapsed    | 27       |
+|    total_timesteps | 16000    |
+| train/             |          |
+|    std             | 1        |
+---------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_1_replay_buffer_16000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 1e+03    |
+|    ep_rew_mean     | -275     |
+| time/              |          |
+|    episodes        | 16       |
+|    fps             | 585      |
+|    time_elapsed    | 27       |
+|    total_timesteps | 16000    |
+| train/             |          |
+|    std             | 1        |
+---------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_2_replay_buffer_17000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_0_replay_buffer_17000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_1_replay_buffer_17000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_2_replay_buffer_18000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_0_replay_buffer_18000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_1_replay_buffer_18000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_2_replay_buffer_19000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_0_replay_buffer_19000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_1_replay_buffer_19000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+Eval num_timesteps=20000, episode_reward=-10.98 +/- 0.63
+Episode length: 1000.00 +/- 0.00
+---------------------------------
+| eval/              |          |
+|    mean_ep_length  | 1e+03    |
+|    mean_reward     | -11      |
+| time/              |          |
+|    total_timesteps | 20000    |
+---------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_2_replay_buffer_20000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 1e+03    |
+|    ep_rew_mean     | -277     |
+| time/              |          |
+|    episodes        | 20       |
+|    fps             | 464      |
+|    time_elapsed    | 43       |
+|    total_timesteps | 20000    |
+| train/             |          |
+|    std             | 1        |
+---------------------------------
+Eval num_timesteps=20000, episode_reward=-11.31 +/- 0.62
+Episode length: 1000.00 +/- 0.00
+---------------------------------
+| eval/              |          |
+|    mean_ep_length  | 1e+03    |
+|    mean_reward     | -11.3    |
+| time/              |          |
+|    total_timesteps | 20000    |
+---------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_0_replay_buffer_20000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 1e+03    |
+|    ep_rew_mean     | -309     |
+| time/              |          |
+|    episodes        | 20       |
+|    fps             | 463      |
+|    time_elapsed    | 43       |
+|    total_timesteps | 20000    |
+| train/             |          |
+|    std             | 1        |
+---------------------------------
+Eval num_timesteps=20000, episode_reward=-11.10 +/- 0.55
+Episode length: 1000.00 +/- 0.00
+---------------------------------
+| eval/              |          |
+|    mean_ep_length  | 1e+03    |
+|    mean_reward     | -11.1    |
+| time/              |          |
+|    total_timesteps | 20000    |
+---------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_1_replay_buffer_20000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 1e+03    |
+|    ep_rew_mean     | -290     |
+| time/              |          |
+|    episodes        | 20       |
+|    fps             | 463      |
+|    time_elapsed    | 43       |
+|    total_timesteps | 20000    |
+| train/             |          |
+|    std             | 1        |
+---------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_2_replay_buffer_21000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_0_replay_buffer_21000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_1_replay_buffer_21000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_2_replay_buffer_22000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_0_replay_buffer_22000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_1_replay_buffer_22000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_2_replay_buffer_23000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_0_replay_buffer_23000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_1_replay_buffer_23000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_2_replay_buffer_24000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 1e+03    |
+|    ep_rew_mean     | -284     |
+| time/              |          |
+|    episodes        | 24       |
+|    fps             | 513      |
+|    time_elapsed    | 46       |
+|    total_timesteps | 24000    |
+| train/             |          |
+|    std             | 1        |
+---------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_0_replay_buffer_24000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 1e+03    |
+|    ep_rew_mean     | -291     |
+| time/              |          |
+|    episodes        | 24       |
+|    fps             | 511      |
+|    time_elapsed    | 46       |
+|    total_timesteps | 24000    |
+| train/             |          |
+|    std             | 1        |
+---------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_1_replay_buffer_24000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 1e+03    |
+|    ep_rew_mean     | -287     |
+| time/              |          |
+|    episodes        | 24       |
+|    fps             | 511      |
+|    time_elapsed    | 46       |
+|    total_timesteps | 24000    |
+| train/             |          |
+|    std             | 1        |
+---------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_2_replay_buffer_25000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_0_replay_buffer_25000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_1_replay_buffer_25000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_2_replay_buffer_26000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_0_replay_buffer_26000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_1_replay_buffer_26000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_2_replay_buffer_27000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_0_replay_buffer_27000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_1_replay_buffer_27000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_2_replay_buffer_28000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 1e+03    |
+|    ep_rew_mean     | -283     |
+| time/              |          |
+|    episodes        | 28       |
+|    fps             | 554      |
+|    time_elapsed    | 50       |
+|    total_timesteps | 28000    |
+| train/             |          |
+|    std             | 1        |
+---------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_0_replay_buffer_28000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 1e+03    |
+|    ep_rew_mean     | -287     |
+| time/              |          |
+|    episodes        | 28       |
+|    fps             | 552      |
+|    time_elapsed    | 50       |
+|    total_timesteps | 28000    |
+| train/             |          |
+|    std             | 1        |
+---------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_1_replay_buffer_28000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 1e+03    |
+|    ep_rew_mean     | -292     |
+| time/              |          |
+|    episodes        | 28       |
+|    fps             | 552      |
+|    time_elapsed    | 50       |
+|    total_timesteps | 28000    |
+| train/             |          |
+|    std             | 1        |
+---------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_2_replay_buffer_29000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_0_replay_buffer_29000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_1_replay_buffer_29000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+Eval num_timesteps=30000, episode_reward=-11.19 +/- 0.68
+Episode length: 1000.00 +/- 0.00
+---------------------------------
+| eval/              |          |
+|    mean_ep_length  | 1e+03    |
+|    mean_reward     | -11.2    |
+| time/              |          |
+|    total_timesteps | 30000    |
+---------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_2_replay_buffer_30000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+Eval num_timesteps=30000, episode_reward=-10.49 +/- 0.77
+Episode length: 1000.00 +/- 0.00
+---------------------------------
+| eval/              |          |
+|    mean_ep_length  | 1e+03    |
+|    mean_reward     | -10.5    |
+| time/              |          |
+|    total_timesteps | 30000    |
+---------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_0_replay_buffer_30000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+Eval num_timesteps=30000, episode_reward=-10.56 +/- 1.00
+Episode length: 1000.00 +/- 0.00
+---------------------------------
+| eval/              |          |
+|    mean_ep_length  | 1e+03    |
+|    mean_reward     | -10.6    |
+| time/              |          |
+|    total_timesteps | 30000    |
+---------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_1_replay_buffer_30000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_2_replay_buffer_31000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_0_replay_buffer_31000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_1_replay_buffer_31000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_2_replay_buffer_32000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 1e+03    |
+|    ep_rew_mean     | -287     |
+| time/              |          |
+|    episodes        | 32       |
+|    fps             | 481      |
+|    time_elapsed    | 66       |
+|    total_timesteps | 32000    |
+| train/             |          |
+|    std             | 1        |
+---------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_0_replay_buffer_32000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+New best mean reward!
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 1e+03    |
+|    ep_rew_mean     | -278     |
+| time/              |          |
+|    episodes        | 32       |
+|    fps             | 480      |
+|    time_elapsed    | 66       |
+|    total_timesteps | 32000    |
+| train/             |          |
+|    std             | 1        |
+---------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_1_replay_buffer_32000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+New best mean reward!
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 1e+03    |
+|    ep_rew_mean     | -279     |
+| time/              |          |
+|    episodes        | 32       |
+|    fps             | 480      |
+|    time_elapsed    | 66       |
+|    total_timesteps | 32000    |
+| train/             |          |
+|    std             | 1        |
+---------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_2_replay_buffer_33000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_0_replay_buffer_33000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_1_replay_buffer_33000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_2_replay_buffer_34000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_0_replay_buffer_34000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_1_replay_buffer_34000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_2_replay_buffer_35000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_0_replay_buffer_35000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_1_replay_buffer_35000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_2_replay_buffer_36000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 1e+03    |
+|    ep_rew_mean     | -285     |
+| time/              |          |
+|    episodes        | 36       |
+|    fps             | 512      |
+|    time_elapsed    | 70       |
+|    total_timesteps | 36000    |
+| train/             |          |
+|    std             | 1        |
+---------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_0_replay_buffer_36000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 1e+03    |
+|    ep_rew_mean     | -280     |
+| time/              |          |
+|    episodes        | 36       |
+|    fps             | 512      |
+|    time_elapsed    | 70       |
+|    total_timesteps | 36000    |
+| train/             |          |
+|    std             | 1        |
+---------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_1_replay_buffer_36000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 1e+03    |
+|    ep_rew_mean     | -277     |
+| time/              |          |
+|    episodes        | 36       |
+|    fps             | 511      |
+|    time_elapsed    | 70       |
+|    total_timesteps | 36000    |
+| train/             |          |
+|    std             | 1        |
+---------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_2_replay_buffer_37000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_0_replay_buffer_37000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_1_replay_buffer_37000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_2_replay_buffer_38000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_0_replay_buffer_38000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_1_replay_buffer_38000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_2_replay_buffer_39000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_0_replay_buffer_39000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_1_replay_buffer_39000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+Eval num_timesteps=40000, episode_reward=-10.60 +/- 0.36
+Episode length: 1000.00 +/- 0.00
+---------------------------------
+| eval/              |          |
+|    mean_ep_length  | 1e+03    |
+|    mean_reward     | -10.6    |
+| time/              |          |
+|    total_timesteps | 40000    |
+---------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_2_replay_buffer_40000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+New best mean reward!
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 1e+03    |
+|    ep_rew_mean     | -283     |
+| time/              |          |
+|    episodes        | 40       |
+|    fps             | 464      |
+|    time_elapsed    | 86       |
+|    total_timesteps | 40000    |
+| train/             |          |
+|    std             | 1        |
+---------------------------------
+Eval num_timesteps=40000, episode_reward=-10.91 +/- 0.81
+Episode length: 1000.00 +/- 0.00
+---------------------------------
+| eval/              |          |
+|    mean_ep_length  | 1e+03    |
+|    mean_reward     | -10.9    |
+| time/              |          |
+|    total_timesteps | 40000    |
+---------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_0_replay_buffer_40000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 1e+03    |
+|    ep_rew_mean     | -287     |
+| time/              |          |
+|    episodes        | 40       |
+|    fps             | 464      |
+|    time_elapsed    | 86       |
+|    total_timesteps | 40000    |
+| train/             |          |
+|    std             | 1        |
+---------------------------------
+Eval num_timesteps=40000, episode_reward=-11.13 +/- 0.22
+Episode length: 1000.00 +/- 0.00
+---------------------------------
+| eval/              |          |
+|    mean_ep_length  | 1e+03    |
+|    mean_reward     | -11.1    |
+| time/              |          |
+|    total_timesteps | 40000    |
+---------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_1_replay_buffer_40000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 1e+03    |
+|    ep_rew_mean     | -280     |
+| time/              |          |
+|    episodes        | 40       |
+|    fps             | 463      |
+|    time_elapsed    | 86       |
+|    total_timesteps | 40000    |
+| train/             |          |
+|    std             | 1        |
+---------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_2_replay_buffer_41000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_0_replay_buffer_41000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_1_replay_buffer_41000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_2_replay_buffer_42000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_0_replay_buffer_42000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_1_replay_buffer_42000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_2_replay_buffer_43000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_0_replay_buffer_43000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_1_replay_buffer_43000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_2_replay_buffer_44000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 1e+03    |
+|    ep_rew_mean     | -284     |
+| time/              |          |
+|    episodes        | 44       |
+|    fps             | 489      |
+|    time_elapsed    | 89       |
+|    total_timesteps | 44000    |
+| train/             |          |
+|    std             | 1        |
+---------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_0_replay_buffer_44000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 1e+03    |
+|    ep_rew_mean     | -284     |
+| time/              |          |
+|    episodes        | 44       |
+|    fps             | 489      |
+|    time_elapsed    | 89       |
+|    total_timesteps | 44000    |
+| train/             |          |
+|    std             | 1        |
+---------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_1_replay_buffer_44000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 1e+03    |
+|    ep_rew_mean     | -279     |
+| time/              |          |
+|    episodes        | 44       |
+|    fps             | 488      |
+|    time_elapsed    | 89       |
+|    total_timesteps | 44000    |
+| train/             |          |
+|    std             | 1        |
+---------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_2_replay_buffer_45000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_0_replay_buffer_45000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_1_replay_buffer_45000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_2_replay_buffer_46000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_0_replay_buffer_46000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_1_replay_buffer_46000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_2_replay_buffer_47000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_0_replay_buffer_47000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_1_replay_buffer_47000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_2_replay_buffer_48000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 1e+03    |
+|    ep_rew_mean     | -288     |
+| time/              |          |
+|    episodes        | 48       |
+|    fps             | 512      |
+|    time_elapsed    | 93       |
+|    total_timesteps | 48000    |
+| train/             |          |
+|    std             | 1        |
+---------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_0_replay_buffer_48000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 1e+03    |
+|    ep_rew_mean     | -283     |
+| time/              |          |
+|    episodes        | 48       |
+|    fps             | 512      |
+|    time_elapsed    | 93       |
+|    total_timesteps | 48000    |
+| train/             |          |
+|    std             | 1        |
+---------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_1_replay_buffer_48000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 1e+03    |
+|    ep_rew_mean     | -277     |
+| time/              |          |
+|    episodes        | 48       |
+|    fps             | 512      |
+|    time_elapsed    | 93       |
+|    total_timesteps | 48000    |
+| train/             |          |
+|    std             | 1        |
+---------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_2_replay_buffer_49000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_0_replay_buffer_49000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_1_replay_buffer_49000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+Eval num_timesteps=50000, episode_reward=-10.95 +/- 0.68
+Episode length: 1000.00 +/- 0.00
+---------------------------------
+| eval/              |          |
+|    mean_ep_length  | 1e+03    |
+|    mean_reward     | -10.9    |
+| time/              |          |
+|    total_timesteps | 50000    |
+---------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_2_replay_buffer_50000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+Eval num_timesteps=50000, episode_reward=-11.15 +/- 0.71
+Episode length: 1000.00 +/- 0.00
+---------------------------------
+| eval/              |          |
+|    mean_ep_length  | 1e+03    |
+|    mean_reward     | -11.1    |
+| time/              |          |
+|    total_timesteps | 50000    |
+---------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_0_replay_buffer_50000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+Eval num_timesteps=50000, episode_reward=-10.68 +/- 0.69
+Episode length: 1000.00 +/- 0.00
+---------------------------------
+| eval/              |          |
+|    mean_ep_length  | 1e+03    |
+|    mean_reward     | -10.7    |
+| time/              |          |
+|    total_timesteps | 50000    |
+---------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_1_replay_buffer_50000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_2_replay_buffer_51000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_0_replay_buffer_51000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_1_replay_buffer_51000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_1_replay_buffer_52000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 1e+03    |
+|    ep_rew_mean     | -278     |
+| time/              |          |
+|    episodes        | 52       |
+|    fps             | 1        |
+|    time_elapsed    | 34180    |
+|    total_timesteps | 52000    |
+| train/             |          |
+|    actor_loss      | 0.16     |
+|    critic_loss     | 0.945    |
+|    d_learning_rate | 5e-05    |
+|    dstb_ent_coef   | 0.726    |
+|    ent_coef        | 0.725    |
+|    ent_coef_loss   | -3.24    |
+|    n_updates       | 63968    |
+|    std             | 0.978    |
+|    u_learning_rate | 1e-05    |
+|    v_learning_rate | 5e-06    |
+---------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/stsac_cheetah_16166464_1_replay_buffer_53000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")
+multiprocessing.pool.RemoteTraceback: 
+"""
+Traceback (most recent call last):
+  File "/home/jw4406/anaconda3/envs/mujoco_sb3_parallel/lib/python3.11/multiprocessing/pool.py", line 125, in worker
+    result = (True, func(*args, **kwds))
+                    ^^^^^^^^^^^^^^^^^^^
+  File "/home/jw4406/anaconda3/envs/mujoco_sb3_parallel/lib/python3.11/multiprocessing/pool.py", line 48, in mapstar
+    return list(map(*args))
+           ^^^^^^^^^^^^^^^^
+  File "/home/jw4406/codebase/stable-baselines3/stable_baselines3/train_parallel_models.py", line 267, in f
+    model.learn(total_timesteps=5_500_000, callback=callback_list)
+  File "/home/jw4406/codebase/stable-baselines3/stable_baselines3/sac/smart.py", line 712, in learn
+    return super().learn(
+           ^^^^^^^^^^^^^^
+  File "/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/off_policy_algorithm.py", line 366, in learn
+    self.train(batch_size=self.batch_size, gradient_steps=gradient_steps)
+  File "/home/jw4406/codebase/stable-baselines3/stable_baselines3/sac/smart.py", line 388, in train
+    hess_psi_J_batched = autograd.grad(h1_lower, self.policy.dstb_actor.optimizer.param_groups[0]['params'],
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jw4406/anaconda3/envs/mujoco_sb3_parallel/lib/python3.11/site-packages/torch/autograd/__init__.py", line 408, in grad
+    result = _vmap_internals._vmap(vjp, 0, 0, allow_none_pass_through=True)(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jw4406/anaconda3/envs/mujoco_sb3_parallel/lib/python3.11/site-packages/torch/_vmap_internals.py", line 223, in wrapped
+    batched_outputs = func(*batched_inputs)
+                      ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jw4406/anaconda3/envs/mujoco_sb3_parallel/lib/python3.11/site-packages/torch/autograd/__init__.py", line 398, in vjp
+    return _engine_run_backward(
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jw4406/anaconda3/envs/mujoco_sb3_parallel/lib/python3.11/site-packages/torch/autograd/graph.py", line 744, in _engine_run_backward
+    return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 80.00 MiB. GPU 
+"""
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/jw4406/codebase/stable-baselines3/stable_baselines3/train_parallel_models.py", line 274, in <module>
+    p.map(f, np.arange(0, 3))
+  File "/home/jw4406/anaconda3/envs/mujoco_sb3_parallel/lib/python3.11/multiprocessing/pool.py", line 367, in map
+    return self._map_async(func, iterable, mapstar, chunksize).get()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jw4406/anaconda3/envs/mujoco_sb3_parallel/lib/python3.11/multiprocessing/pool.py", line 774, in get
+    raise self._value
+torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 80.00 MiB. GPU 
+wandb: - Processing 3 runs with 3 files (0.01 MB/0.01 MB)wandb: \ Processing 3 runs with 17 files (0.01 MB/0.09 MB)wandb: | Processing 3 runs with 18 files (0.09 MB/0.09 MB)wandb: / Processing 3 runs with 18 files (0.09 MB/0.09 MB)wandb: 
+wandb: Run history:
+wandb: d_learning_rate ▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:        eval_rew ▁██▆▇▆▆▅▆▆▆▅
+wandb:        eval_std ▁█▇▇▆▇█▇▇▇▇▆
+wandb: u_learning_rate ▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb: v_learning_rate ▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb: 
+wandb: Run summary:
+wandb: d_learning_rate 5e-05
+wandb:        eval_rew -287.58973
+wandb:        eval_std 82.54637
+wandb: u_learning_rate 1e-05
+wandb: v_learning_rate 1e-05
+wandb: 
+wandb: 🚀 View run exalted-frost-21 at: https://wandb.ai/jw4406/stac_pend_graph_baseline_6_1010/runs/42okyhxq
+wandb: ⭐️ View project at: https://wandb.ai/jw4406/stac_pend_graph_baseline_6_1010
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240917_161047-42okyhxq/logs
+wandb: WARNING The new W&B backend becomes opt-out in version 0.18.0; try it out with `wandb.require("core")`! See https://wandb.me/wandb-core for more information.
+wandb: 
+wandb: Run history:
+wandb: d_learning_rate ▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:        eval_rew █▃▄▃▁▂▁▃▃▃▃▃▃
+wandb:        eval_std ▅█▅▄▄▃▂▃▂▂▁▁▂
+wandb: u_learning_rate ▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb: v_learning_rate ▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb: 
+wandb: Run summary:
+wandb: d_learning_rate 5e-05
+wandb:        eval_rew -277.80337
+wandb:        eval_std 79.88973
+wandb: u_learning_rate 1e-05
+wandb: v_learning_rate 1e-05
+wandb: 
+wandb: 🚀 View run apricot-dragon-21 at: https://wandb.ai/jw4406/stac_pend_graph_baseline_6_1010/runs/7t73kg1k
+wandb: ⭐️ View project at: https://wandb.ai/jw4406/stac_pend_graph_baseline_6_1010
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240917_161048-7t73kg1k/logs
+wandb: WARNING The new W&B backend becomes opt-out in version 0.18.0; try it out with `wandb.require("core")`! See https://wandb.me/wandb-core for more information.
+wandb: 
+wandb: Run history:
+wandb: d_learning_rate ▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:        eval_rew ▂▁▃▅▆▇▇██▇██
+wandb:        eval_std ▁▇▇▇▇▇▇▇▆▇██
+wandb: u_learning_rate ▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb: v_learning_rate ▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb: 
+wandb: Run summary:
+wandb: d_learning_rate 5e-05
+wandb:        eval_rew -282.88659
+wandb:        eval_std 108.16306
+wandb: u_learning_rate 1e-05
+wandb: v_learning_rate 1e-05
+wandb: 
+wandb: 🚀 View run dandy-wind-23 at: https://wandb.ai/jw4406/stac_pend_graph_baseline_6_1010/runs/tpa79shq
+wandb: ⭐️ View project at: https://wandb.ai/jw4406/stac_pend_graph_baseline_6_1010
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240917_161048-tpa79shq/logs
+wandb: WARNING The new W&B backend becomes opt-out in version 0.18.0; try it out with `wandb.require("core")`! See https://wandb.me/wandb-core for more information.

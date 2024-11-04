@@ -13,6 +13,7 @@ import os
 import wandb
 from gymnasium.spaces import Box
 import numpy as np
+import torch
 parser = argparse.ArgumentParser()
 parser.add_argument('--jobid', default=None, required=False)
 #parser.set_defaults(jobid=0)
@@ -93,11 +94,11 @@ from stable_baselines3 import A3C_rarl
 #env = gym.make("my_half_cheetah", render_mode='human')
 env = gym.make("my_pendulum")
 env = gym.make("my_half_cheetah")
-v_learning_rate = 5e-4
+v_learning_rate = 5e-6
 
 tau_v_c = 0.0066932472422626425 / 0.0005933974267381725
 tau_c_d = 0.01235801572155198 / 0.0066932472422626425
-tau_v_c = 10
+tau_v_c = 2
 tau_c_d = 5
 use_pretrain = False
 exp_decay_load = False
@@ -109,9 +110,9 @@ np.random.seed(seed=4)
 #model = lambda tau1, tau2: A3C_rarl("MlPAACPolicy", use_stackelberg=False, env=env, verbose=2, n_steps=8, normalize_advantage=False,gae_lambda=.9,ent_coef=0.0,max_grad_norm=.5,vf_coef=.4,gamma=.9,v_learning_rate=v_learning_rate, c_learning_rate=v_learning_rate * tau1,d_learning_rate=v_learning_rate * tau1 * tau2, use_sde=True,use_rms_prop=False, device='cpu')
 def f(tau2):
     high = 1_000_000_000
-    seed_list = np.random.randint(0, high=high, size=5, dtype=int)
+    seed_list = np.random.randint(0, high=high, size=1, dtype=int)
 
-    wandb.init(project="efim_pend",
+    wandb.init(project="stsac_ef_reg100",
                entity='jw4406',
                config={"v_lr": v_learning_rate,
                        "u_lr": v_learning_rate * tau_v_c,
@@ -140,7 +141,7 @@ def f(tau2):
                      parallel_run_num=int(tau2))
     '''
     '''
-    model = A3C_rarl("MlPAACPolicy", dstb_action_space=Box(-.2, .2, (2,), dtype=np.float32), use_stackelberg=True,
+    model = A3C_rarl("MlPAACPolicy", dstb_action_space=Box(-.3, .3, (2,), dtype=np.float32), use_stackelberg=True,
                      env=env, verbose=2, n_steps=8, normalize_advantage=False, gae_lambda=.9, ent_coef=0.0,
                      max_grad_norm=.7, vf_coef=.4, gamma=.99,
                      v_learning_rate=v_learning_rate,
@@ -157,12 +158,13 @@ def f(tau2):
                      parallel_run_num=int(tau2))
     '''
     model = SMART("MlPAACPolicy", dstb_action_space=Box(-.3, .3, (2,), dtype=np.float32), ent_coef='auto',
-                  learning_starts=50000, env=env, verbose=2, v_learning_rate=5e-6, c_learning_rate=10e-6,
+                  learning_starts=100000, env=env, verbose=2, v_learning_rate=5e-6, c_learning_rate=10e-6,
                   d_learning_rate=50e-6, v_learning_rate_decay=critic_decay_schedule(5e-6),
                   c_learning_rate_decay=critic_decay_schedule(10e-6),
                   d_learning_rate_decay=critic_decay_schedule(50e-6),
-                  buffer_size=50000, batch_size=512, train_freq=32, gradient_steps=32, gamma=0.9,
-                  tau=0.01, use_sde=True, use_stackelberg=True, device='auto', use_ef=True)
+                  buffer_size=100000, batch_size=1024, train_freq=32, gradient_steps=64, gamma=0.9,
+                  tau=0.01, use_sde=True, use_stackelberg=True, device='auto', use_ef=False)
+    
     '''
     model = SMART("MlPAACPolicy", dstb_action_space=Box(-.7, .7, (1,), dtype=np.float32), ent_coef='auto',
                   learning_starts=50000, env=env, verbose=2, v_learning_rate=5e-4, c_learning_rate=1e-3,
@@ -190,8 +192,22 @@ def f(tau2):
         #name = '/home/jw4406/codebase/stable-baselines3/stable_baselines3/competitive_models/stac_completely_new_pretrain_linear_5mil_advpop_10_%d_1120000_steps.zip' % int(tau2)
         name = '/home/jw4406/codebase/stable-baselines3/stable_baselines3/smart_trained_2_%d.zip' % int(tau2)
         name = '/home/jw4406/codebase/stable-baselines3/stable_baselines3/baseline_trained_%d.zip' % int(tau2)
-        model = SMART.load(
-            "/home/jw4406/codebase/stable-baselines3/stable_baselines3/competitive_models/stsac_pend_hl3_len200_28_ef_%d_88000_steps.zip" % int(tau2),env=env)
+        #model = SMART.load(
+        #    "/home/jw4406/codebase/stable-baselines3/stable_baselines3/competitive_models/stsac_pend_hl3_len200_28_ef_%d_88000_steps.zip" % int(tau2),env=env)
+        #name = '/home/jw4406/codebase/stable-baselines3/stable_baselines3/competitive_models/stsac_cheetah_models/stsac_ablation_cheetah_hl3_len200_73_%d_150000_steps.zip' % int(tau2)
+        #name = '/home/jw4406/codebase/stable-baselines3/stable_baselines3/competitive_models/stsac_cheetah_ws/stsac_ablation_cheetah_hl3_len200_73_%d_204000_steps.zip' % int(
+        #    tau2)
+        name = '/home/jw4406/codebase/stable-baselines3/stable_baselines3/competitive_models/stsac_cheetah_models/stsac_ablation_cheetah_hl3_len200_73_%d_307000_steps.zip' % int(
+            tau2)
+        model = SMART.load(name, env=env)
+
+        model.actor.log_std = torch.nn.Parameter(model.actor.log_std * 0, requires_grad=True)
+        model.actor.optimizer = torch.optim.Adam(model.actor.parameters(), lr=model.actor.optimizer.param_groups[0]['lr'])
+        model.dstb_actor.log_std = torch.nn.Parameter(model.dstb_actor.log_std * 0, requires_grad=True)
+        model.dstb_actor.optimizer = torch.optim.Adam(model.dstb_actor.parameters(), lr=model.dstb_actor.optimizer.param_groups[0]['lr'])
+
+        model.use_stackelberg = True
+        model.use_ef = True
         #model = A3C_rarl.load(name, env=env)
 
         model.linear_phase = False
@@ -202,16 +218,19 @@ def f(tau2):
         #model.use_leaderboard = USE_LEADERBOARD
         model._n_updates = 0
         model.v_learning_rate = const_schedule(v_learning_rate)
-        model.c_learning_rate = const_schedule(v_learning_rate)
-        model.d_learning_rate = const_schedule(v_learning_rate)
-        model.lr_schedule = [const_schedule(v_learning_rate), const_schedule(v_learning_rate), const_schedule(v_learning_rate)]
+        model.c_learning_rate = const_schedule(v_learning_rate * tau_v_c)
+        model.d_learning_rate = const_schedule(v_learning_rate * tau_v_c * tau_c_d)
+        model.lr_schedule = [const_schedule(v_learning_rate), const_schedule(v_learning_rate * tau_v_c), const_schedule(v_learning_rate * tau_v_c * tau_c_d)]
         model.v_learning_rate_decay = critic_decay_schedule(v_learning_rate)
         model.c_learning_rate_decay = actor_decay_schedule(v_learning_rate * tau_v_c)
         model.d_learning_rate_decay = actor_decay_schedule(v_learning_rate * tau_v_c * tau_c_d)
         model.lr_schedule_decay = [critic_decay_schedule(v_learning_rate),
                              actor_decay_schedule(v_learning_rate * tau_v_c),
                              actor_decay_schedule(v_learning_rate * tau_v_c * tau_c_d)]
-
+        model.log_ent_coef = torch.log(torch.ones(1, device=model.device) * 1.).requires_grad_(True)
+        model.ent_coef_optimizer = torch.optim.Adam([model.log_ent_coef], lr=model.lr_schedule[0](1))
+        model.dstb_log_ent_coef = torch.log(torch.ones(1, device=model.device) * 1.).requires_grad_(True)
+        model.dstb_ent_coef_optimizer = torch.optim.Adam([model.dstb_log_ent_coef], lr=model.lr_schedule[0](1))
     if USE_LEADERBOARD is True:
         for i in range(LEADERBOARD_SIZE):
             if use_pretrain is True:
@@ -244,7 +263,7 @@ def f(tau2):
         save_freq=1000,
         save_path="./competitive_models/",
         #stac_train_sweep_pend_competitive_%d % int(tau2)
-        name_prefix="stsac_cheetah_decay_active_%d" % int(tau2),
+        name_prefix="stsac_cheetah_fullstackelberg_frombeginning_%d" % int(tau2),
         save_replay_buffer=True,
         save_vecnormalize=True,
         jobid=args.jobid
@@ -252,13 +271,13 @@ def f(tau2):
     callback_list = CallbackList([eval_callback, checkpoint_callback])  # , checkpoint_callback])
     # model.learn(total_timesteps=1_000_000, callback=callback_list)
     model.learn(total_timesteps=5_500_000, callback=callback_list)
-    model.save("./competitive_models/stsac_cheetah_decay_active_%d.zip" % int(tau2))
+    model.save("./competitive_models/stsac_cheetah_major_test_%d.zip" % int(tau2))
     print("HI IM DONE")
 
 if __name__ == '__main__':
     wandb.login(key='d95a51c4001b862123a34a3853fe0306906d2f07')
     with Pool(os.cpu_count()) as p:
-        p.map(f, np.arange(0, 5))
+        p.map(f, np.arange(0, 1))
 
 
 

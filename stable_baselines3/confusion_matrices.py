@@ -108,38 +108,48 @@ def duel_models(model1, model2, env, num_episodes=10, angle_thresh=20, hold_thre
                 controller_wins.append(model1_wins)
                 rew_list.append(rew_test)
     elif model_class == "cheetah" or model_class == "half_cheetah" or model_class == "my_half_cheetah":
-        for _ in range(num_episodes):
-            rew = 0
-            obs = env.reset()
-            obs_for_env = obs[0]
-            obs_for_env = obs_for_env[None, :]
-            done = False
-            obs_vec = []
-            vec_env = model1.get_env()
-            obs = vec_env.reset()
-            time_up = 0
-            #angle_thresh = 10
-            counter = 0
-            while not done:
-                action, _, _ = model1.predict(obs, deterministic=True)
-                _, dstb_action, _ = model2.predict(obs, deterministic=True)
-                obs, reward, done, info = vec_env.step([[action, dstb_action, 1]])
-                rew_test = rew_test + reward
-                vec_env.render()
-                rew = rew + reward
-                if counter == 500:
-                    done = True
-                else:
-                    counter = counter + 1
-            if rew > 450:
-                model1_wins = model1_wins + 1
-            else:
-                model2_wins = model2_wins + 1
+        controller_wins = []
+        rew_list = []
+        for k in range(len(model1)):
+            for l in range(len(model2)):
+                model1_wins = 0
+                model2_wins = 0
+                my_env = model1[k].get_env()
+                for _ in range(num_episodes):
+                    rew = 0
+                    obs = env.reset()
+                    rew_test = 0
+                    #obs_for_env = obs[0]
+                    #obs_for_env = obs_for_env[None, :]
+                    done = False
+                    obs_vec = []
+                    vec_env = model1[k].get_env()
+                    obs = vec_env.reset()
+                    time_up = 0
+                    #angle_thresh = 10
+                    counter = 0
+                    while not done:
+                        action, _, _ = model1[k].predict(obs, deterministic=True)
+                        _, dstb_action, _ = model2[l].predict(obs, deterministic=True)
+                        obs, reward, done, info = vec_env.step([[action, dstb_action, 1]])
+                        rew_test = rew_test + reward
+                        vec_env.render()
+                        rew = rew + reward
+                        #if counter == 500:
+                        #    done = True
+                        #else:
+                        #    counter = counter + 1
+                    if rew > 450:
+                        model1_wins = model1_wins + 1
+                    else:
+                        model2_wins = model2_wins + 1
+                controller_wins.append(model1_wins)
+                rew_list.append(rew_test)
     return controller_wins, rew_list
 
 
 #env = gym.make("my_pendulum", render_mode='human')
-model_class = 'pend'
+model_class = 'cheetah'
 
 if model_class == 'pend':
     nums = np.arange(10)
@@ -235,6 +245,7 @@ if model_class == 'pend':
         ablation_model_list.append(ablation)
 elif model_class == 'cheetah':
     env = gym.make("my_half_cheetah")
+    '''
     folder = "/Users/jw4406/Data/Justin/532/dissipativity/stable-baselines3/stable_baselines3/cheetah_model/"
     smart_model_path = 'half_cheetah_della_stac_finished.zip'
     #smart = A3C_rarl.load(folder + smart_model_path, env=env)
@@ -248,8 +259,29 @@ elif model_class == 'cheetah':
     baseline_model_path= "/Users/jw4406/Data/Justin/532/dissipativity/stable-baselines3/stable_baselines3/cheetah_baseline_1860000_steps.zip"
     baseline = A3C_rarl.load(baseline_model_path, env=env)
     baseline.spirit = False
-
-rounds=100 # change later
+    '''
+    smart_model_list, ablation_model_list, baseline_model_list = [], [], []
+    for i in range(2):
+        #try:
+            #smart = SMART.load("/home/jw4406/codebase/stable-baselines3/stable_baselines3/competitive_models/stsac_ablation_cheetah_16166464_%d_94000_steps.zip" % i,env=env)
+        #smart = SMART.load(
+        #    "/home/jw4406/codebase/stable-baselines3/stable_baselines3/competitive_models/stsac_cheetah_models/stsac_cheetah_73_stackelberg_on_halfway_%d_236000_steps.zip" % i,
+        #    env=env)
+        pog = [0,2]
+        smart = SMART.load(
+            "/home/jw4406/codebase/stable-baselines3/stable_baselines3/competitive_models/stsac_cheetah_ws_reg100_307000_%d_658000_steps.zip" % pog[i],
+            env=env)
+        smart.spirit = False
+        smart_model_list.append(smart)
+        #except:
+        #    pass
+        ablation = SMART.load("/home/jw4406/codebase/stable-baselines3/stable_baselines3/competitive_models/stsac_cheetah_models/stsac_ablation_cheetah_hl3_len200_73_%d_307000_steps.zip" % i, env=env)
+        ablation.spirit = False
+        ablation_model_list.append(ablation)
+        baseline = SMART.load("/home/jw4406/codebase/stable-baselines3/stable_baselines3/competitive_models/stsac_cheetah_models/stsac_baseline_cheetah_hl3_len200_73_%d_307000_steps.zip" % i, env=env)
+        baseline.spirit = False
+        baseline_model_list.append(baseline)
+rounds=5 # change later
 
 s_b, s_a, s_s, a_b, a_a, a_s, b_b, b_a, b_s = [], [], [], [], [], [], [], [], []
 

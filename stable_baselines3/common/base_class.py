@@ -324,13 +324,15 @@ class BaseAlgorithm(ABC):
         #for i in range(len(self.lr_schedule)):
             #self.logger.record("train/learning_rate", self.lr_schedule[i](self._current_progress_remaining))
         #warmup = 100
-        explore = 500_000 # do NOT use this for SMART
+        explore = 300_000 # do NOT use this for SMART
         if isinstance(self, A3C_rarl) or isinstance(self, SMART):
             if isinstance(self, SMART):
-                explore = 90_000 # heuristic
+                explore = 400_000 # heuristic
             if self.num_timesteps < explore and self.linear_phase == True:
                 self.linear_phase = True
             else:
+                self.use_stackelberg=True
+                #self.use_ef = True
                 self.linear_phase = False
                 if isinstance(self, A3C_rarl):
                     if (self.num_timesteps == explore) or (self.num_timesteps - explore <= self.n_steps):

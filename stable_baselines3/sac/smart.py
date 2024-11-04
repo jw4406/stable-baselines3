@@ -28,7 +28,7 @@ SelfSAC = TypeVar("SelfSAC", bound="SAC")
 class Result:
     def __init__(self):
         self.my_dict = {}
-
+ 
     def update_result(self, index_vector_tuple):
         #self.col = 999
         col_index = index_vector_tuple[0]
@@ -436,7 +436,7 @@ class SMART(OffPolicyAlgorithm):
                     # Step 2: Calculate the gradients for the entire batch
                     actions_pi, log_prob = self.actor.action_log_prob(replay_data.observations)
                     dstb_actions_pi, dstb_log_prob = self.dstb_actor.action_log_prob(replay_data.observations)
-                    critic_pred = self.critic(replay_data.observations, actions_pi, dstb_actions_pi)
+                    critic_pred = self.critic(replay_data.observations, actions_pi, dstb_actions_pi) 
                     grad_theta_flattened_batch = compute_batched_grads(log_prob,
                                                                        self.policy.actor.optimizer.param_groups[0][
                                                                            'params'])
@@ -461,7 +461,7 @@ class SMART(OffPolicyAlgorithm):
                     lower_rows = torch.cat((grad_theta_psi_J_t, fim_psi), dim=1)
 
                     H = torch.cat((upper_rows, lower_rows), dim=0)
-                reg_param = 10
+                reg_param = 500
                 H = H + torch.eye(H.shape[0], device=self.device) * reg_param
                 # assert torch.allclose(H, H_test)
                 # assert torch.equal(H, H_test)
