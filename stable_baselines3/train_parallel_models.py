@@ -5,7 +5,7 @@ from stable_baselines3.a2c.my_pendulum import my_PendulumEnv
 from stable_baselines3.a2c.my_walker2d_v4 import my_Walker2dEnv
 from stable_baselines3.a2c.my_mountain_car_continuous import my_Continuous_MountainCarEnv
 from stable_baselines3.a2c.my_half_cheetah import my_HalfCheetahEnv
-from stable_baselines3 import SAC, SMART
+from stable_baselines3 import SAC, MAGICS_CL, MAGICS_AL
 from stable_baselines3.common.callbacks import EvalCallback, StopTrainingOnRewardThreshold, CheckpointCallback, CallbackList
 import argparse
 from multiprocessing import Pool
@@ -157,14 +157,21 @@ def f(tau2):
                      policy_memory_size=LEADERBOARD_SIZE,
                      parallel_run_num=int(tau2))
     '''
-    model = SMART("MlPAACPolicy", dstb_action_space=Box(-.3, .3, (2,), dtype=np.float32), ent_coef='auto',
+    model = MAGICS_CL("MlPAACPolicy", dstb_action_space=Box(-.3, .3, (2,), dtype=np.float32), ent_coef='auto',
                   learning_starts=100000, env=env, verbose=2, v_learning_rate=5e-6, c_learning_rate=10e-6,
                   d_learning_rate=50e-6, v_learning_rate_decay=critic_decay_schedule(5e-6),
                   c_learning_rate_decay=critic_decay_schedule(10e-6),
                   d_learning_rate_decay=critic_decay_schedule(50e-6),
                   buffer_size=100000, batch_size=1024, train_freq=32, gradient_steps=64, gamma=0.9,
                   tau=0.01, use_sde=True, use_stackelberg=True, device='auto', use_ef=False)
-    
+
+    model = MAGICS_AL("MlPAACPolicy", dstb_action_space=Box(-.3, .3, (2,), dtype=np.float32), ent_coef='auto',
+                      learning_starts=50000, env=env, verbose=2, v_learning_rate=5e-6, c_learning_rate=10e-6,
+                      d_learning_rate=50e-6, v_learning_rate_decay=critic_decay_schedule(5e-6),
+                      c_learning_rate_decay=critic_decay_schedule(10e-6),
+                      d_learning_rate_decay=critic_decay_schedule(50e-6),
+                      buffer_size=50000, batch_size=1024, train_freq=32, gradient_steps=64, gamma=0.9,
+                      tau=0.01, use_sde=True, use_stackelberg=True, device='auto', use_ef=False)
     '''
     model = SMART("MlPAACPolicy", dstb_action_space=Box(-.7, .7, (1,), dtype=np.float32), ent_coef='auto',
                   learning_starts=50000, env=env, verbose=2, v_learning_rate=5e-4, c_learning_rate=1e-3,
