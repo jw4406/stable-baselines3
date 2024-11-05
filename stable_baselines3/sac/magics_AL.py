@@ -348,22 +348,22 @@ class MAGICS_AL(OffPolicyAlgorithm):
                 # surr_q_value_pre_mean = torch.div(critic_pred_sum, 2)
 
                 surr_q_values = torch.mean(torch.sum(torch.hstack((critic_pred[0], critic_pred[1])), dim=1))
+                time_start = time.time()
+                #ctrl_partial_batched = autograd.grad(-surr_q_values,
+                #                                      self.policy.actor.optimizer.param_groups[0]['params'],
+                #                                      create_graph=True, retain_graph=True)
+                #ctrl_partial = torch.hstack([t.flatten() for t in ctrl_partial_batched])
 
-                ctrl_partial_batched = autograd.grad(-surr_q_values,
-                                                      self.policy.actor.optimizer.param_groups[0]['params'],
-                                                      create_graph=True, retain_graph=True)
-                ctrl_partial = torch.hstack([t.flatten() for t in ctrl_partial_batched])
-
-                dstb_partial_batched = autograd.grad(surr_q_values,
-                                                      self.policy.dstb_actor.optimizer.param_groups[0]['params'],
-                                                      create_graph=True, retain_graph=True)
-                dstb_partial = torch.hstack([t.flatten() for t in dstb_partial_batched])
+                #dstb_partial_batched = autograd.grad(surr_q_values,
+                #                                     self.policy.dstb_actor.optimizer.param_groups[0]['params'],
+                 #                                     create_graph=True, retain_graph=True)
+                #dstb_partial = torch.hstack([t.flatten() for t in dstb_partial_batched])
                 #h1_pre_omega = torch.hstack((h1_upper, h1_lower))
 
 
                 # Diagonal terms (Hessians) first
                 if self.use_ef is False:  # compute true hessians
-                    time_start = time.time()
+                    #time_start = time.time()
 
                     L_ctrl_grad_batched = autograd.grad(critic_loss, self.critic.optimizer.param_groups[0]['params'],
                                                 create_graph=True,retain_graph=True)
@@ -373,7 +373,7 @@ class MAGICS_AL(OffPolicyAlgorithm):
 
                     L_ctrl_hessian_batched = autograd.grad(L_ctrl_grad, self.critic.optimizer.param_groups[0]['params'],
                                                    torch.eye(L_ctrl_grad.shape[0], device=self.device),
-                                                         is_grads_batched=True, create_graph=True, retain_graph=True)
+                                                         is_grads_batched=True)
                     L_ctrl_hessian = self.matrix_unbatch(L_ctrl_hessian_batched, L_ctrl_grad.shape[0])
                     reg_param = 5
                     L_ctrl_hessian = L_ctrl_hessian + torch.eye(L_ctrl_hessian.shape[0], device=self.device) * reg_param
@@ -412,12 +412,10 @@ class MAGICS_AL(OffPolicyAlgorithm):
                     iHvp_dstb = -iHvp_ctrl
 
                     ctrl_imp_batched = autograd.grad(ctrl_stage_1_mixed, self.policy.actor.optimizer.param_groups[0]['params'],
-                                             iHvp_ctrl, is_grads_batched=False, create_graph=True,
-                                             retain_graph=True, allow_unused=False)
+                                             iHvp_ctrl, is_grads_batched=False, create_graph=True, retain_graph=True)
 
                     dstb_imp_batched = autograd.grad(ctrl_stage_1_mixed, self.policy.dstb_actor.optimizer.param_groups[0]['params'],
-                                                     iHvp_dstb, is_grads_batched=False, create_graph=True,
-                                                     retain_graph=True, allow_unused=False)
+                                                     iHvp_dstb, is_grads_batched=False, create_graph=True, retain_graph=True)
 
                     #ctrl_imp = torch.hstack([t.flatten() for t in ctrl_imp_batched])
                     #dstb_imp = torch.hstack([t.flatten() for t in dstb_imp_batched])
@@ -428,7 +426,7 @@ class MAGICS_AL(OffPolicyAlgorithm):
                     # min_qf_pi = min_qf_pi.detach()
                     actor_loss = (ent_coef * log_prob - min_qf_pi).mean()
                     self.actor.optimizer.zero_grad()
-                    actor_loss.backward(retain_graph=True)
+                    actor_loss.backward()
                     for i in range(len(self.actor.optimizer.param_groups[0]['params'])):
                         self.actor.optimizer.param_groups[0]['params'][i].grad = \
                             self.actor.optimizer.param_groups[0]['params'][i].grad - ctrl_imp_batched[i]
@@ -446,6 +444,8 @@ class MAGICS_AL(OffPolicyAlgorithm):
                         self.dstb_actor.optimizer.param_groups[0]['params'][i].grad = \
                             self.dstb_actor.optimizer.param_groups[0]['params'][i].grad - dstb_imp_batched[i]
                     self.dstb_actor.optimizer.step()
+                    end = time.time() - time_start
+                    print("hello")
                     # del flat_imp
                 else:
                     time_start = time.time()
@@ -633,9 +633,9 @@ class MAGICS_AL(OffPolicyAlgorithm):
             '''
             # Optimize the critic
             self.critic.optimizer.zero_grad()
-            grad = autograd.grad(critic_loss, self.critic.optimizer.param_groups[0]['params'])
-            for i in range(len(grad)):
-                self.critic.optimizer.param_groups[0]['params'][i].grad = grad[i]
+            #grad = autograd.grad(critic_loss, self.critic.optimizer.param_groups[0]['params'])
+            for i in range(len(L_ctrl_grad_batched)):
+                self.critic.optimizer.param_groups[0]['params'][i].grad = L_ctrl_grad_batched[i]
             self.critic.optimizer.step()
             '''
             # Compute actor loss

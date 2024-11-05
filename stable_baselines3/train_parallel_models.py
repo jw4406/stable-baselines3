@@ -166,11 +166,11 @@ def f(tau2):
                   tau=0.01, use_sde=True, use_stackelberg=True, device='auto', use_ef=False)
 
     model = MAGICS_AL("MlPAACPolicy", dstb_action_space=Box(-.3, .3, (2,), dtype=np.float32), ent_coef='auto',
-                      learning_starts=50000, env=env, verbose=2, v_learning_rate=5e-6, c_learning_rate=10e-6,
-                      d_learning_rate=50e-6, v_learning_rate_decay=critic_decay_schedule(5e-6),
-                      c_learning_rate_decay=critic_decay_schedule(10e-6),
-                      d_learning_rate_decay=critic_decay_schedule(50e-6),
-                      buffer_size=50000, batch_size=1024, train_freq=32, gradient_steps=64, gamma=0.9,
+                      learning_starts=50000, env=env, verbose=2, v_learning_rate=5e-4, c_learning_rate=10e-4,
+                      d_learning_rate=50e-4, v_learning_rate_decay=critic_decay_schedule(5e-4),
+                      c_learning_rate_decay=critic_decay_schedule(10e-4),
+                      d_learning_rate_decay=critic_decay_schedule(50e-4),
+                      buffer_size=50000, batch_size=512, train_freq=32, gradient_steps=64, gamma=0.9,
                       tau=0.01, use_sde=True, use_stackelberg=True, device='auto', use_ef=False)
     '''
     model = SMART("MlPAACPolicy", dstb_action_space=Box(-.7, .7, (1,), dtype=np.float32), ent_coef='auto',
