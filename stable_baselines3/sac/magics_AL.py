@@ -1,7 +1,7 @@
 import os
 from typing import Any, ClassVar, Dict, List, Optional, Tuple, Type, TypeVar, Union
 
-import numpy as np, copy
+import numpy as np, copy, scipy
 import torch
 import torch as th
 from gymnasium import spaces
@@ -16,6 +16,7 @@ from stable_baselines3.common.utils import get_parameters_by_name, polyak_update
 from stable_baselines3.sac.policies import Actor, CnnPolicy, MlpPolicy, MultiInputPolicy, SACPolicy, MlPAACPolicy
 from functorch import make_functional_with_buffers, make_functional, vmap, grad, jacrev, hessian
 # import multiprocess
+from scipy.sparse.linalg import cg, LinearOperator
 # multiprocess.set_start_method('spawn', force=True)
 import time
 from multiprocess.pool import ThreadPool as bitx
@@ -338,6 +339,12 @@ class MAGICS_AL(OffPolicyAlgorithm):
                 num_dstb_params = 0
                 for ele in self.policy.dstb_actor.optimizer.param_groups[0]['params']:
                     num_dstb_params = num_dstb_params + torch.numel(ele)
+                num_critic_params = 0
+                for ele in self.policy.critic.optimizer.param_groups[0]['params']:
+                    num_critic_params = num_critic_params + torch.numel(ele)
+
+                #self.derivative_free(replay_data, num_ctrl_params, num_dstb_params)
+
                 actions_pi, log_prob = self.actor.action_log_prob(replay_data.observations)
                 dstb_actions_pi, dstb_log_prob = self.dstb_actor.action_log_prob(replay_data.observations)
                 critic_pred = self.critic(replay_data.observations, actions_pi, dstb_actions_pi)
@@ -371,12 +378,29 @@ class MAGICS_AL(OffPolicyAlgorithm):
 
                     L_ctrl_grad = torch.hstack([t.flatten() for t in L_ctrl_grad_batched])
 
+                    '''
                     L_ctrl_hessian_batched = autograd.grad(L_ctrl_grad, self.critic.optimizer.param_groups[0]['params'],
                                                    torch.eye(L_ctrl_grad.shape[0], device=self.device),
                                                          is_grads_batched=True)
                     L_ctrl_hessian = self.matrix_unbatch(L_ctrl_hessian_batched, L_ctrl_grad.shape[0])
                     reg_param = 5
                     L_ctrl_hessian = L_ctrl_hessian + torch.eye(L_ctrl_hessian.shape[0], device=self.device) * reg_param
+                    '''
+
+                    def L_hessian_matvec(vec):
+                        """
+                        input:  numpy array
+                        output: numpy array
+                        """
+                        vec = torch.from_numpy(vec).to(self.device)
+                        _Avec = autograd.grad(L_ctrl_grad, self.critic.optimizer.param_groups[0]['params'], vec, retain_graph=True)
+                        Avec = torch.cat([g.contiguous().view(-1) for g in _Avec])
+                        reg_param = 5
+                        Avec += reg_param * vec
+                        return np.array(Avec.detach().to('cpu'))
+
+                    Dvvfv_lo = LinearOperator(shape=(num_critic_params, num_critic_params), matvec=L_hessian_matvec)
+
                     J_ctrl_critic_grad_batched = autograd.grad(-surr_q_values, self.critic.optimizer.param_groups[0]['params'], create_graph=True, retain_graph=True)
 
                     J_ctrl_critic_grad = torch.hstack([t.flatten() for t in J_ctrl_critic_grad_batched])
@@ -408,7 +432,10 @@ class MAGICS_AL(OffPolicyAlgorithm):
 
                     ctrl_stage_1_mixed = torch.hstack([t.flatten() for t in ctrl_stage_1_mixed_batched])
 
-                    iHvp_ctrl = torch.linalg.solve(L_ctrl_hessian, J_ctrl_critic_grad)
+                    #iHvp_ctrl = torch.linalg.solve(L_ctrl_hessian, J_ctrl_critic_grad)
+                    iHvp_ctrl = torch.from_numpy(cg(Dvvfv_lo, J_ctrl_critic_grad.detach().to('cpu').numpy(), maxiter=1000)[0]).to(self.device)
+                    #iHvp_ctrl = torch.from_numpy(
+                    #    scipy.sparse.linalg.spsolve(Dvvfv_lo, J_ctrl_critic_grad.detach().to('cpu').numpy())).to(self.device)
                     iHvp_dstb = -iHvp_ctrl
 
                     ctrl_imp_batched = autograd.grad(ctrl_stage_1_mixed, self.policy.actor.optimizer.param_groups[0]['params'],
@@ -445,7 +472,6 @@ class MAGICS_AL(OffPolicyAlgorithm):
                             self.dstb_actor.optimizer.param_groups[0]['params'][i].grad - dstb_imp_batched[i]
                     self.dstb_actor.optimizer.step()
                     end = time.time() - time_start
-                    print("hello")
                     # del flat_imp
                 else:
                     time_start = time.time()
@@ -1174,3 +1200,141 @@ class MAGICS_AL(OffPolicyAlgorithm):
                     count = count + 1
 
         return J
+
+    def derivative_free(self, replay_data, ctrl_d, dstb_d):
+        delta = .001
+
+        K = 1000
+        ctrl_select = torch.from_numpy(np.random.uniform(low=-1,high=1,size=ctrl_d)).to(self.device)
+        dstb_select = torch.from_numpy(np.random.uniform(low=-1,high=1,size=dstb_d)).to(self.device)
+
+        v_ctrl = ctrl_select / torch.linalg.norm(ctrl_select)
+        v_dstb = dstb_select / torch.linalg.norm(dstb_select)
+        weights_path = 'descend_'
+        torch.save(self.policy, weights_path)
+        descend_copy_model = torch.load(weights_path)
+        print("hello")
+
+        for i in range(K):
+            with th.no_grad():
+                # Select action according to policy
+                next_actions, next_log_prob = descend_copy_model.actor.action_log_prob(replay_data.next_observations)
+                next_dstb_actions, next_dstb_log_prob = descend_copy_model.dstb_actor.action_log_prob(replay_data.next_observations)
+                # next_dstb_actions = th.zeros(next_dstb_actions.shape, device=self.device)
+                # Compute the next Q values: min over all critics targets
+                next_q_values = th.cat(
+                    descend_copy_model.critic_target(replay_data.next_observations, next_actions, next_dstb_actions), dim=1)
+                next_q_values, _ = th.min(next_q_values, dim=1, keepdim=True)
+                # next_q_values = next_q_values[:, 0, None]
+                # add entropy term
+                # next_q_values = next_q_values - ent_coef * next_log_prob.reshape(-1, 1)# + dstb_ent_coef * next_dstb_log_prob.reshape(-1, 1)
+                # td error + entropy term
+                target_q_values = replay_data.rewards + (1 - replay_data.dones) * self.gamma * next_q_values
+
+                # Get current Q-values estimates for each critic network
+                # using action from the replay buffer
+            current_q_values = descend_copy_model.critic(replay_data.observations, replay_data.actions, replay_data.dstb_actions)
+
+            # Compute critic loss
+            critic_loss = 0.5 * sum(F.mse_loss(current_q, target_q_values) for current_q in current_q_values)
+            #grads_batched = autograd.grad(critic_loss, descend_copy_model.critic.parameters())
+            #grads = torch.hstack([t.flatten() for t in grads_batched])
+            descend_copy_model.critic.optimizer.zero_grad()
+            critic_loss.backward()
+            descend_copy_model.critic.optimizer.step()
+
+        x_q_vals = descend_copy_model.critic(replay_data.observations, replay_data.actions, replay_data.dstb_actions)
+        f_x = torch.mean(torch.sum(torch.hstack((x_q_vals[0], x_q_vals[1])), dim=1))
+        # tmp1 = autograd.grad(critic_pred[0][0], self.actor.optimizer.param_groups[0]['params'], create_graph=True, retain_graph=True)
+        # tmp2 = autograd.grad(tmp1[0][0][0], self.critic.parameters()[:6], create_graph=True, retain_graph=True)
+
+        # critic_pred_sum = torch.add(critic_pred[0], critic_pred[1])
+        # surr_q_value_pre_mean = torch.div(critic_pred_sum, 2)
+
+        #surr_q_values = torch.mean(torch.sum(torch.hstack((critic_pred[0], critic_pred[1])), dim=1))
+        descend_copy_model = torch.load(weights_path)
+        count = 0
+        with torch.no_grad():
+            for p in descend_copy_model.actor.parameters():
+                p.copy_(p + torch.reshape(v_ctrl[count:count + torch.numel(p)], p.shape).to(self.device))
+
+        for i in range(K):
+            with th.no_grad():
+                # Select action according to policy
+                next_actions, next_log_prob = descend_copy_model.actor.action_log_prob(
+                    replay_data.next_observations)
+                next_dstb_actions, next_dstb_log_prob = descend_copy_model.dstb_actor.action_log_prob(
+                    replay_data.next_observations)
+                # next_dstb_actions = th.zeros(next_dstb_actions.shape, device=self.device)
+                # Compute the next Q values: min over all critics targets
+                next_q_values = th.cat(
+                    descend_copy_model.critic_target(replay_data.next_observations, next_actions,
+                                                     next_dstb_actions), dim=1)
+                next_q_values, _ = th.min(next_q_values, dim=1, keepdim=True)
+                # next_q_values = next_q_values[:, 0, None]
+                # add entropy term
+                # next_q_values = next_q_values - ent_coef * next_log_prob.reshape(-1, 1)# + dstb_ent_coef * next_dstb_log_prob.reshape(-1, 1)
+                # td error + entropy term
+                target_q_values = replay_data.rewards + (1 - replay_data.dones) * self.gamma * next_q_values
+
+                # Get current Q-values estimates for each critic network
+                # using action from the replay buffer
+            current_q_values = descend_copy_model.critic(replay_data.observations, replay_data.actions,
+                                                         replay_data.dstb_actions)
+
+            # Compute critic loss
+            critic_loss = 0.5 * sum(F.mse_loss(current_q, target_q_values) for current_q in current_q_values)
+            # grads_batched = autograd.grad(critic_loss, descend_copy_model.critic.parameters())
+            # grads = torch.hstack([t.flatten() for t in grads_batched])
+            descend_copy_model.critic.optimizer.zero_grad()
+            critic_loss.backward()
+            descend_copy_model.critic.optimizer.step()
+
+        xhat_q_vals = descend_copy_model.critic(replay_data.observations, replay_data.actions,
+                                             replay_data.dstb_actions)
+        f_xhat = torch.mean(torch.sum(torch.hstack((xhat_q_vals[0], xhat_q_vals[1])), dim=1))
+
+        ctrl_estimator = -ctrl_d / delta * (f_xhat - f_x) * v_ctrl
+
+
+        with torch.no_grad():
+            for p in descend_copy_model.dstb_actor.parameters():
+                p.copy_(p + torch.reshape(v_dstb[count:count + torch.numel(p)], p.shape).to(self.device))
+
+        for i in range(K):
+            with th.no_grad():
+                # Select action according to policy
+                next_actions, next_log_prob = descend_copy_model.actor.action_log_prob(
+                    replay_data.next_observations)
+                next_dstb_actions, next_dstb_log_prob = descend_copy_model.dstb_actor.action_log_prob(
+                    replay_data.next_observations)
+                # next_dstb_actions = th.zeros(next_dstb_actions.shape, device=self.device)
+                # Compute the next Q values: min over all critics targets
+                next_q_values = th.cat(
+                    descend_copy_model.critic_target(replay_data.next_observations, next_actions,
+                                                     next_dstb_actions), dim=1)
+                next_q_values, _ = th.min(next_q_values, dim=1, keepdim=True)
+                # next_q_values = next_q_values[:, 0, None]
+                # add entropy term
+                # next_q_values = next_q_values - ent_coef * next_log_prob.reshape(-1, 1)# + dstb_ent_coef * next_dstb_log_prob.reshape(-1, 1)
+                # td error + entropy term
+                target_q_values = replay_data.rewards + (1 - replay_data.dones) * self.gamma * next_q_values
+
+                # Get current Q-values estimates for each critic network
+                # using action from the replay buffer
+            current_q_values = descend_copy_model.critic(replay_data.observations, replay_data.actions,
+                                                         replay_data.dstb_actions)
+
+            # Compute critic loss
+            critic_loss = 0.5 * sum(F.mse_loss(current_q, target_q_values) for current_q in current_q_values)
+            # grads_batched = autograd.grad(critic_loss, descend_copy_model.critic.parameters())
+            # grads = torch.hstack([t.flatten() for t in grads_batched])
+            descend_copy_model.critic.optimizer.zero_grad()
+            critic_loss.backward()
+            descend_copy_model.critic.optimizer.step()
+
+        xhat_q_vals = descend_copy_model.critic(replay_data.observations, replay_data.actions,
+                                             replay_data.dstb_actions)
+        f_xhat = torch.mean(torch.sum(torch.hstack((xhat_q_vals[0], xhat_q_vals[1])), dim=1))
+
+        dstb_estimator = ctrl_d / delta * (f_xhat - f_x) * v_ctrl
