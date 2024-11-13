@@ -16,7 +16,7 @@ from stable_baselines3.common.utils import get_parameters_by_name, polyak_update
 from stable_baselines3.sac.policies import Actor, CnnPolicy, MlpPolicy, MultiInputPolicy, SACPolicy, MlPAACPolicy
 from functorch import make_functional_with_buffers, make_functional, vmap, grad, jacrev, hessian
 # import multiprocess
-from scipy.sparse.linalg import cg, LinearOperator
+from scipy.sparse.linalg import cg, bicgstab, LinearOperator
 # multiprocess.set_start_method('spawn', force=True)
 import time
 from multiprocess.pool import ThreadPool as bitx
@@ -265,6 +265,7 @@ class MAGICS_AL(OffPolicyAlgorithm):
 
         ent_coef_losses, ent_coefs, dstb_ent_coefs = [], [], []
         actor_losses, critic_losses, dstb_actor_losses = [], [], []
+        batch_start = time.time()
         for gradient_step in range(gradient_steps):
             start = time.time()
             # Sample replay buffer
@@ -378,14 +379,15 @@ class MAGICS_AL(OffPolicyAlgorithm):
 
                     L_ctrl_grad = torch.hstack([t.flatten() for t in L_ctrl_grad_batched])
 
-                    '''
+                    
                     L_ctrl_hessian_batched = autograd.grad(L_ctrl_grad, self.critic.optimizer.param_groups[0]['params'],
                                                    torch.eye(L_ctrl_grad.shape[0], device=self.device),
                                                          is_grads_batched=True)
-                    L_ctrl_hessian = self.matrix_unbatch(L_ctrl_hessian_batched, L_ctrl_grad.shape[0])
+                    L_ctrl_hessian = self.matrix_unbatch(L_ctrl_hessian_batched, L_ctrl_grad.shape[0]).detach()
+                    del L_ctrl_hessian_batched
                     reg_param = 5
                     L_ctrl_hessian = L_ctrl_hessian + torch.eye(L_ctrl_hessian.shape[0], device=self.device) * reg_param
-                    '''
+                    
 
                     def L_hessian_matvec(vec):
                         """
@@ -399,7 +401,7 @@ class MAGICS_AL(OffPolicyAlgorithm):
                         Avec += reg_param * vec
                         return np.array(Avec.detach().to('cpu'))
 
-                    Dvvfv_lo = LinearOperator(shape=(num_critic_params, num_critic_params), matvec=L_hessian_matvec)
+                    #Dvvfv_lo = LinearOperator(shape=(num_critic_params, num_critic_params), matvec=L_hessian_matvec)
 
                     J_ctrl_critic_grad_batched = autograd.grad(-surr_q_values, self.critic.optimizer.param_groups[0]['params'], create_graph=True, retain_graph=True)
 
@@ -426,14 +428,15 @@ class MAGICS_AL(OffPolicyAlgorithm):
                     # Compute critic loss
                     critic_loss = 0.5 * sum(F.mse_loss(current_q, target_q_values) for current_q in current_q_values)
 
-
                     ctrl_stage_1_mixed_batched = autograd.grad(critic_loss, self.critic.optimizer.param_groups[0]['params'],
                                                        create_graph=True, retain_graph=True)
 
                     ctrl_stage_1_mixed = torch.hstack([t.flatten() for t in ctrl_stage_1_mixed_batched])
 
-                    #iHvp_ctrl = torch.linalg.solve(L_ctrl_hessian, J_ctrl_critic_grad)
-                    iHvp_ctrl = torch.from_numpy(cg(Dvvfv_lo, J_ctrl_critic_grad.detach().to('cpu').numpy(), maxiter=1000)[0]).to(self.device)
+                    #iHvp_ctrl = self.kaczmarz(L_ctrl_grad, J_ctrl_critic_grad)
+
+                    iHvp_ctrl = torch.linalg.solve(L_ctrl_hessian, J_ctrl_critic_grad)
+                    #iHvp_ctrl = torch.from_numpy(bicgstab(Dvvfv_lo, J_ctrl_critic_grad.detach().to('cpu').numpy())[0]).to(self.device)
                     #iHvp_ctrl = torch.from_numpy(
                     #    scipy.sparse.linalg.spsolve(Dvvfv_lo, J_ctrl_critic_grad.detach().to('cpu').numpy())).to(self.device)
                     iHvp_dstb = -iHvp_ctrl
@@ -472,7 +475,6 @@ class MAGICS_AL(OffPolicyAlgorithm):
                             self.dstb_actor.optimizer.param_groups[0]['params'][i].grad - dstb_imp_batched[i]
                     self.dstb_actor.optimizer.step()
                     end = time.time() - time_start
-                    # del flat_imp
                 else:
                     time_start = time.time()
 
@@ -708,7 +710,6 @@ class MAGICS_AL(OffPolicyAlgorithm):
                 polyak_update(self.critic.parameters(), self.critic_target.parameters(), self.tau)
                 # Copy running stats, see GH issue #996
                 polyak_update(self.batch_norm_stats, self.batch_norm_stats_target, 1.0)
-            elapsed = time.time() - start
             q_norm = 0
             u_norm = 0
             d_norm = 0
@@ -723,8 +724,8 @@ class MAGICS_AL(OffPolicyAlgorithm):
                         self.policy.policy_memory[self.dstb_model_choice].dstb_optimizer.param_groups[0]['params'][
                             i].grad)
             else:
-                # for i in range(len(self.dstb_actor.optimizer.param_groups[0]['params'])):
-                #    d_norm = d_norm + torch.linalg.norm(self.dstb_actor.optimizer.param_groups[0]['params'][i].grad)
+                for i in range(len(self.dstb_actor.optimizer.param_groups[0]['params'])):
+                    d_norm = d_norm + torch.linalg.norm(self.dstb_actor.optimizer.param_groups[0]['params'][i].grad)
                 pass
             self.q_norm = q_norm
             self.d_norm = d_norm
@@ -735,6 +736,7 @@ class MAGICS_AL(OffPolicyAlgorithm):
                 self.max_u_grad_norm = self.u_norm
             if self.d_norm > self.max_d_grad_norm:
                 self.max_d_grad_norm = self.d_norm
+        elapsed = time.time() - batch_start
         self._n_updates += gradient_steps
 
         self.logger.record("train/n_updates", self._n_updates, exclude="tensorboard")
@@ -1338,3 +1340,34 @@ class MAGICS_AL(OffPolicyAlgorithm):
         f_xhat = torch.mean(torch.sum(torch.hstack((xhat_q_vals[0], xhat_q_vals[1])), dim=1))
 
         dstb_estimator = ctrl_d / delta * (f_xhat - f_x) * v_ctrl
+
+    def kaczmarz(self, grad_vec, b):
+        tol = .00001
+        x = torch.zeros_like(b)
+        #P = torch.zeros(torch.numel(b), torch.numel(b), device=self.device)
+        eye = torch.eye(torch.numel(b), device=self.device)
+        old = 0
+        for k in range(torch.numel(b)):
+            '''
+            a = autograd.grad(grad_vec, self.critic.optimizer.param_groups[0]['params'], eye[k, :], retain_graph=True)
+            a = torch.hstack([t.flatten() for t in a])
+            d = P.transpose(0,1) @ a
+            c1 = torch.linalg.norm(a)
+            c2 = torch.linalg.norm(d)
+            c3 = (b[k] - torch.dot(x,a)) / ((c1 - c2)*(c1 + c2))
+            p = c3*(a-P@(P.transpose(0,1)@a))
+            P = torch.cat((P, torch.reshape(p/torch.linalg.norm(p), (torch.numel(b),1))),dim=1)
+            x = x + p
+            '''
+            a = autograd.grad(grad_vec, self.critic.optimizer.param_groups[0]['params'], eye[k, :], retain_graph=True)
+            a = torch.hstack([t.flatten() for t in a])
+            r_k = b[k] - torch.dot(a,x)
+
+            # Update the solution vector
+            row_norm_sq = torch.norm(a)**2
+            #old = x.detach().clone()
+            x += (r_k / row_norm_sq) * a
+
+
+
+        return x

@@ -112,7 +112,7 @@ def f(tau2):
     high = 1_000_000_000
     seed_list = np.random.randint(0, high=high, size=1, dtype=int)
 
-    wandb.init(project="stsac_ef_reg100",
+    wandb.init(project="cheetah_al",
                entity='jw4406',
                config={"v_lr": v_learning_rate,
                        "u_lr": v_learning_rate * tau_v_c,
@@ -158,10 +158,10 @@ def f(tau2):
                      parallel_run_num=int(tau2))
     '''
     model = MAGICS_CL("MlPAACPolicy", dstb_action_space=Box(-.3, .3, (2,), dtype=np.float32), ent_coef='auto',
-                  learning_starts=100000, env=env, verbose=2, v_learning_rate=5e-6, c_learning_rate=10e-6,
-                  d_learning_rate=50e-6, v_learning_rate_decay=critic_decay_schedule(5e-6),
-                  c_learning_rate_decay=critic_decay_schedule(10e-6),
-                  d_learning_rate_decay=critic_decay_schedule(50e-6),
+                  learning_starts=100000, env=env, verbose=2, v_learning_rate=5e-5, c_learning_rate=10e-5,
+                  d_learning_rate=50e-5, v_learning_rate_decay=critic_decay_schedule(5e-5),
+                  c_learning_rate_decay=critic_decay_schedule(10e-5),
+                  d_learning_rate_decay=critic_decay_schedule(50e-5),
                   buffer_size=100000, batch_size=1024, train_freq=32, gradient_steps=64, gamma=0.9,
                   tau=0.01, use_sde=True, use_stackelberg=True, device='auto', use_ef=False)
 
@@ -170,7 +170,7 @@ def f(tau2):
                       d_learning_rate=50e-4, v_learning_rate_decay=critic_decay_schedule(5e-4),
                       c_learning_rate_decay=critic_decay_schedule(10e-4),
                       d_learning_rate_decay=critic_decay_schedule(50e-4),
-                      buffer_size=100000, batch_size=512, train_freq=32, gradient_steps=64, gamma=0.9,
+                      buffer_size=100000, batch_size=1024, train_freq=32, gradient_steps=64, gamma=0.9,
                       tau=0.01, use_sde=True, use_stackelberg=True, device='auto', use_ef=False)
     '''
     model = SMART("MlPAACPolicy", dstb_action_space=Box(-.7, .7, (1,), dtype=np.float32), ent_coef='auto',
@@ -270,7 +270,7 @@ def f(tau2):
         save_freq=1000,
         save_path="./competitive_models/",
         #stac_train_sweep_pend_competitive_%d % int(tau2)
-        name_prefix="stsac_cheetah_fullstackelberg_frombeginning_%d" % int(tau2),
+        name_prefix="magics_al_cheetah_%d" % int(tau2),
         save_replay_buffer=True,
         save_vecnormalize=True,
         jobid=args.jobid
@@ -278,7 +278,7 @@ def f(tau2):
     callback_list = CallbackList([eval_callback, checkpoint_callback])  # , checkpoint_callback])
     # model.learn(total_timesteps=1_000_000, callback=callback_list)
     model.learn(total_timesteps=5_500_000, callback=callback_list)
-    model.save("./competitive_models/stsac_cheetah_major_test_%d.zip" % int(tau2))
+    model.save("./competitive_models/magics_al_cheetah_finished_%d.zip" % int(tau2))
     print("HI IM DONE")
 
 if __name__ == '__main__':

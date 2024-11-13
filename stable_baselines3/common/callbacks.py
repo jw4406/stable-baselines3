@@ -394,7 +394,7 @@ class EvalCallback(EventCallback):
         callback_on_new_best: Optional[BaseCallback] = None,
         callback_after_eval: Optional[BaseCallback] = None,
         n_eval_episodes: int = 5,
-        eval_freq: int = 10000,
+        eval_freq: int = 1000,
         log_path: Optional[str] = None,
         best_model_save_path: Optional[str] = None,
         deterministic: bool = True,
