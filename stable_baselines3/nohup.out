@@ -1429,3 +1429,24 @@ Episode length: 1000.00 +/- 0.00
   return _methods._mean(a, axis=axis, dtype=dtype,
 /home/jw4406/anaconda3/envs/mujoco_sb3_parallel/lib/python3.11/site-packages/numpy/_core/_methods.py:138: RuntimeWarning: invalid value encountered in scalar divide
   ret = ret.dtype.type(ret / rcount)
+Eval num_timesteps=101000, episode_reward=-376.18 +/- 2.52
+Episode length: 1000.00 +/- 0.00
+---------------------------------
+| eval/              |          |
+|    mean_ep_length  | 1e+03    |
+|    mean_reward     | -376     |
+| time/              |          |
+|    total_timesteps | 101000   |
+| train/             |          |
+|    actor_loss      | nan      |
+|    critic_loss     | 0.527    |
+|    d_learning_rate | 0.005    |
+|    dstb_ent_coef   | 0.00356  |
+|    ent_coef        | 0.0163   |
+|    ent_coef_loss   | -3.69    |
+|    n_updates       | 63936    |
+|    u_learning_rate | 0.001    |
+|    v_learning_rate | 0.0005   |
+---------------------------------
+/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/save_util.py:278: UserWarning: Path 'competitive_models/magics_al_cheetah_0_replay_buffer_101000_steps.pkl' exists, will overwrite it.
+  warnings.warn(f"Path '{path}' exists, will overwrite it.")

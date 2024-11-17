@@ -139,7 +139,8 @@ class MAGICS_AL(OffPolicyAlgorithm):
             use_stackelberg: bool = True,
             dstb_action_space: spaces.Space = None,
             linear_phase: bool = True,
-            use_ef=True
+            use_ef=True,
+            zofo=False
     ):
         super().__init__(
             policy,
@@ -171,6 +172,7 @@ class MAGICS_AL(OffPolicyAlgorithm):
         self.use_stackelberg = use_stackelberg
         self.linear_phase = linear_phase
         self.use_ef = use_ef
+        self.zofo = zofo
         print("using e-fim: %r" % self.use_ef, flush=True)
         self.target_entropy = target_entropy
         self.log_ent_coef = None  # type: Optional[th.Tensor]
@@ -344,7 +346,6 @@ class MAGICS_AL(OffPolicyAlgorithm):
                 for ele in self.policy.critic.optimizer.param_groups[0]['params']:
                     num_critic_params = num_critic_params + torch.numel(ele)
 
-                #self.derivative_free(replay_data, num_ctrl_params, num_dstb_params)
 
                 actions_pi, log_prob = self.actor.action_log_prob(replay_data.observations)
                 dstb_actions_pi, dstb_log_prob = self.dstb_actor.action_log_prob(replay_data.observations)
@@ -356,6 +357,7 @@ class MAGICS_AL(OffPolicyAlgorithm):
                 # surr_q_value_pre_mean = torch.div(critic_pred_sum, 2)
 
                 surr_q_values = torch.mean(torch.sum(torch.hstack((critic_pred[0], critic_pred[1])), dim=1))
+
                 time_start = time.time()
                 #ctrl_partial_batched = autograd.grad(-surr_q_values,
                 #                                      self.policy.actor.optimizer.param_groups[0]['params'],
@@ -370,7 +372,7 @@ class MAGICS_AL(OffPolicyAlgorithm):
 
 
                 # Diagonal terms (Hessians) first
-                if self.use_ef is False:  # compute true hessians
+                if self.use_ef is False and self.zofo is False:  # compute true hessians
                     #time_start = time.time()
 
                     L_ctrl_grad_batched = autograd.grad(critic_loss, self.critic.optimizer.param_groups[0]['params'],
@@ -475,7 +477,8 @@ class MAGICS_AL(OffPolicyAlgorithm):
                             self.dstb_actor.optimizer.param_groups[0]['params'][i].grad - dstb_imp_batched[i]
                     self.dstb_actor.optimizer.step()
                     end = time.time() - time_start
-                else:
+                    #print("elapsed: %.2f" % end)
+                elif self.use_ef is True and self.zofo is False:
                     time_start = time.time()
 
                     # Step 1: Compute batched gradients using autograd with is_grads_batched=True
@@ -522,6 +525,20 @@ class MAGICS_AL(OffPolicyAlgorithm):
                     lower_rows = torch.cat((grad_theta_psi_J_t, fim_psi), dim=1)
 
                     H = torch.cat((upper_rows, lower_rows), dim=0)
+                else:
+                    ctrl_estimator, dstb_estimator = self.derivative_free(replay_data, num_ctrl_params, num_dstb_params)
+                    self.actor.optimizer.zero_grad()
+                    for i in range(len(ctrl_estimator)):
+                        self.actor.optimizer.param_groups[0]['params'][i].grad = ctrl_estimator[i].float()
+                    self.actor.optimizer.step()
+                    for i in range(len(dstb_estimator)):
+                        self.dstb_actor.optimizer.param_groups[0]['params'][i].grad = dstb_estimator[i].float()
+                    self.dstb_actor.optimizer.step()
+
+                    L_ctrl_grad_batched = autograd.grad(critic_loss, self.critic.optimizer.param_groups[0]['params'],
+                                                        create_graph=True, retain_graph=True)
+
+                    L_ctrl_grad = torch.hstack([t.flatten() for t in L_ctrl_grad_batched])
                 '''# ======================================================================
 
                 #import torch
@@ -737,6 +754,7 @@ class MAGICS_AL(OffPolicyAlgorithm):
             if self.d_norm > self.max_d_grad_norm:
                 self.max_d_grad_norm = self.d_norm
         elapsed = time.time() - batch_start
+        print("batch elapsed: %.2f" % elapsed)
         self._n_updates += gradient_steps
 
         self.logger.record("train/n_updates", self._n_updates, exclude="tensorboard")
@@ -1204,20 +1222,22 @@ class MAGICS_AL(OffPolicyAlgorithm):
         return J
 
     def derivative_free(self, replay_data, ctrl_d, dstb_d):
-        delta = .001
-
+        delta = .0001
+        tol = .1
         K = 1000
         ctrl_select = torch.from_numpy(np.random.uniform(low=-1,high=1,size=ctrl_d)).to(self.device)
         dstb_select = torch.from_numpy(np.random.uniform(low=-1,high=1,size=dstb_d)).to(self.device)
 
-        v_ctrl = ctrl_select / torch.linalg.norm(ctrl_select)
-        v_dstb = dstb_select / torch.linalg.norm(dstb_select)
         weights_path = 'descend_'
         torch.save(self.policy, weights_path)
+        v_ctrl = ctrl_select / torch.linalg.norm(ctrl_select)
+        v_dstb = dstb_select / torch.linalg.norm(dstb_select)
         descend_copy_model = torch.load(weights_path)
+        descend_copy_model.critic.optimizer.param_groups[0]['lr'] *= 10
         print("hello")
-
-        for i in range(K):
+        norm = 1
+        count = 0
+        while norm > tol:
             with th.no_grad():
                 # Select action according to policy
                 next_actions, next_log_prob = descend_copy_model.actor.action_log_prob(replay_data.next_observations)
@@ -1244,7 +1264,10 @@ class MAGICS_AL(OffPolicyAlgorithm):
             descend_copy_model.critic.optimizer.zero_grad()
             critic_loss.backward()
             descend_copy_model.critic.optimizer.step()
-
+            norm = 0
+            for j in range(len(descend_copy_model.critic.optimizer.param_groups[0]['params'])):
+                norm = norm + torch.linalg.norm(descend_copy_model.critic.optimizer.param_groups[0]['params'][j].grad)
+            count = count + 1
         x_q_vals = descend_copy_model.critic(replay_data.observations, replay_data.actions, replay_data.dstb_actions)
         f_x = torch.mean(torch.sum(torch.hstack((x_q_vals[0], x_q_vals[1])), dim=1))
         # tmp1 = autograd.grad(critic_pred[0][0], self.actor.optimizer.param_groups[0]['params'], create_graph=True, retain_graph=True)
@@ -1255,12 +1278,13 @@ class MAGICS_AL(OffPolicyAlgorithm):
 
         #surr_q_values = torch.mean(torch.sum(torch.hstack((critic_pred[0], critic_pred[1])), dim=1))
         descend_copy_model = torch.load(weights_path)
+        descend_copy_model.critic.optimizer.param_groups[0]['lr'] *= 10
         count = 0
         with torch.no_grad():
             for p in descend_copy_model.actor.parameters():
                 p.copy_(p + torch.reshape(v_ctrl[count:count + torch.numel(p)], p.shape).to(self.device))
-
-        for i in range(K):
+        norm = 1
+        while norm > tol:
             with th.no_grad():
                 # Select action according to policy
                 next_actions, next_log_prob = descend_copy_model.actor.action_log_prob(
@@ -1291,19 +1315,24 @@ class MAGICS_AL(OffPolicyAlgorithm):
             descend_copy_model.critic.optimizer.zero_grad()
             critic_loss.backward()
             descend_copy_model.critic.optimizer.step()
+            norm = 0
+            for j in range(len(descend_copy_model.critic.optimizer.param_groups[0]['params'])):
+                norm = norm + torch.linalg.norm(descend_copy_model.critic.optimizer.param_groups[0]['params'][j].grad)
+            count = count + 1
 
         xhat_q_vals = descend_copy_model.critic(replay_data.observations, replay_data.actions,
                                              replay_data.dstb_actions)
         f_xhat = torch.mean(torch.sum(torch.hstack((xhat_q_vals[0], xhat_q_vals[1])), dim=1))
 
         ctrl_estimator = -ctrl_d / delta * (f_xhat - f_x) * v_ctrl
-
-
+        count = 0
+        descend_copy_model = torch.load(weights_path)
+        descend_copy_model.critic.optimizer.param_groups[0]['lr'] *= 10
         with torch.no_grad():
             for p in descend_copy_model.dstb_actor.parameters():
                 p.copy_(p + torch.reshape(v_dstb[count:count + torch.numel(p)], p.shape).to(self.device))
-
-        for i in range(K):
+        norm = 1
+        while norm > tol:
             with th.no_grad():
                 # Select action according to policy
                 next_actions, next_log_prob = descend_copy_model.actor.action_log_prob(
@@ -1334,6 +1363,10 @@ class MAGICS_AL(OffPolicyAlgorithm):
             descend_copy_model.critic.optimizer.zero_grad()
             critic_loss.backward()
             descend_copy_model.critic.optimizer.step()
+            norm = 0
+            for j in range(len(descend_copy_model.critic.optimizer.param_groups[0]['params'])):
+                norm = norm + torch.linalg.norm(descend_copy_model.critic.optimizer.param_groups[0]['params'][j].grad)
+            count = count + 1
 
         xhat_q_vals = descend_copy_model.critic(replay_data.observations, replay_data.actions,
                                              replay_data.dstb_actions)
@@ -1341,6 +1374,20 @@ class MAGICS_AL(OffPolicyAlgorithm):
 
         dstb_estimator = ctrl_d / delta * (f_xhat - f_x) * v_ctrl
 
+        ctrl_size_lists = [list(x.shape) for x in self.actor.optimizer.param_groups[0]['params']]
+        dstb_size_lists = [list(x.shape) for x in self.dstb_actor.optimizer.param_groups[0]['params']]
+        reshaped_ctrl, reshaped_dstb = [], []
+        count = 0
+        for i in range(len(ctrl_size_lists)):
+            numel = np.prod(ctrl_size_lists[i])
+            reshaped_ctrl.append(torch.reshape(ctrl_estimator[count : count + numel], ctrl_size_lists[i]))
+            count += numel
+        count = 0
+        for i in range(len(dstb_size_lists)):
+            numel = np.prod(dstb_size_lists[i])
+            reshaped_dstb.append(torch.reshape(dstb_estimator[count: count + numel], dstb_size_lists[i]))
+            count += numel
+        return reshaped_ctrl, reshaped_dstb
     def kaczmarz(self, grad_vec, b):
         tol = .00001
         x = torch.zeros_like(b)

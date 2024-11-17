@@ -93,7 +93,7 @@ from stable_baselines3 import A3C_rarl
 #env = gym.make("MountainCarContinuous-v0")
 #env = gym.make("my_half_cheetah", render_mode='human')
 env = gym.make("my_pendulum")
-env = gym.make("my_half_cheetah")
+#env = gym.make("my_half_cheetah")
 v_learning_rate = 5e-6
 
 tau_v_c = 0.0066932472422626425 / 0.0005933974267381725
@@ -165,13 +165,13 @@ def f(tau2):
                   buffer_size=100000, batch_size=1024, train_freq=32, gradient_steps=64, gamma=0.9,
                   tau=0.01, use_sde=True, use_stackelberg=True, device='auto', use_ef=False)
 
-    model = MAGICS_AL("MlPAACPolicy", dstb_action_space=Box(-.3, .3, (2,), dtype=np.float32), ent_coef='auto',
-                      learning_starts=100000, env=env, verbose=2, v_learning_rate=5e-4, c_learning_rate=10e-4,
+    model = MAGICS_AL("MlPAACPolicy", dstb_action_space=Box(-.3, .3, (1,), dtype=np.float32), ent_coef='auto',
+                      learning_starts=10000, env=env, verbose=2, v_learning_rate=5e-4, c_learning_rate=10e-4,
                       d_learning_rate=50e-4, v_learning_rate_decay=critic_decay_schedule(5e-4),
                       c_learning_rate_decay=critic_decay_schedule(10e-4),
                       d_learning_rate_decay=critic_decay_schedule(50e-4),
-                      buffer_size=100000, batch_size=1024, train_freq=32, gradient_steps=64, gamma=0.9,
-                      tau=0.01, use_sde=True, use_stackelberg=True, device='auto', use_ef=False)
+                      buffer_size=10000, batch_size=256, train_freq=32, gradient_steps=64, gamma=0.9,
+                      tau=0.01, use_sde=True, use_stackelberg=True, device='auto', use_ef=False, zofo=True)
     '''
     model = SMART("MlPAACPolicy", dstb_action_space=Box(-.7, .7, (1,), dtype=np.float32), ent_coef='auto',
                   learning_starts=50000, env=env, verbose=2, v_learning_rate=5e-4, c_learning_rate=1e-3,
