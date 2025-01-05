@@ -139,8 +139,9 @@ class MAGICS_AL(OffPolicyAlgorithm):
             use_stackelberg: bool = True,
             dstb_action_space: spaces.Space = None,
             linear_phase: bool = True,
-            use_ef=True,
-            zofo=False
+            use_ef: bool = False,
+            zofo: bool = False,
+            diag: bool = True
     ):
         super().__init__(
             policy,
@@ -173,7 +174,10 @@ class MAGICS_AL(OffPolicyAlgorithm):
         self.linear_phase = linear_phase
         self.use_ef = use_ef
         self.zofo = zofo
+        self.diag = diag
         print("using e-fim: %r" % self.use_ef, flush=True)
+        print("using zofo: %r" % self.zofo, flush=True)
+        print("using diag: %r" % self.diag, flush=True)
         self.target_entropy = target_entropy
         self.log_ent_coef = None  # type: Optional[th.Tensor]
         self.dstb_log_ent_coef = None
@@ -372,7 +376,7 @@ class MAGICS_AL(OffPolicyAlgorithm):
 
 
                 # Diagonal terms (Hessians) first
-                if self.use_ef is False and self.zofo is False:  # compute true hessians
+                if self.use_ef is False and self.zofo is False:  # compute true hessians OR diagonal only
                     #time_start = time.time()
 
                     L_ctrl_grad_batched = autograd.grad(critic_loss, self.critic.optimizer.param_groups[0]['params'],
@@ -381,16 +385,35 @@ class MAGICS_AL(OffPolicyAlgorithm):
 
                     L_ctrl_grad = torch.hstack([t.flatten() for t in L_ctrl_grad_batched])
 
-                    
-                    L_ctrl_hessian_batched = autograd.grad(L_ctrl_grad, self.critic.optimizer.param_groups[0]['params'],
-                                                   torch.eye(L_ctrl_grad.shape[0], device=self.device),
-                                                         is_grads_batched=True)
-                    L_ctrl_hessian = self.matrix_unbatch(L_ctrl_hessian_batched, L_ctrl_grad.shape[0]).detach()
-                    del L_ctrl_hessian_batched
-                    reg_param = 5
-                    L_ctrl_hessian = L_ctrl_hessian + torch.eye(L_ctrl_hessian.shape[0], device=self.device) * reg_param
-                    
+                    if self.diag is True:
+                        k = 30
+                        n = sum(p.numel() for p in self.critic.parameters())
 
+                        rademacher = torch.bernoulli(torch.from_numpy(np.ones((n, k)) * .5)).to(self.device)
+                        rademacher[rademacher == 0] = -1
+                        # grad_batched = autograd.grad(L_ctrl_grad, flat_params, rademacher,0,1, is_grads_batched=True)
+                        grad_batched = autograd.grad(L_ctrl_grad, self.critic.optimizer.param_groups[0]['params'],
+                                                     torch.transpose(rademacher.to(self.device), 0, 1),
+                                                     is_grads_batched=True,
+                                                     retain_graph=True, create_graph=True)
+
+                        reshaped_grads = self.matrix_unbatch(grad_batched, k, size2=n).T
+                        reshaped_grads *= rademacher
+                        L_ctrl_hessian = torch.mean(reshaped_grads, dim=1)
+                        L_ctrl_hessian += 5
+                    else:
+                        L_ctrl_hessian_batched = autograd.grad(L_ctrl_grad, self.critic.optimizer.param_groups[0]['params'],
+                                                       torch.eye(L_ctrl_grad.shape[0], device=self.device),
+                                                             is_grads_batched=True)
+                        L_ctrl_hessian = self.matrix_unbatch(L_ctrl_hessian_batched, L_ctrl_grad.shape[0]).detach()
+                        del L_ctrl_hessian_batched
+                        reg_param = 5
+                        L_ctrl_hessian.diagonal().add_(reg_param)
+                    
+                    '''
+                    DO NOT USE!
+                    DO NOT USE!
+                    DO NOT USE!
                     def L_hessian_matvec(vec):
                         """
                         input:  numpy array
@@ -404,7 +427,10 @@ class MAGICS_AL(OffPolicyAlgorithm):
                         return np.array(Avec.detach().to('cpu'))
 
                     #Dvvfv_lo = LinearOperator(shape=(num_critic_params, num_critic_params), matvec=L_hessian_matvec)
-
+                    DO NOT USE!
+                    DO NOT USE!
+                    DO NOT USE!
+                    '''
                     J_ctrl_critic_grad_batched = autograd.grad(-surr_q_values, self.critic.optimizer.param_groups[0]['params'], create_graph=True, retain_graph=True)
 
                     J_ctrl_critic_grad = torch.hstack([t.flatten() for t in J_ctrl_critic_grad_batched])
@@ -436,8 +462,10 @@ class MAGICS_AL(OffPolicyAlgorithm):
                     ctrl_stage_1_mixed = torch.hstack([t.flatten() for t in ctrl_stage_1_mixed_batched])
 
                     #iHvp_ctrl = self.kaczmarz(L_ctrl_grad, J_ctrl_critic_grad)
-
-                    iHvp_ctrl = torch.linalg.solve(L_ctrl_hessian, J_ctrl_critic_grad)
+                    if len(L_ctrl_hessian.shape) == 1 and self.diag is True:
+                        iHvp_ctrl = torch.mul(L_ctrl_hessian.pow_(-1), J_ctrl_critic_grad)
+                    else:
+                        iHvp_ctrl = torch.linalg.solve(L_ctrl_hessian, J_ctrl_critic_grad)
                     #iHvp_ctrl = torch.from_numpy(bicgstab(Dvvfv_lo, J_ctrl_critic_grad.detach().to('cpu').numpy())[0]).to(self.device)
                     #iHvp_ctrl = torch.from_numpy(
                     #    scipy.sparse.linalg.spsolve(Dvvfv_lo, J_ctrl_critic_grad.detach().to('cpu').numpy())).to(self.device)
@@ -463,7 +491,7 @@ class MAGICS_AL(OffPolicyAlgorithm):
                         self.actor.optimizer.param_groups[0]['params'][i].grad = \
                             self.actor.optimizer.param_groups[0]['params'][i].grad - ctrl_imp_batched[i]
                     self.actor.optimizer.step()
-
+                    actor_losses.append(actor_loss.detach().cpu().numpy())
                     q_values_pi = th.cat(self.critic(replay_data.observations, actions_pi, dstb_actions_pi), dim=1)
                     min_qf_pi, _ = th.min(q_values_pi, dim=1, keepdim=True)
                     dstb_actor_loss = (dstb_ent_coef * dstb_log_prob + min_qf_pi).mean()
@@ -476,6 +504,7 @@ class MAGICS_AL(OffPolicyAlgorithm):
                         self.dstb_actor.optimizer.param_groups[0]['params'][i].grad = \
                             self.dstb_actor.optimizer.param_groups[0]['params'][i].grad - dstb_imp_batched[i]
                     self.dstb_actor.optimizer.step()
+                    dstb_actor_losses.append(dstb_actor_loss)
                     end = time.time() - time_start
                     #print("elapsed: %.2f" % end)
                 elif self.use_ef is True and self.zofo is False:
@@ -677,11 +706,33 @@ class MAGICS_AL(OffPolicyAlgorithm):
                 #imp = self.critic_param_reshape(flat_imp)
             '''
             # Optimize the critic
+            with th.no_grad():
+                # Select action according to policy
+                next_actions, next_log_prob = self.actor.action_log_prob(replay_data.next_observations)
+                next_dstb_actions, next_dstb_log_prob = self.dstb_actor.action_log_prob(replay_data.next_observations)
+                # next_dstb_actions = th.zeros(next_dstb_actions.shape, device=self.device)
+                # Compute the next Q values: min over all critics targets
+                next_q_values = th.cat(
+                    self.critic_target(replay_data.next_observations, next_actions, next_dstb_actions), dim=1)
+                next_q_values, _ = th.min(next_q_values, dim=1, keepdim=True)
+                # next_q_values = next_q_values[:, 0, None]
+                # add entropy term
+                # next_q_values = next_q_values - ent_coef * next_log_prob.reshape(-1, 1)# + dstb_ent_coef * next_dstb_log_prob.reshape(-1, 1)
+                # td error + entropy term
+                target_q_values = replay_data.rewards + (1 - replay_data.dones) * self.gamma * next_q_values
+
+            # Get current Q-values estimates for each critic network
+            # using action from the replay buffer
+            current_q_values = self.critic(replay_data.observations, replay_data.actions, replay_data.dstb_actions)
+
+            # Compute critic loss
+            critic_loss = 0.5 * sum(F.mse_loss(current_q, target_q_values) for current_q in current_q_values)
+            assert isinstance(critic_loss, th.Tensor)  # for type checker
+
             self.critic.optimizer.zero_grad()
-            #grad = autograd.grad(critic_loss, self.critic.optimizer.param_groups[0]['params'])
-            for i in range(len(L_ctrl_grad_batched)):
-                self.critic.optimizer.param_groups[0]['params'][i].grad = L_ctrl_grad_batched[i]
+            critic_loss.backward()
             self.critic.optimizer.step()
+            critic_losses.append(critic_loss.item())  # type: ignore[union-attr]
             '''
             # Compute actor loss
             # Alternative: actor_loss = th.mean(log_prob - qf1_pi)
@@ -1222,16 +1273,16 @@ class MAGICS_AL(OffPolicyAlgorithm):
         return J
 
     def derivative_free(self, replay_data, ctrl_d, dstb_d):
-        delta = .0001
+        delta = .1
         tol = .1
         K = 1000
         ctrl_select = torch.from_numpy(np.random.uniform(low=-1,high=1,size=ctrl_d)).to(self.device)
         dstb_select = torch.from_numpy(np.random.uniform(low=-1,high=1,size=dstb_d)).to(self.device)
 
-        weights_path = 'descend_'
+        weights_path = 'descend_%d' % self.seed
         torch.save(self.policy, weights_path)
-        v_ctrl = ctrl_select / torch.linalg.norm(ctrl_select)
-        v_dstb = dstb_select / torch.linalg.norm(dstb_select)
+        v_ctrl = delta * ctrl_select / torch.linalg.norm(ctrl_select)
+        v_dstb = delta * dstb_select / torch.linalg.norm(dstb_select)
         descend_copy_model = torch.load(weights_path)
         descend_copy_model.critic.optimizer.param_groups[0]['lr'] *= 10
         print("hello")

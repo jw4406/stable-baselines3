@@ -92,8 +92,8 @@ from stable_baselines3 import A3C_rarl
 
 #env = gym.make("MountainCarContinuous-v0")
 #env = gym.make("my_half_cheetah", render_mode='human')
-env = gym.make("my_pendulum")
-#env = gym.make("my_half_cheetah")
+#env = gym.make("my_pendulum")
+env = gym.make("my_half_cheetah")
 v_learning_rate = 5e-6
 
 tau_v_c = 0.0066932472422626425 / 0.0005933974267381725
@@ -158,21 +158,22 @@ def f(tau2):
                      parallel_run_num=int(tau2))
     '''
     model = MAGICS_CL("MlPAACPolicy", dstb_action_space=Box(-.3, .3, (2,), dtype=np.float32), ent_coef='auto',
-                  learning_starts=100000, env=env, verbose=2, v_learning_rate=5e-5, c_learning_rate=10e-5,
+                  learning_starts=25000, env=env, verbose=2, v_learning_rate=5e-5, c_learning_rate=10e-5,
                   d_learning_rate=50e-5, v_learning_rate_decay=critic_decay_schedule(5e-5),
                   c_learning_rate_decay=critic_decay_schedule(10e-5),
                   d_learning_rate_decay=critic_decay_schedule(50e-5),
-                  buffer_size=100000, batch_size=1024, train_freq=32, gradient_steps=64, gamma=0.9,
+                  buffer_size=25000, batch_size=512, train_freq=32, gradient_steps=64, gamma=0.9,
                   tau=0.01, use_sde=True, use_stackelberg=True, device='auto', use_ef=False)
 
-    model = MAGICS_AL("MlPAACPolicy", dstb_action_space=Box(-.3, .3, (1,), dtype=np.float32), ent_coef='auto',
-                      learning_starts=10000, env=env, verbose=2, v_learning_rate=5e-4, c_learning_rate=10e-4,
+    model = MAGICS_AL("MlPAACPolicy", dstb_action_space=Box(-.3, .3, (2,), dtype=np.float32), ent_coef='auto',
+                      learning_starts=100000, env=env, verbose=2, v_learning_rate=5e-4, c_learning_rate=10e-4,
                       d_learning_rate=50e-4, v_learning_rate_decay=critic_decay_schedule(5e-4),
                       c_learning_rate_decay=critic_decay_schedule(10e-4),
                       d_learning_rate_decay=critic_decay_schedule(50e-4),
-                      buffer_size=10000, batch_size=256, train_freq=32, gradient_steps=64, gamma=0.9,
-                      tau=0.01, use_sde=True, use_stackelberg=True, device='auto', use_ef=False, zofo=True)
-    '''
+                      policy_kwargs={'net_arch': dict(pi=[64,64,64], qf=[64,64,64])},
+                      buffer_size=100000, batch_size=256, train_freq=32, gradient_steps=1000, gamma=0.9,
+                      tau=0.01, use_sde=True, use_stackelberg=True, device='auto', diag=True, use_ef=False, zofo=False, seed=int(tau2))
+    ''' 
     model = SMART("MlPAACPolicy", dstb_action_space=Box(-.7, .7, (1,), dtype=np.float32), ent_coef='auto',
                   learning_starts=50000, env=env, verbose=2, v_learning_rate=5e-4, c_learning_rate=1e-3,
                   d_learning_rate=5e-3, buffer_size=50000, batch_size=512, train_freq=32, gradient_steps=32, gamma=0.9,
