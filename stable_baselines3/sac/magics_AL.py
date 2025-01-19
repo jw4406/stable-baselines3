@@ -141,7 +141,8 @@ class MAGICS_AL(OffPolicyAlgorithm):
             linear_phase: bool = True,
             use_ef: bool = False,
             zofo: bool = False,
-            diag: bool = True
+            diag: bool = True,
+            d_see_u: bool = False
     ):
         super().__init__(
             policy,
@@ -175,9 +176,11 @@ class MAGICS_AL(OffPolicyAlgorithm):
         self.use_ef = use_ef
         self.zofo = zofo
         self.diag = diag
+        self.d_see_u = d_see_u
         print("using e-fim: %r" % self.use_ef, flush=True)
         print("using zofo: %r" % self.zofo, flush=True)
         print("using diag: %r" % self.diag, flush=True)
+        print("dstb sees ctrl input %r" % self.d_see_u, flush=True)
         self.target_entropy = target_entropy
         self.log_ent_coef = None  # type: Optional[th.Tensor]
         self.dstb_log_ent_coef = None
@@ -202,6 +205,9 @@ class MAGICS_AL(OffPolicyAlgorithm):
         self.d_norm = 0
         self.u_norm = 0
         self.policy_kwargs['dstb_action_space'] = dstb_action_space
+        self.policy_kwargs['d_see_u'] = self.d_see_u
+        #if self.d_see_u is True:
+        #    self.observation_space = Box(low=-np.inf, high=np.inf, shape=(self.observation_space.shape[0] + self.action_space.shape[0],))
         if dstb_action_space is None:
             self.dstb_action_space = env.action_space
         else:
@@ -284,7 +290,10 @@ class MAGICS_AL(OffPolicyAlgorithm):
 
             # Action by the current actor for the sampled state
             actions_pi, log_prob = self.actor.action_log_prob(replay_data.observations)
-            dstb_actions_pi, dstb_log_prob = self.dstb_actor.action_log_prob(replay_data.observations)
+            if self.d_see_u is True:
+                dstb_actions_pi, dstb_log_prob = self.dstb_actor.action_log_prob(th.cat((replay_data.observations, actions_pi),dim=1))
+            else:
+                dstb_actions_pi, dstb_log_prob = self.dstb_actor.action_log_prob(replay_data.observations)
             # dstb_actions_pi = th.zeros(dstb_actions_pi.shape, device=self.device)
             log_prob = log_prob.reshape(-1, 1)
             dstb_log_prob = dstb_log_prob.reshape(-1, 1)
@@ -318,7 +327,10 @@ class MAGICS_AL(OffPolicyAlgorithm):
             with th.no_grad():
                 # Select action according to policy
                 next_actions, next_log_prob = self.actor.action_log_prob(replay_data.next_observations)
-                next_dstb_actions, next_dstb_log_prob = self.dstb_actor.action_log_prob(replay_data.next_observations)
+                if self.d_see_u is True:
+                    next_dstb_actions, next_dstb_log_prob = self.dstb_actor.action_log_prob(th.cat((replay_data.next_observations, next_actions),dim=1))
+                else:
+                    next_dstb_actions, next_dstb_log_prob = self.dstb_actor.action_log_prob(replay_data.next_observations)
                 # next_dstb_actions = th.zeros(next_dstb_actions.shape, device=self.device)
                 # Compute the next Q values: min over all critics targets
                 next_q_values = th.cat(
@@ -352,7 +364,10 @@ class MAGICS_AL(OffPolicyAlgorithm):
 
 
                 actions_pi, log_prob = self.actor.action_log_prob(replay_data.observations)
-                dstb_actions_pi, dstb_log_prob = self.dstb_actor.action_log_prob(replay_data.observations)
+                if self.d_see_u is True:
+                    dstb_actions_pi, dstb_log_prob = self.dstb_actor.action_log_prob(th.cat((replay_data.observations, actions_pi),dim=1))
+                else:
+                    dstb_actions_pi, dstb_log_prob = self.dstb_actor.action_log_prob(replay_data.observations)
                 critic_pred = self.critic(replay_data.observations, actions_pi, dstb_actions_pi)
                 # tmp1 = autograd.grad(critic_pred[0][0], self.actor.optimizer.param_groups[0]['params'], create_graph=True, retain_graph=True)
                 # tmp2 = autograd.grad(tmp1[0][0][0], self.critic.parameters()[:6], create_graph=True, retain_graph=True)
@@ -439,8 +454,11 @@ class MAGICS_AL(OffPolicyAlgorithm):
 
                     # Select action according to policy
                     next_actions, next_log_prob = self.actor.action_log_prob(replay_data.next_observations)
-                    next_dstb_actions, next_dstb_log_prob = self.dstb_actor.action_log_prob(
-                        replay_data.next_observations)
+                    if self.d_see_u is True:
+                        next_dstb_actions, next_dstb_log_prob = self.dstb_actor.action_log_prob(
+                            th.cat((replay_data.next_observations, next_actions),dim=1))
+                    else:
+                        next_dstb_actions, next_dstb_log_prob = self.dstb_actor.action_log_prob(replay_data.next_observations)
                     # next_dstb_actions = th.zeros(next_dstb_actions.shape, device=self.device)
                     # Compute the next Q values: min over all critics targets
                     next_q_values = th.cat(
@@ -568,148 +586,42 @@ class MAGICS_AL(OffPolicyAlgorithm):
                                                         create_graph=True, retain_graph=True)
 
                     L_ctrl_grad = torch.hstack([t.flatten() for t in L_ctrl_grad_batched])
-                '''# ======================================================================
 
-                #import torch
-                fisher_start = time.time()
-                # Assuming replay_data.observations is a batch of observations
-                batch_size = replay_data.observations.shape[0]
 
-                # Step 1: Calculate log probabilities and gradients
-                actions_pi, log_prob = self.actor.action_log_prob(replay_data.observations)
-                dstb_actions_pi, dstb_log_prob = self.dstb_actor.action_log_prob(replay_data.observations)
-                critic_pred = self.critic(replay_data.observations, actions_pi, dstb_actions_pi)
+            else:
+                current_q_values = self.critic(replay_data.observations, replay_data.actions, replay_data.dstb_actions)
+                min_qf_pi, _ = th.min(th.cat(current_q_values, dim=1), dim=1, keepdim=True)
+                # min_qf_pi = min_qf_pi.detach()
+                actor_loss = (ent_coef * log_prob - min_qf_pi).mean()
+                self.actor.optimizer.zero_grad()
+                actor_loss.backward()
+                for i in range(len(self.actor.optimizer.param_groups[0]['params'])):
+                    self.actor.optimizer.param_groups[0]['params'][i].grad = \
+                        self.actor.optimizer.param_groups[0]['params'][i].grad - ctrl_imp_batched[i]
+                self.actor.optimizer.step()
+                actor_losses.append(actor_loss.detach().cpu().numpy())
+                q_values_pi = th.cat(self.critic(replay_data.observations, actions_pi, dstb_actions_pi), dim=1)
+                min_qf_pi, _ = th.min(q_values_pi, dim=1, keepdim=True)
+                dstb_actor_loss = (dstb_ent_coef * dstb_log_prob + min_qf_pi).mean()
+                self.dstb_actor.optimizer.zero_grad()
+                grad = autograd.grad(dstb_actor_loss, self.dstb_actor.parameters())
+                self.dstb_actor.optimizer.zero_grad()
+                for i in range(len(grad)):
+                    self.dstb_actor.optimizer.param_groups[0]['params'][i].grad = grad[i]
+                for i in range(len(self.dstb_actor.optimizer.param_groups[0]['params'])):
+                    self.dstb_actor.optimizer.param_groups[0]['params'][i].grad = \
+                        self.dstb_actor.optimizer.param_groups[0]['params'][i].grad - dstb_imp_batched[i]
+                self.dstb_actor.optimizer.step()
+                dstb_actor_losses.append(dstb_actor_loss)
 
-                # Initialize the FIM approximations for diagonal and off-diagonal blocks
-                fim_theta = torch.zeros((num_ctrl_params, num_ctrl_params), device=self.device)
-                fim_psi = torch.zeros((num_dstb_params, num_dstb_params), device=self.device)
-                fim_theta_psi = torch.zeros((num_ctrl_params, num_dstb_params), device=self.device)
-
-                # Step 2: Accumulate FIM using outer products of gradients
-                for i in range(batch_size):
-                    # Compute gradient wrt player 1's parameters
-                    grad_theta_log_prob = torch.autograd.grad(
-                        log_prob[i], self.policy.actor.optimizer.param_groups[0]['params'],
-                        create_graph=True, retain_graph=True
-                    )
-                    grad_theta_flattened = torch.hstack([t.flatten() for t in grad_theta_log_prob])
-
-                    # Compute FIM for player 1 (Diagonal Block)
-                    fim_theta += grad_theta_flattened.outer(grad_theta_flattened)
-
-                    # Compute gradient wrt player 2's parameters
-                    grad_psi_log_prob = torch.autograd.grad(
-                        dstb_log_prob[i], self.policy.dstb_actor.optimizer.param_groups[0]['params'],
-                        create_graph=True, retain_graph=True
-                    )
-                    grad_psi_flattened = torch.hstack([t.flatten() for t in grad_psi_log_prob])
-
-                    # Compute FIM for player 2 (Diagonal Block)
-                    fim_psi += grad_psi_flattened.outer(grad_psi_flattened)
-
-                    # Compute FIM for cross terms (Off-Diagonal Blocks)
-                    fim_theta_psi += grad_theta_flattened.outer(grad_psi_flattened)
-
-                # Average over the batch size
-                fim_theta /= batch_size
-                fim_psi /= batch_size
-                fim_theta_psi /= batch_size
-
-                # Step 3: Assemble the big H matrix
-                grad_theta_psi_J_t = torch.transpose(fim_theta_psi, 0, 1)  # this is the 2,1 position
-
-                upper_rows = torch.cat((fim_theta, fim_theta_psi), dim=1)
-                lower_rows = torch.cat((grad_theta_psi_J_t, fim_psi), dim=1)
-
-                H = torch.cat((upper_rows, lower_rows), dim=0)
-
-                # Optional: Add regularization (to ensure H is positive definite)
-                reg_param = 5
-                H += torch.eye(H.shape[0], device=self.device) * reg_param
-
-                # Step 4: Solve the system H * ivp_H_h2 = h2
-                ivp_H_h2 = torch.linalg.solve(H, h2)
-
-                # Final Step: Calculate the final gradient
-                imp = torch.autograd.grad(h1_pre_omega, self.critic.parameters(), ivp_H_h2, create_graph=True,
-                                          retain_graph=True)
-                fisher_elapsed = time.time() - fisher_start
-                '''
-                # =======================
-            '''
-            elif self.use_stackelberg is True and self.use_ef is True:
-                vmap_fisher_start = time.time()
-
-                # Step 1: Compute batched gradients using autograd with is_grads_batched=True
-                def compute_batched_grads(arb_log_probs, params):
-                    batch_size = arb_log_probs.shape[0]
-                    identity = torch.eye(batch_size, device=log_prob.device)  # Identity matrix for batching
-                    batched_grads = torch.autograd.grad(
-                        arb_log_probs,
-                        params,
-                        identity,  # Batching through the identity matrix
-                        is_grads_batched=True,  # Enable batched gradient computation
-                        create_graph=False,
-                        retain_graph=False
-                    )
-                    #return torch.hstack([t.flatten() for t in batched_grads])
-                    flattened_grads = [g.view(batch_size, -1) for g in batched_grads]
-                    return torch.cat(flattened_grads, dim=1)
-
-                # Step 2: Calculate the gradients for the entire batch
-                actions_pi, log_prob = self.actor.action_log_prob(replay_data.observations)
-                dstb_actions_pi, dstb_log_prob = self.dstb_actor.action_log_prob(replay_data.observations)
-                critic_pred = self.critic(replay_data.observations, actions_pi, dstb_actions_pi)
-                grad_theta_flattened_batch = compute_batched_grads(log_prob,
-                                                                   self.policy.actor.optimizer.param_groups[0][
-                                                                       'params'])
-                grad_psi_flattened_batch = compute_batched_grads(dstb_log_prob,
-                                                                 self.policy.dstb_actor.optimizer.param_groups[0][
-                                                                     'params'])
-                #grad_theta_flattened_batch = torch.cat([g.view(log_prob.shape[0], -1) for g in grad_theta_batch], dim=1)
-                #grad_psi_flattened_batch = torch.cat([g.view(dstb_log_prob.shape[0], -1) for g in grad_psi_batch],
-                #                                     dim=1)
-
-                # Step 3: Compute the empirical Fisher Information Matrices using outer products
-                fim_theta = torch.einsum('bi,bj->ij', grad_theta_flattened_batch,
-                                         grad_theta_flattened_batch) / batch_size
-                fim_psi = torch.einsum('bi,bj->ij', grad_psi_flattened_batch, grad_psi_flattened_batch) / batch_size
-                fim_theta_psi = torch.einsum('bi,bj->ij', grad_theta_flattened_batch,
-                                             grad_psi_flattened_batch) / batch_size
-
-                # Step 4: Assemble the big H matrix
-                grad_theta_psi_J_t = torch.transpose(fim_theta_psi, 0, 1)  # this is the 2,1 position
-
-                upper_rows = torch.cat((fim_theta, fim_theta_psi), dim=1)
-                lower_rows = torch.cat((grad_theta_psi_J_t, fim_psi), dim=1)
-
-                H = torch.cat((upper_rows, lower_rows), dim=0)
-
-                # Optional: Add regularization (to ensure H is positive definite)
-                reg_param = 5
-                H += torch.eye(H.shape[0], device=self.device) * reg_param
-
-                # Step 5: Solve the system H * ivp_H_h2 = h2
-                ivp_H_h2 = torch.linalg.solve(H, h2)
-
-                # Final Step: Calculate the final gradient
-                imp = torch.autograd.grad(h1_pre_omega, self.critic.parameters(), ivp_H_h2, create_graph=True,
-                                          retain_graph=True)
-
-                vmap_elapsed = time.time() - vmap_fisher_start
-                #=======================
-                #J = x.get()
-                #flat_imp = torch.matmul(torch.transpose(J, 0,1), ivp_H_h2)
-                #flat_imp = test_imp
-                # imp is the stackelberg part of the total derivative
-
-                #imp = self.critic_param_reshape(flat_imp)
-            '''
             # Optimize the critic
             with th.no_grad():
                 # Select action according to policy
                 next_actions, next_log_prob = self.actor.action_log_prob(replay_data.next_observations)
-                next_dstb_actions, next_dstb_log_prob = self.dstb_actor.action_log_prob(replay_data.next_observations)
+                if self.d_see_u is True:
+                    next_dstb_actions, next_dstb_log_prob = self.dstb_actor.action_log_prob(th.cat((replay_data.next_observations, next_actions),dim=1))
+                else:
+                    next_dstb_actions, next_dstb_log_prob = self.dstb_actor.action_log_prob(replay_data.next_observations)
                 # next_dstb_actions = th.zeros(next_dstb_actions.shape, device=self.device)
                 # Compute the next Q values: min over all critics targets
                 next_q_values = th.cat(

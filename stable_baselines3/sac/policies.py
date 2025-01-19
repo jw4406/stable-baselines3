@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
-import torch as th
+import torch as th, numpy as np
 from gymnasium import spaces
 from torch import nn
 
@@ -16,7 +16,7 @@ from stable_baselines3.common.torch_layers import (
     get_actor_critic_arch,
 )
 from stable_baselines3.common.type_aliases import PyTorchObs, Schedule
-
+from gymnasium.spaces import Box
 # CAP the standard deviation of the actor
 LOG_STD_MAX = 2
 LOG_STD_MIN = -20
@@ -61,6 +61,7 @@ class Actor(BasePolicy):
         use_expln: bool = False,
         clip_mean: float = 2.0,
         normalize_images: bool = True,
+        d_see_u: bool = False
     ):
         super().__init__(
             observation_space,
@@ -80,6 +81,7 @@ class Actor(BasePolicy):
         self.use_expln = use_expln
         self.full_std = full_std
         self.clip_mean = clip_mean
+        self.d_see_u = d_see_u
 
         action_dim = get_action_dim(self.action_space)
         latent_pi_net = create_mlp(features_dim, -1, net_arch, activation_fn)
@@ -416,7 +418,8 @@ class SAACPolicy(BasePolicy):
         optimizer_kwargs: Optional[Dict[str, Any]] = None,
         n_critics: int = 2,
         share_features_extractor: bool = False,
-        dstb_action_space: spaces.Space = None
+        dstb_action_space: spaces.Space = None,
+        d_see_u: bool = False
     ):
         super().__init__(
             observation_space,
@@ -439,6 +442,7 @@ class SAACPolicy(BasePolicy):
         self.net_arch = net_arch
         self.activation_fn = activation_fn
         self.dstb_action_space = dstb_action_space
+        #self.d_see_u = d_see_u
         self.net_args = {
             "observation_space": self.observation_space,
             "action_space": self.action_space,
@@ -448,11 +452,13 @@ class SAACPolicy(BasePolicy):
         }
 
         self.dstb_net_args = {
-            "observation_space": self.observation_space,
+            "observation_space": self.observation_space if d_see_u is False
+            else Box(low=-np.inf, high=np.inf, shape=(self.observation_space.shape[0] + self.action_space.shape[0],)),
             "action_space": self.dstb_action_space,
             "net_arch": actor_arch,
             "activation_fn": self.activation_fn,
             "normalize_images": normalize_images,
+            "d_see_u": d_see_u
         }
 
         self.actor_kwargs = self.net_args.copy()
@@ -473,16 +479,23 @@ class SAACPolicy(BasePolicy):
                 "share_features_extractor": share_features_extractor,
             }
         )
-
+        self.net_args["d_see_u"] = False, # never change this or you'll break everything
         self.share_features_extractor = share_features_extractor
 
         self._build(lr_schedule)
+        print("hello")
 
     def _build(self, lr_schedule: Schedule) -> None:
+        self.d_see_u = False
         self.actor = self.make_actor()
+        if self.dstb_net_args['d_see_u'] is True:
+            self.d_see_u = True
         self.dstb_actor = self.make_dstb_actor()
+        self.observation_space = self.actor.observation_space
+        if self.dstb_net_args['d_see_u'] is True:
+            self.d_see_u = False # because critic needs to be initialized
         # the order will ALWAYS be v_lr, c_lr, d_lr
-        assert lr_schedule[0](1) <= lr_schedule[1](1) and lr_schedule[1](1) <= lr_schedule[2](1)
+        #assert lr_schedule[0](1) <= lr_schedule[1](1) and lr_schedule[1](1) <= lr_schedule[2](1)
         self.actor.optimizer = self.optimizer_class(
             self.actor.parameters(),
             lr=lr_schedule[1](1),  # type: ignore[call-arg]
@@ -566,8 +579,12 @@ class SAACPolicy(BasePolicy):
         return self._predict(obs, deterministic=deterministic)
 
     def _predict(self, observation: PyTorchObs, deterministic: bool = False) -> [th.Tensor, th.Tensor]:
-        return self.actor(observation, deterministic), self.dstb_actor(observation, deterministic)
-
+        if self.dstb_net_args['d_see_u'] is True:
+            action = self.actor(observation, deterministic)
+            dstb_action = self.dstb_actor(th.cat((observation, action), dim=1), deterministic)
+            return action, dstb_action
+        else:
+            return self.actor(observation, deterministic), self.dstb_actor(observation, deterministic)
     def set_training_mode(self, mode: bool) -> None:
         """
         Put the policy in either training or evaluation mode.

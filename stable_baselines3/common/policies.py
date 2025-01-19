@@ -113,12 +113,19 @@ class BaseModel(nn.Module):
         net_kwargs = net_kwargs.copy()
         if features_extractor is None:
             # The features extractor is not shared, create a new one
-            features_extractor = self.make_features_extractor()
+            if self.d_see_u is False:
+                features_extractor = self.make_features_extractor()
+            else:
+                features_extractor = self.make_features_extractor_d_see_u()
         net_kwargs.update(dict(features_extractor=features_extractor, features_dim=features_extractor.features_dim))
         return net_kwargs
 
     def make_features_extractor(self) -> BaseFeaturesExtractor:
         """Helper method to create a features extractor."""
+        return self.features_extractor_class(self.observation_space, **self.features_extractor_kwargs)
+
+    def make_features_extractor_d_see_u(self) -> BaseFeaturesExtractor:
+        self.observation_space = self.dstb_actor_kwargs['observation_space']
         return self.features_extractor_class(self.observation_space, **self.features_extractor_kwargs)
 
     def extract_features(self, obs: PyTorchObs, features_extractor: BaseFeaturesExtractor) -> th.Tensor:

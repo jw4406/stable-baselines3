@@ -56,7 +56,7 @@ register(
     # Note: entry_point also accept a class as input (and not only a string)
     entry_point=my_PendulumEnv,
     # Max number of steps per episode, using a `TimeLimitWrapper`
-    max_episode_steps=500,
+    max_episode_steps=200,
 )
 register(# unique identifier for the env `name-version`
     id="my_walker2d_v4",
@@ -92,7 +92,7 @@ from stable_baselines3 import A3C_rarl
 
 #env = gym.make("MountainCarContinuous-v0")
 #env = gym.make("my_half_cheetah", render_mode='human')
-#env = gym.make("my_pendulum")
+env = gym.make("my_pendulum")
 env = gym.make("my_half_cheetah")
 v_learning_rate = 5e-6
 
@@ -166,13 +166,13 @@ def f(tau2):
                   tau=0.01, use_sde=True, use_stackelberg=True, device='auto', use_ef=False)
 
     model = MAGICS_AL("MlPAACPolicy", dstb_action_space=Box(-.3, .3, (2,), dtype=np.float32), ent_coef='auto',
-                      learning_starts=100000, env=env, verbose=2, v_learning_rate=5e-4, c_learning_rate=10e-4,
-                      d_learning_rate=50e-4, v_learning_rate_decay=critic_decay_schedule(5e-4),
-                      c_learning_rate_decay=critic_decay_schedule(10e-4),
-                      d_learning_rate_decay=critic_decay_schedule(50e-4),
-                      policy_kwargs={'net_arch': dict(pi=[64,64,64], qf=[64,64,64])},
-                      buffer_size=100000, batch_size=256, train_freq=32, gradient_steps=1000, gamma=0.9,
-                      tau=0.01, use_sde=True, use_stackelberg=True, device='auto', diag=True, use_ef=False, zofo=False, seed=int(tau2))
+                      learning_starts=50000, env=env, verbose=2, v_learning_rate=1e-3, c_learning_rate=1e-4,
+                      d_learning_rate=5e-4, v_learning_rate_decay=critic_decay_schedule(5e-3),
+                      c_learning_rate_decay=critic_decay_schedule(10e-3),
+                      d_learning_rate_decay=critic_decay_schedule(50e-3),
+                      policy_kwargs={'net_arch': dict(pi=[16,16,16], qf=[32,32,32])},
+                      buffer_size=50000, batch_size=256, train_freq=32, gradient_steps=64, gamma=0.9,
+                      tau=0.01, use_sde=True, use_stackelberg=True, d_see_u=True, device='auto', diag=True, use_ef=False, zofo=False, seed=int(tau2))
     ''' 
     model = SMART("MlPAACPolicy", dstb_action_space=Box(-.7, .7, (1,), dtype=np.float32), ent_coef='auto',
                   learning_starts=50000, env=env, verbose=2, v_learning_rate=5e-4, c_learning_rate=1e-3,
@@ -271,7 +271,7 @@ def f(tau2):
         save_freq=1000,
         save_path="./competitive_models/",
         #stac_train_sweep_pend_competitive_%d % int(tau2)
-        name_prefix="magics_al_cheetah_%d" % int(tau2),
+        name_prefix="_DELETE_magics_al_cheetah_seed5_%d" % int(tau2),
         save_replay_buffer=True,
         save_vecnormalize=True,
         jobid=args.jobid
@@ -279,13 +279,13 @@ def f(tau2):
     callback_list = CallbackList([eval_callback, checkpoint_callback])  # , checkpoint_callback])
     # model.learn(total_timesteps=1_000_000, callback=callback_list)
     model.learn(total_timesteps=5_500_000, callback=callback_list)
-    model.save("./competitive_models/magics_al_cheetah_finished_%d.zip" % int(tau2))
+    model.save("./competitive_models/magics_al_cheetah_seed5_finished_%d.zip" % int(tau2))
     print("HI IM DONE")
 
 if __name__ == '__main__':
     wandb.login(key='d95a51c4001b862123a34a3853fe0306906d2f07')
     with Pool(os.cpu_count()) as p:
-        p.map(f, np.arange(0, 1))
+        p.map(f, np.arange(4, 5))
 
 
 

@@ -145,7 +145,8 @@ class MAGICS_CL(OffPolicyAlgorithm):
         use_stackelberg: bool = True,
         dstb_action_space: spaces.Space = None,
         linear_phase: bool = True,
-        use_ef=True
+        use_ef=True,
+        d_see_u: bool = False
     ):
         super().__init__(
             policy,
@@ -178,6 +179,7 @@ class MAGICS_CL(OffPolicyAlgorithm):
         self.linear_phase = linear_phase
         self.use_ef = use_ef
         print("using e-fim: %r" % self.use_ef, flush=True)
+        self.d_see_u=d_see_u
         self.target_entropy = target_entropy
         self.log_ent_coef = None  # type: Optional[th.Tensor]
         self.dstb_log_ent_coef = None
@@ -202,6 +204,7 @@ class MAGICS_CL(OffPolicyAlgorithm):
         self.d_norm = 0
         self.u_norm = 0
         self.policy_kwargs['dstb_action_space'] = dstb_action_space
+        self.policy_kwargs['d_see_u'] = self.d_see_u
         if dstb_action_space is None:
             self.dstb_action_space = env.action_space
         else:
