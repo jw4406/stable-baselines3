@@ -130,7 +130,7 @@ class my_PendulumEnv(gym.Env):
 
     def step(self, joint_action):
         th, thdot = self.state  # th := theta
-        u = joint_action[0][0]
+        u = joint_action[0]
         d = joint_action[1]
         g = self.g
         m = self.m
@@ -138,9 +138,9 @@ class my_PendulumEnv(gym.Env):
         dt = self.dt
 
         #u = np.clip(u, -self.max_torque, self.max_torque)[0]
-        u = np.clip(u, -1.2, 1.2)[0]
-        d = np.clip(d, -.8, .8)[0]
-        #d = 0
+        u = np.clip(u, -2.0, 2.0)
+        d = np.clip(d, -.8, .8)
+        d = 0
         try:
             len(d)
             d = d[0]

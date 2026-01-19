@@ -76,6 +76,19 @@ class DictReplayBufferSamples(NamedTuple):
     dones: th.Tensor
     rewards: th.Tensor
 
+class Q_RolloutBufferSamples(NamedTuple):
+    observations: th.Tensor
+    actions: th.Tensor
+    adv_actions: th.Tensor
+    next_observations: th.Tensor
+    old_values: th.Tensor
+    old_log_prob: th.Tensor
+    advantages: th.Tensor
+    returns: th.Tensor
+    q_values: th.Tensor
+    env_indices: th.Tensor
+    rewards: th.Tensor
+    dones: th.Tensor
 
 class RolloutReturn(NamedTuple):
     episode_timesteps: int

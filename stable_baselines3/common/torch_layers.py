@@ -237,7 +237,7 @@ class MlpExtractor(nn.Module):
     def forward_critic(self, features: th.Tensor) -> th.Tensor:
         return self.value_net(features)
 
-class MlpExtractorAdv(nn.Module):
+class sb_MlpExtractorAdv(nn.Module):
     """
     Constructs an MLP that receives the output from a previous features extractor (i.e. a CNN) or directly
     the observations (if no features extractor is applied) as an input and outputs a latent representation
@@ -321,6 +321,133 @@ class MlpExtractorAdv(nn.Module):
 
     def forward_critic(self, features: th.Tensor) -> th.Tensor:
         return self.value_net(features)
+class MlpExtractorAdv(nn.Module):
+    """
+    Constructs an MLP that receives the output from a previous features extractor (i.e. a CNN) or directly
+    the observations (if no features extractor is applied) as an input and outputs a latent representation
+    for the policy and a value network.
+
+    The ``net_arch`` parameter allows to specify the amount and size of the hidden layers.
+    It can be in either of the following forms:
+    1. ``dict(vf=[<list of layer sizes>], pi=[<list of layer sizes>])``: to specify the amount and size of the layers in the
+        policy and value nets individually. If it is missing any of the keys (pi or vf),
+        zero layers will be considered for that key.
+    2. ``[<list of layer sizes>]``: "shortcut" in case the amount and size of the layers
+        in the policy and value nets are the same. Same as ``dict(vf=int_list, pi=int_list)``
+        where int_list is the same for the actor and critic.
+
+    .. note::
+        If a key is not specified or an empty list is passed ``[]``, a linear network will be used.
+
+    :param feature_dim: Dimension of the feature vector (can be the output of a CNN)
+    :param net_arch: The specification of the policy and value networks.
+        See above for details on its formatting.
+    :param activation_fn: The activation function to use for the networks.
+    :param device: PyTorch device.
+    """
+
+    def __init__(
+        self,
+        feature_dim: int,
+        net_arch: Union[List[int], Dict[str, List[int]]],
+        activation_fn: Type[nn.Module],
+        device: Union[th.device, str] = "auto",
+        adversarial:bool = False,
+        context_dim=None,
+        ego_action_dim=12,
+        adv_action_dim=12,
+
+    ) -> None:
+        super().__init__()
+        device = get_device(device)
+        policy_net: List[nn.Module] = []
+        dstb_net: List[nn.Module] = []
+        value_net: List[nn.Module] = []
+        q_value_net: List[nn.Module] = []
+        last_layer_dim_pi = feature_dim
+        last_layer_dim_vf = feature_dim
+        self.ego_action_dim = ego_action_dim
+        self.adv_action_dim = adv_action_dim
+
+        # save dimensions of layers in policy and value nets
+        if isinstance(net_arch, dict):
+            # Note: if key is not specificed, assume linear network
+            pi_layers_dims = net_arch.get("pi", [])  # Layer sizes of the policy network
+            vf_layers_dims = net_arch.get("vf", [])  # Layer sizes of the value network
+        else:
+            pi_layers_dims = vf_layers_dims = net_arch
+        # Iterate through the policy layers and build the policy net
+        count = 0
+        for curr_layer_dim in pi_layers_dims:
+            policy_net.append(nn.Linear(last_layer_dim_pi, curr_layer_dim))
+            if count == 0:
+                dstb_net.append(nn.Linear(last_layer_dim_pi + context_dim, curr_layer_dim))
+            else:
+                dstb_net.append(nn.Linear(last_layer_dim_pi, curr_layer_dim))
+            policy_net.append(activation_fn())
+            dstb_net.append(activation_fn())
+            last_layer_dim_pi = curr_layer_dim
+            count = count + 1
+        # Iterate through the value layers and build the value net
+        count = 0
+        for curr_layer_dim in vf_layers_dims:
+            if count == 0:
+                q_value_net.append(nn.Linear(last_layer_dim_vf + ego_action_dim + adv_action_dim, curr_layer_dim))
+            else:
+                    q_value_net.append(nn.Linear(last_layer_dim_vf, curr_layer_dim))
+            q_value_net.append(activation_fn())
+            value_net.append(nn.Linear(last_layer_dim_vf, curr_layer_dim))
+            value_net.append(activation_fn())
+            last_layer_dim_vf = curr_layer_dim
+            count = count + 1
+
+        # Save dim, used to create the distributions
+        self.latent_dim_pi = last_layer_dim_pi
+        self.latent_dim_vf = last_layer_dim_vf
+
+        # Create networks
+        # If the list of layers is empty, the network will just act as an Identity module
+        self.policy_net = nn.Sequential(*policy_net).to(device)
+        self.value_net = nn.Sequential(*value_net).to(device)
+        self.q_value_net = nn.Sequential(*q_value_net).to(device)
+        self.ego_action_extractor = nn.Sequential(
+            nn.Linear(ego_action_dim, ego_action_dim),
+            activation_fn(),
+            nn.Linear(ego_action_dim, ego_action_dim),
+        )
+        self.adv_action_extractor = nn.Sequential(
+            nn.Linear(adv_action_dim, adv_action_dim),
+            activation_fn(),
+            nn.Linear(adv_action_dim, adv_action_dim)
+        )
+        self.dstb_net = nn.Sequential(*dstb_net).to(device)
+
+    def forward(self, ctrl_features: th.Tensor, dstb_features: th.Tensor) -> Tuple[th.Tensor, th.Tensor]:
+        """
+        :return: latent_policy, latent_value of the specified network.
+            If all layers are shared, then ``latent_policy == latent_value``
+        """
+        return self.forward_actor(ctrl_features), self.forward_critic(dstb_features)
+
+    def forward_actor(self, ctrl_features: th.Tensor, dstb_features: th.Tensor = None) -> [th.Tensor, th.Tensor]:
+        if dstb_features is None:
+            return self.policy_net(ctrl_features)
+        else:
+            return self.policy_net(ctrl_features), self.dstb_net(dstb_features)
+
+    def adv_forward(self, dstb_features: th.Tensor) -> th.Tensor:
+        return self.dstb_net(dstb_features)
+
+    def ego_forward(self, ctrl_features: th.Tensor) -> th.Tensor:
+        return self.policy_net(ctrl_features)
+
+    def forward_critic(self, vf_features: th.Tensor) -> th.Tensor:
+        return self.value_net(vf_features)
+
+    def forward_q_value(self, vf_features: th.Tensor, ego_actions: th.Tensor, adv_actions: th.Tensor) -> th.Tensor:
+        ego_actions_transformed = self.ego_action_extractor(ego_actions)
+        adv_actions_transformed = self.adv_action_extractor(adv_actions)
+        return self.q_value_net(th.cat([vf_features, ego_actions_transformed, adv_actions_transformed], dim=1))                                                                                                                   
 class CombinedExtractor(BaseFeaturesExtractor):
     """
     Combined features extractor for Dict observation spaces.

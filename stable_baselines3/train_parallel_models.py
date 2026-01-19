@@ -5,6 +5,8 @@ from stable_baselines3.a2c.my_pendulum import my_PendulumEnv
 from stable_baselines3.a2c.my_walker2d_v4 import my_Walker2dEnv
 from stable_baselines3.a2c.my_mountain_car_continuous import my_Continuous_MountainCarEnv
 from stable_baselines3.a2c.my_half_cheetah import my_HalfCheetahEnv
+from stable_baselines3.a2c.my_hopper_v5 import my_HopperEnv
+from stable_baselines3.a2c.my_ant_v5 import my_AntEnv
 from stable_baselines3 import SAC, MAGICS_CL, MAGICS_AL
 from stable_baselines3.common.callbacks import EvalCallback, StopTrainingOnRewardThreshold, CheckpointCallback, CallbackList
 import argparse
@@ -14,6 +16,7 @@ import wandb
 from gymnasium.spaces import Box
 import numpy as np
 import torch
+from stable_baselines3.main.common.justin.clean_derivative_free_spar import CleanDerivativeFreeSPAR
 parser = argparse.ArgumentParser()
 parser.add_argument('--jobid', default=None, required=False)
 #parser.set_defaults(jobid=0)
@@ -84,6 +87,24 @@ register(# unique identifier for the env `name-version`
     max_episode_steps=1000,
 )
 
+register(# unique identifier for the env `name-version`
+    id="my_hopper",
+    # path to the class for creating the env
+    # Note: entry_point also accept a class as input (and not only a string)
+    entry_point=my_HopperEnv,
+    # Max number of steps per episode, using a `TimeLimitWrapper`
+    max_episode_steps=1000,
+)
+
+register(# unique identifier for the env `name-version`
+    id="my_ant",
+    # path to the class for creating the env
+    # Note: entry_point also accept a class as input (and not only a string)
+    entry_point=my_AntEnv,
+    # Max number of steps per episode, using a `TimeLimitWrapper`
+    max_episode_steps=1000,
+)
+
 import stable_baselines3.a2c
 from stable_baselines3 import A2C
 from stable_baselines3 import A3C_rarl
@@ -94,6 +115,8 @@ from stable_baselines3 import A3C_rarl
 #env = gym.make("my_half_cheetah", render_mode='human')
 env = gym.make("my_pendulum")
 env = gym.make("my_half_cheetah")
+#env = gym.make("my_hopper")
+#env = gym.make("my_ant")
 v_learning_rate = 5e-6
 
 tau_v_c = 0.0066932472422626425 / 0.0005933974267381725
@@ -112,7 +135,7 @@ def f(tau2):
     high = 1_000_000_000
     seed_list = np.random.randint(0, high=high, size=1, dtype=int)
 
-    wandb.init(project="cheetah_al",
+    wandb.init(project="match_al_cl_cheetah",
                entity='jw4406',
                config={"v_lr": v_learning_rate,
                        "u_lr": v_learning_rate * tau_v_c,
@@ -133,7 +156,7 @@ def f(tau2):
                      d_learning_rate_decay=actor_decay_schedule(v_learning_rate * tau_v_c * tau_c_d),
                      linear_phase=True,
                      use_sde=True,use_rms_prop=False,
-                     device='auto',
+                     device='auto', 
                      seed=int(tau2),
                      policy_kwargs={'net_arch': dict(pi=[16,16,16], vf=[128,128,128])},
                      use_leaderboard=USE_LEADERBOARD,
@@ -157,27 +180,32 @@ def f(tau2):
                      policy_memory_size=LEADERBOARD_SIZE,
                      parallel_run_num=int(tau2))
     '''
-    model = MAGICS_CL("MlPAACPolicy", dstb_action_space=Box(-.3, .3, (2,), dtype=np.float32), ent_coef='auto',
-                  learning_starts=25000, env=env, verbose=2, v_learning_rate=5e-5, c_learning_rate=10e-5,
-                  d_learning_rate=50e-5, v_learning_rate_decay=critic_decay_schedule(5e-5),
-                  c_learning_rate_decay=critic_decay_schedule(10e-5),
-                  d_learning_rate_decay=critic_decay_schedule(50e-5),
-                  buffer_size=25000, batch_size=512, train_freq=32, gradient_steps=64, gamma=0.9,
-                  tau=0.01, use_sde=True, use_stackelberg=True, device='auto', use_ef=False)
+    # model = MAGICS_CL("MlPAACPolicy", dstb_action_space=Box(-.3, .3, (2,), dtype=np.float32), ent_coef='auto',
+    #               learning_starts=25000, env=env, verbose=2, v_learning_rate=5e-5, c_learning_rate=10e-5,
+    #               d_learning_rate=50e-5, v_learning_rate_decay=critic_decay_schedule(5e-5),
+    #               c_learning_rate_decay=critic_decay_schedule(10e-5),
+    #               d_learning_rate_decay=critic_decay_schedule(50e-5),
+    #               buffer_size=25000, batch_size=512, train_freq=32, gradient_steps=64, gamma=0.9,
+    #               tau=0.01, use_sde=True, use_stackelberg=True, device='auto', use_ef=False)
 
-    model = MAGICS_AL("MlPAACPolicy", dstb_action_space=Box(-.3, .3, (2,), dtype=np.float32), ent_coef='auto',
-                      learning_starts=50000, env=env, verbose=2, v_learning_rate=1e-3, c_learning_rate=1e-4,
-                      d_learning_rate=5e-4, v_learning_rate_decay=critic_decay_schedule(5e-3),
-                      c_learning_rate_decay=critic_decay_schedule(10e-3),
-                      d_learning_rate_decay=critic_decay_schedule(50e-3),
-                      policy_kwargs={'net_arch': dict(pi=[16,16,16], qf=[32,32,32])},
-                      buffer_size=50000, batch_size=256, train_freq=32, gradient_steps=64, gamma=0.9,
-                      tau=0.01, use_sde=True, use_stackelberg=True, d_see_u=True, device='auto', diag=True, use_ef=False, zofo=False, seed=int(tau2))
+    # model = MAGICS_AL("MlPAACPolicy", dstb_action_space=Box(-.3, .3, (2,), dtype=np.float32), ent_coef='auto',
+    #                   learning_starts=50000, env=env, verbose=2, v_learning_rate=1e-3, c_learning_rate=1e-4,
+    #                   d_learning_rate=5e-4, v_learning_rate_decay=critic_decay_schedule(1e-3),
+    #                   c_learning_rate_decay=critic_decay_schedule(1e-4),
+    #                   d_learning_rate_decay=critic_decay_schedule(5e-4),
+    #                   policy_kwargs={'net_arch': dict(pi=[16,16,16], qf=[64,64,64])},
+    #                   buffer_size=50000, batch_size=256, train_freq=32, gradient_steps=64, gamma=0.9,
+    #                   tau=0.01, use_sde=True, use_stackelberg=True, d_see_u=True, device='auto', diag=True, use_ef=False, zofo=False, seed=int(tau2))
+
+
+
+    
+    #model = MAGICS_AL.load("/home/jw4406/codebase/stable-baselines3/stable_baselines3/competitive_models/ant_background_magics_al_dseeu_0_10_%d_58000_steps.zip" % int(tau2), env=env)
     ''' 
     model = SMART("MlPAACPolicy", dstb_action_space=Box(-.7, .7, (1,), dtype=np.float32), ent_coef='auto',
                   learning_starts=50000, env=env, verbose=2, v_learning_rate=5e-4, c_learning_rate=1e-3,
                   d_learning_rate=5e-3, buffer_size=50000, batch_size=512, train_freq=32, gradient_steps=32, gamma=0.9,
-                  tau=0.01, use_sde=True, use_stackelberg=True, device='auto', use_ef=True)
+                  tau=0.01, use_sde=True, use_stackelberg=True, device='auto', use_ef=True) 
     ''' 
 
     
@@ -271,7 +299,7 @@ def f(tau2):
         save_freq=1000,
         save_path="./competitive_models/",
         #stac_train_sweep_pend_competitive_%d % int(tau2)
-        name_prefix="_DELETE_magics_al_cheetah_seed5_%d" % int(tau2),
+        name_prefix="cheetah_match_magics_al_dseeu_0_5_%d" % int(tau2),
         save_replay_buffer=True,
         save_vecnormalize=True,
         jobid=args.jobid
@@ -279,13 +307,13 @@ def f(tau2):
     callback_list = CallbackList([eval_callback, checkpoint_callback])  # , checkpoint_callback])
     # model.learn(total_timesteps=1_000_000, callback=callback_list)
     model.learn(total_timesteps=5_500_000, callback=callback_list)
-    model.save("./competitive_models/magics_al_cheetah_seed5_finished_%d.zip" % int(tau2))
+    model.save("./competitive_models/cheetah_dseeu_magics_al_match_finished_0_5_%d.zip" % int(tau2))
     print("HI IM DONE")
 
 if __name__ == '__main__':
     wandb.login(key='d95a51c4001b862123a34a3853fe0306906d2f07')
     with Pool(os.cpu_count()) as p:
-        p.map(f, np.arange(4, 5))
+        p.map(f, np.arange(0, 5))
 
 
 

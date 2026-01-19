@@ -37,6 +37,17 @@ from stable_baselines3.common.utils import get_device, is_vectorized_observation
 
 SelfBaseModel = TypeVar("SelfBaseModel", bound="BaseModel")
 
+class SelectLastLSTMOutput(nn.Module):
+    """
+    A helper module to select the last output from an LSTM layer.
+    LSTMs return (output, (hidden, cell)), and this module extracts
+    the `output` tensor and returns the last time step's output,
+    which has a shape of (batch_size, hidden_size).
+    """
+
+    def forward(self, x: Tuple[th.Tensor, Tuple[th.Tensor, th.Tensor]]) -> th.Tensor:
+        output, _ = x
+        return output
 
 class BaseModel(nn.Module):
     """
@@ -691,7 +702,7 @@ class ActorCriticPolicy(BasePolicy):
                 module.apply(partial(self.init_weights, gain=gain))
         import itertools
         # Setup optimizer with initial learning rate
-        self.optimizer = self.optimizer_class(self.parameters(), lr=lr_schedule[0](1), **self.optimizer_kwargs)  # type: ignore[call-arg]
+        self.optimizer = self.optimizer_class(self.parameters(), lr=lr_schedule(1), **self.optimizer_kwargs)  # type: ignore[call-arg]
         #self.optimizer = self.optimizer_class(itertools.chain([self.log_std], self.mlp_extractor.policy_net.parameters(), self.mlp_extractor.value_net.parameters(), self.action_net.parameters(), self.value_net.parameters()))
     def forward(self, obs: th.Tensor, deterministic: bool = False) -> Tuple[th.Tensor, th.Tensor, th.Tensor]:
         """

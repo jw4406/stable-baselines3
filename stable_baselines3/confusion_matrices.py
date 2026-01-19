@@ -1,7 +1,7 @@
 import torch, torch.autograd as autograd, numpy as np, matplotlib.pyplot as plt
 import gymnasium as gym
 from gymnasium.envs.registration import register
-from stable_baselines3 import A3C_rarl, SMART
+from stable_baselines3 import A3C_rarl, MAGICS_CL
 from stable_baselines3.a2c.my_pendulum import my_PendulumEnv
 from stable_baselines3.a2c.my_half_cheetah import my_HalfCheetahEnv
 register(
@@ -268,17 +268,18 @@ elif model_class == 'cheetah':
         #    "/home/jw4406/codebase/stable-baselines3/stable_baselines3/competitive_models/stsac_cheetah_models/stsac_cheetah_73_stackelberg_on_halfway_%d_236000_steps.zip" % i,
         #    env=env)
         pog = [0,2]
-        smart = SMART.load(
-            "/home/jw4406/codebase/stable-baselines3/stable_baselines3/competitive_models/stsac_cheetah_ws_reg100_307000_%d_658000_steps.zip" % pog[i],
-            env=env)
+        #smart = MAGICS_CL.load(
+        #    "/home/jw4406/codebase/stable-baselines3/stable_baselines3/competitive_models/stsac_cheetah_ws_reg100_307000_%d_658000_steps.zip" % pog[i],
+        #    env=env)
+        smart = MAGICS_CL.load('/home/jw4406/codebase/stable-baselines3/stable_baselines3/competitive_models/stsac_cheetah_ws_reg100_307000_%d_658000_steps.zip' % pog[i],env=env)
         smart.spirit = False
         smart_model_list.append(smart)
         #except:
         #    pass
-        ablation = SMART.load("/home/jw4406/codebase/stable-baselines3/stable_baselines3/competitive_models/stsac_cheetah_models/stsac_ablation_cheetah_hl3_len200_73_%d_307000_steps.zip" % i, env=env)
+        ablation = MAGICS_CL.load("/home/jw4406/codebase/stable-baselines3/stable_baselines3/competitive_models/stsac_cheetah_models/stsac_ablation_cheetah_hl3_len200_73_%d_307000_steps.zip" % i, env=env)
         ablation.spirit = False
         ablation_model_list.append(ablation)
-        baseline = SMART.load("/home/jw4406/codebase/stable-baselines3/stable_baselines3/competitive_models/stsac_cheetah_models/stsac_baseline_cheetah_hl3_len200_73_%d_307000_steps.zip" % i, env=env)
+        baseline = MAGICS_CL.load("/home/jw4406/codebase/stable-baselines3/stable_baselines3/competitive_models/stsac_cheetah_models/stsac_baseline_cheetah_hl3_len200_73_%d_307000_steps.zip" % i, env=env)
         baseline.spirit = False
         baseline_model_list.append(baseline)
 rounds=5 # change later
@@ -286,8 +287,8 @@ rounds=5 # change later
 s_b, s_a, s_s, a_b, a_a, a_s, b_b, b_a, b_s = [], [], [], [], [], [], [], [], []
 
 for i in range(1):
-    smartc_baselined_win, baselined_smartc_win = duel_models(smart_model_list, baseline_model_list, smart.get_env(),
-                                                             num_episodes=rounds, model_class=model_class)
+    #smartc_baselined_win, baselined_smartc_win = duel_models(smart_model_list, baseline_model_list, smart.get_env(),
+    #                                                         num_episodes=rounds, model_class=model_class)
     smartc_smartd_win, smartd_smartc_win = duel_models(smart_model_list, smart_model_list, smart.get_env(),
                                                        num_episodes=rounds, model_class=model_class, sd=False) #!!
 
