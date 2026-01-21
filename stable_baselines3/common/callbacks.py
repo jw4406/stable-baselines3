@@ -340,7 +340,164 @@ class CheckpointCallback(BaseCallback):
             #    print("Stopping because gradient norm condition is fulfilled", flush=True)
             #    return True
         return True
+class FileQueueTriggerCallback(CheckpointCallback):
+    """
+    A custom callback that creates a task file in a directory
+    after a new model checkpoint is saved.
+    """
 
+    def __init__(self, task_dir: str, use_mirror: bool, num_workers: int, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.task_dir_todo = os.path.join(task_dir, "todo")
+        self.use_mirror = use_mirror
+        self.num_workers = num_workers
+        # Ensure the directory exists
+        os.makedirs(self.task_dir_todo, exist_ok=True)
+        print(f"FileQueueTriggerCallback initialized. Task files will be created in: {self.task_dir_todo}")
+
+    def _on_step(self) -> None:
+        """
+        This method is called by the CheckpointCallback after a checkpoint is saved.
+        """
+        def _submit_br_worker(i: int, time: int, eval_prot: bool, use_mirror: bool) -> str:
+            """Submit a br_worker job and return JobID."""
+            wrap = ["python", "br_worker.py"]
+            if eval_prot:
+                wrap.append("--eval_prot")
+            if use_mirror:
+                wrap.append("--use_mirror")
+
+            python_command = " ".join(wrap)
+
+            script_body = f"""#!/bin/bash
+WORKDIR=/n/fs/magics
+JOBID=$SLURM_JOB_ID
+mkdir -p $WORKDIR/$JOBID
+cd $WORKDIR/$JOBID
+cp -r $HOME/FightLadder ./
+cd FightLadder
+module purge
+__conda_setup="$('/usr/local/anaconda3/2024.02/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
+if [ $? -eq 0 ]; then
+    eval "$__conda_setup"
+else
+    if [ -f "/usr/local/anaconda3/2024.02/etc/profile.d/conda.sh" ]; then
+        . "/usr/local/anaconda3/2024.02/etc/profile.d/conda.sh"
+    else
+        export PATH="/usr/local/anaconda3/2024.02/bin:$PATH"
+    fi
+fi
+unset __conda_setup
+conda activate fightladder
+cd main
+{python_command}
+"""
+
+            cmd = [
+                "sbatch",
+                "--parsable",
+                "--job-name",
+                f"br_worker_{i}",
+                "--nodes=1",
+                "--ntasks=1",
+                "--cpus-per-task=24",
+                "--mem-per-cpu=10G",
+                f"--output=slurm-%j.out",
+                "--mail-type=begin,end",
+                "--mail-user=jw4406@princeton.edu",
+                "--time",
+                str(time),
+                "--gres",
+                "gpu:1",
+                "--wrap",
+                script_body,
+            ]
+
+
+            #TODO: These lines are commented for debugging purposes - uncomment when done
+            #print(cmd)
+            #result = subprocess.run(cmd,check=True, capture_output=True, text=True)
+            #return result.stdout.strip()
+
+        # The path to the checkpoint that was just saved
+        if self.n_calls % self.save_freq == 0:
+            checkpoint_path = os.path.join(self.save_path, f"{self.name_prefix}_{self.num_timesteps}_steps.zip")
+
+            # Define the task file. We'll write the checkpoint path inside it for robustness.
+            task_filename = f"{self.name_prefix}_{self.num_timesteps}_steps.task"
+            task_filepath = os.path.join(self.task_dir_todo, task_filename)
+
+            try:
+                os.rename(checkpoint_path, task_filepath)
+                #TODO: Justin - time, output_log and error_lag are placeholders. Should probably be inputs. Note that _submit_br_worker has a return value (SLURM ID) that currently isn't used.
+                time = 8640
+                for i in range(self.num_workers):
+                    if self.use_mirror:
+                        _submit_br_worker(i=i, time=time, eval_prot=True, use_mirror=True)
+                        _submit_br_worker(i=i, time=time, eval_prot=False, use_mirror=True)
+                    else:
+                        _submit_br_worker(i=i, time=time, eval_prot=False, use_mirror=False)
+                #with open(task_filepath, 'w') as f:
+                #    f.write(checkpoint_path)
+                print(f"CALLBACK: Successfully created task file for {os.path.basename(checkpoint_path)}")
+            except Exception as e:
+                print(f"CALLBACK: Error creating task file {task_filepath}: {e}")
+
+class SACheckpointCallback(CheckpointCallback):
+    def __init__(
+            self,
+            save_freq: int,
+            save_path: str,
+            name_prefix: str = "rl_model",
+            save_replay_buffer: bool = False,
+            save_vecnormalize: bool = False,
+            verbose: int = 0,
+    ):
+        super().__init__(save_path=save_path, verbose=verbose, save_freq=save_freq, name_prefix=name_prefix, save_replay_buffer=save_replay_buffer, save_vecnormalize=save_vecnormalize)
+        self.save_freq = save_freq
+        self.save_path = save_path
+        self.name_prefix = name_prefix
+        self.save_replay_buffer = save_replay_buffer
+        self.save_vecnormalize = save_vecnormalize
+
+    def _on_step(self) -> bool:
+        #from FightLadder.main.common.algorithms import TSS_PPO
+        if self.n_calls % self.save_freq == 0:
+            #test_list = self.model.adversaries
+            model_path = self._checkpoint_path(extension="zip")
+            #for i in range(len(self.model.adversaries)):
+            #    self.model.adversaries[i].save(self.save_path + "/enemy_policy_%d_steps_%d.pt" % (self.n_calls,i))
+            #self.model.adversaries = []
+            #self.model.save(model_path)
+            other = self.model
+            other.perturbed_agent = []
+            other.callback = []
+            other.save(model_path, include=['state_list'])
+            if self.verbose >= 2:
+                print(f"Saving model checkpoint to {model_path}")
+            '''
+            for i in range(self.model.num_adversaries):
+                self.model.env.num_envs = self.model.n_env_per_adv
+                self.model.adversaries.append(TSS_PPO.load(self.save_path + "/enemy_policy_%d.pt" % i, env=self.model.env))
+                self.model.adversaries[i].rollout_buffer.n_envs = self.model.n_env_per_adv
+                self.model.env.num_envs = self.model.n_env_per_adv
+            '''
+            #self.model.adversaries = test_list
+            if self.save_replay_buffer and hasattr(self.model, "replay_buffer") and self.model.replay_buffer is not None:
+                # If model has a replay buffer, save it too
+                replay_buffer_path = self._checkpoint_path("replay_buffer_", extension="pkl")
+                self.model.save_replay_buffer(replay_buffer_path)
+                if self.verbose > 1:
+                    print(f"Saving model replay buffer checkpoint to {replay_buffer_path}")
+
+            if self.save_vecnormalize and self.model.get_vec_normalize_env() is not None:
+                # Save the VecNormalize statistics
+                vec_normalize_path = self._checkpoint_path("vecnormalize_", extension="pkl")
+                self.model.get_vec_normalize_env().save(vec_normalize_path)
+                if self.verbose >= 2:
+                    print(f"Saving model VecNormalize to {vec_normalize_path}")
+
+        return True
 
 class ConvertCallback(BaseCallback):
     """

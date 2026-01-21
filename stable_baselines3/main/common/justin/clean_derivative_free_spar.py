@@ -136,8 +136,11 @@ class CleanDerivativeFreeSPAR(PPO):
             use_mirror=False,
             num_workers=None,
             scheduler_step_size: int=10, #TODO: 10 was chosen arbitrarily - should be changed.
+            ego_strength=1.5,
+            adv_strength=0.5
     ):
-
+        self.ego_strength = ego_strength
+        self.adv_strength = adv_strength
         self.matchups = [state2matchup(state) for state in state_list] if state_list is not None else None #This needs to happen before the super().__init__
         self.envs_per_matchup = envs_per_matchup
         super().__init__(

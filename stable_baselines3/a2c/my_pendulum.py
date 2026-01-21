@@ -101,13 +101,15 @@ class my_PendulumEnv(gym.Env):
         "render_fps": 30,
     }
 
-    def __init__(self, render_mode: Optional[str] = None, g=10.0):
+    def __init__(self, render_mode: Optional[str] = None, g=10.0, ego_strength=1.5, adv_strength=0.5):
         self.max_speed = 8
         self.max_torque = 2.0
         self.dt = 0.05
         self.g = g
         self.m = 1.0
         self.l = 1.0
+        self.ego_strength = ego_strength
+        self.adv_strength = adv_strength
 
         self.render_mode = render_mode
 
@@ -138,9 +140,9 @@ class my_PendulumEnv(gym.Env):
         dt = self.dt
 
         #u = np.clip(u, -self.max_torque, self.max_torque)[0]
-        u = np.clip(u, -2.0, 2.0)
-        d = np.clip(d, -.8, .8)
-        d = 0
+        u = np.clip(u, -self.ego_strength, self.ego_strength)
+        d = np.clip(d, -self.adv_strength, self.adv_strength)
+        #d = 0
         try:
             len(d)
             d = d[0]

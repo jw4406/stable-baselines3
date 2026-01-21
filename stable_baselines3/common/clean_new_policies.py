@@ -300,7 +300,11 @@ class CleanActorActorCriticPolicy(ActorCriticPolicy):
                 dstb_action_net_to_use = self.dstb_action_net[key]
             if evaluate:
                 dstb_actions = dstb_action_net_to_use(latent_pi_dstb)
-                return self.dstb_action_dist[buf_num[0]].proba_distribution(action_logits=dstb_actions)
+                if isinstance(self.dstb_action_dist[buf_num[0]], DiagGaussianDistribution):
+                    key = select_matchup_env(self.matchups, buf_num[0], self.envs_per_matchup)
+                    return self.dstb_action_dist[buf_num[0]].proba_distribution(mean_actions=dstb_actions, log_std=self.dstb_log_std[key])
+                else:
+                    return self.dstb_action_dist[buf_num[0]].proba_distribution(action_logits=dstb_actions)
             else:
                 dstb_actions[buf_num[i] * latents_per_adv : (buf_num[i]+1) * latents_per_adv, :] = dstb_action_net_to_use(latent_pi_dstb[buf_num[i] * latents_per_adv : (buf_num[i]+1) * latents_per_adv, :])
         if isinstance(self.dstb_action_dist[buf_num[i]], BernoulliDistribution):

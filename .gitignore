@@ -54,3 +54,5 @@ pug*.png
 *.png
 *.csv
 */wandb/*
+./wandb/*
+wandb/*
