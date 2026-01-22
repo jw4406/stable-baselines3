@@ -39,9 +39,9 @@ PLAYER = "ego0"
 OPPONENT_LIST = ["adv0"]
 TOTAL_TIMESTEPS = 100000000
 current_dir = os.path.dirname(os.path.abspath(__file__))
-CHECKPOINT_DIR = os.path.join(current_dir, "trained_models/main_checkpoint_models")
-TASK_DIR = os.path.join(current_dir, "trained_models/tasks")
-BR_CHECKPOINT_DIR = os.path.join(current_dir, "trained_models/br_checkpoint_models")
+CHECKPOINT_DIR = os.path.join(current_dir, "main/trained_models/tasks/main_checkpoint_models")
+TASK_DIR = os.path.join(current_dir, "main/trained_models/tasks")
+BR_CHECKPOINT_DIR = os.path.join(current_dir, "main/trained_models/tasks/br_checkpoint_models")
 def main(args):
     env_name = args.env_name
     model_name_prefix = f"{env_name}_ego_{args.ego_strength}_adv_{args.adv_strength}"
@@ -84,7 +84,7 @@ def main(args):
         use_mirror=False,
         num_workers=2,
         save_freq=checkpoint_interval,
-        save_path=BR_CHECKPOINT_DIR,
+        save_path=CHECKPOINT_DIR,
         name_prefix=f"{model_name_prefix}"
     )
     callback_list = CallbackList([checkpoint_callback, file_queue_callback])
