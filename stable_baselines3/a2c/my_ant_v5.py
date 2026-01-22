@@ -243,6 +243,8 @@ class my_AntEnv(MujocoEnv, utils.EzPickle):
         reset_noise_scale: float = 0.1,
         exclude_current_positions_from_observation: bool = True,
         include_cfrc_ext_in_observation: bool = True,
+        ego_strength: float = 0.7,
+        adv_strength: float = 0.7,
         **kwargs,
     ):
         utils.EzPickle.__init__(
@@ -261,6 +263,8 @@ class my_AntEnv(MujocoEnv, utils.EzPickle):
             reset_noise_scale,
             exclude_current_positions_from_observation,
             include_cfrc_ext_in_observation,
+            ego_strength,
+            adv_strength,
             **kwargs,
         )
 
@@ -282,6 +286,9 @@ class my_AntEnv(MujocoEnv, utils.EzPickle):
             exclude_current_positions_from_observation
         )
         self._include_cfrc_ext_in_observation = include_cfrc_ext_in_observation
+        
+        self.ego_strength = ego_strength
+        self.adv_strength = adv_strength
 
         MujocoEnv.__init__(
             self,
@@ -349,13 +356,14 @@ class my_AntEnv(MujocoEnv, utils.EzPickle):
 
     def step(self, action):
         #action = action[0][0]
-        ub = .7
-        lb = -.7
+        ub = self.ego_strength
+        lb = -self.ego_strength
         if any(action[0][0] > ub):
             action[0][0][action[0][0] > ub] = ub
         if any(action[0][0] < lb):
             action[0][0][action[0][0] < lb] = lb
-        action = (action[0] + action[1])[0]
+        dstb_action = np.clip(action[1], -self.adv_strength, self.adv_strength)
+        action = (action[0] + dstb_action)[0]
         xy_position_before = self.data.body(self._main_body).xpos[:2].copy()
         #force = np.ones(3)*1000
         #self.data.xfrc_applied[0, :3] = force

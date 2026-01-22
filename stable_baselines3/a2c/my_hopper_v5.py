@@ -176,6 +176,8 @@ class my_HopperEnv(MujocoEnv, utils.EzPickle):
         healthy_angle_range: Tuple[float, float] = (-0.2, 0.2),
         reset_noise_scale: float = 5e-3,
         exclude_current_positions_from_observation: bool = True,
+        ego_strength: float = 0.7,
+        adv_strength: float = 0.7,
         **kwargs,
     ):
         utils.EzPickle.__init__(
@@ -192,6 +194,8 @@ class my_HopperEnv(MujocoEnv, utils.EzPickle):
             healthy_angle_range,
             reset_noise_scale,
             exclude_current_positions_from_observation,
+            ego_strength,
+            adv_strength,
             **kwargs,
         )
 
@@ -211,6 +215,9 @@ class my_HopperEnv(MujocoEnv, utils.EzPickle):
         self._exclude_current_positions_from_observation = (
             exclude_current_positions_from_observation
         )
+        
+        self.ego_strength = ego_strength
+        self.adv_strength = adv_strength
 
         MujocoEnv.__init__(
             self,
@@ -284,11 +291,12 @@ class my_HopperEnv(MujocoEnv, utils.EzPickle):
 
     def step(self, action):
         ctrl_action = action[0][0, :]
-        if ctrl_action[-1] > .7:
-            ctrl_action[-1] = .7
-        if ctrl_action[-1] < -.7:
-            ctrl_action[-1] = -.7
+        if ctrl_action[-1] > self.ego_strength:
+            ctrl_action[-1] = self.ego_strength
+        if ctrl_action[-1] < -self.ego_strength:
+            ctrl_action[-1] = -self.ego_strength
         dstb_action = action[1][0, :]
+        dstb_action = np.clip(dstb_action, -self.adv_strength, self.adv_strength)
         ctrl_action[-1] += dstb_action
         action = ctrl_action
         x_position_before = self.data.qpos[0]

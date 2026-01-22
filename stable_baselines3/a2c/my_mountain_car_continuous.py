@@ -114,11 +114,13 @@ class my_Continuous_MountainCarEnv(gym.Env):
         "render_fps": 30,
     }
 
-    def __init__(self, render_mode: Optional[str] = None, goal_velocity=0):
-        self.c_min_action = -.8
-        self.c_max_action = .8
-        self.d_min_action = -.2
-        self.d_max_action = .2
+    def __init__(self, render_mode: Optional[str] = None, goal_velocity=0, ego_strength=0.8, adv_strength=0.2):
+        self.ego_strength = ego_strength
+        self.adv_strength = adv_strength
+        self.c_min_action = -ego_strength
+        self.c_max_action = ego_strength
+        self.d_min_action = -adv_strength
+        self.d_max_action = adv_strength
         self.min_position = -1.2
         self.max_position = 0.6
         self.max_speed = 0.07

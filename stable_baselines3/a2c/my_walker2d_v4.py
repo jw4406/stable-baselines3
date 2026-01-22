@@ -33,6 +33,8 @@ class my_Walker2dEnv(MujocoEnv, utils.EzPickle):
         healthy_angle_range=(-1.0, 1.0),
         reset_noise_scale=5e-3,
         exclude_current_positions_from_observation=True,
+        ego_strength=0.8,
+        adv_strength=0.8,
         **kwargs,
     ):
         utils.EzPickle.__init__(
@@ -45,6 +47,8 @@ class my_Walker2dEnv(MujocoEnv, utils.EzPickle):
             healthy_angle_range,
             reset_noise_scale,
             exclude_current_positions_from_observation,
+            ego_strength,
+            adv_strength,
             **kwargs,
         )
 
@@ -62,6 +66,9 @@ class my_Walker2dEnv(MujocoEnv, utils.EzPickle):
         self._exclude_current_positions_from_observation = (
             exclude_current_positions_from_observation
         )
+        
+        self.ego_strength = ego_strength
+        self.adv_strength = adv_strength
 
         if exclude_current_positions_from_observation:
             observation_space = Box(
@@ -122,15 +129,16 @@ class my_Walker2dEnv(MujocoEnv, utils.EzPickle):
 
     def step(self, joint_action):
         ctrl_action = joint_action[0].flatten()
-        #if ctrl_action[2] > .8:
-        #    ctrl_action[2] = .8
-        #elif ctrl_action[2] < -.8:
-        #    ctrl_action[2] = -.8
-        #if ctrl_action[5] > .8:
-        #    ctrl_action[5] = .8
-        #elif ctrl_action[5] < -.8:
-        #    ctrl_action[5] = -.8
+        if ctrl_action[2] > self.ego_strength:
+            ctrl_action[2] = self.ego_strength
+        elif ctrl_action[2] < -self.ego_strength:
+            ctrl_action[2] = -self.ego_strength
+        if ctrl_action[5] > self.ego_strength:
+            ctrl_action[5] = self.ego_strength
+        elif ctrl_action[5] < -self.ego_strength:
+            ctrl_action[5] = -self.ego_strength
         dstb_action = joint_action[1].flatten()
+        dstb_action = np.clip(dstb_action, -self.adv_strength, self.adv_strength)
         expanded_dstb_action = np.zeros(np.shape(ctrl_action))
         expanded_dstb_action[2] = dstb_action[0]
         expanded_dstb_action[5] = dstb_action[1]

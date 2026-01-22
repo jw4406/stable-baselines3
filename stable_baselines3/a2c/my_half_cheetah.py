@@ -28,6 +28,8 @@ class my_HalfCheetahEnv(MujocoEnv, utils.EzPickle):
         ctrl_cost_weight=0.1,
         reset_noise_scale=0.1,
         exclude_current_positions_from_observation=True,
+        ego_strength=0.7,
+        adv_strength=0.7,
         **kwargs,
     ):
         utils.EzPickle.__init__(
@@ -36,6 +38,8 @@ class my_HalfCheetahEnv(MujocoEnv, utils.EzPickle):
             ctrl_cost_weight,
             reset_noise_scale,
             exclude_current_positions_from_observation,
+            ego_strength,
+            adv_strength,
             **kwargs,
         )
 
@@ -48,6 +52,9 @@ class my_HalfCheetahEnv(MujocoEnv, utils.EzPickle):
         self._exclude_current_positions_from_observation = (
             exclude_current_positions_from_observation
         )
+        
+        self.ego_strength = ego_strength
+        self.adv_strength = adv_strength
 
         if exclude_current_positions_from_observation:
             observation_space = Box(
@@ -73,15 +80,16 @@ class my_HalfCheetahEnv(MujocoEnv, utils.EzPickle):
 
     def step(self, joint_action):
         ctrl_action = joint_action[0].flatten()
-        if ctrl_action[2] > .7:
-           ctrl_action[2] = .7
-        elif ctrl_action[2] < -.7:
-           ctrl_action[2] = -.7
-        if ctrl_action[5] > .7:
-           ctrl_action[5] = .7
-        elif ctrl_action[5] < -.7:
-           ctrl_action[5] = -.7
+        if ctrl_action[2] > self.ego_strength:
+           ctrl_action[2] = self.ego_strength
+        elif ctrl_action[2] < -self.ego_strength:
+           ctrl_action[2] = -self.ego_strength
+        if ctrl_action[5] > self.ego_strength:
+           ctrl_action[5] = self.ego_strength
+        elif ctrl_action[5] < -self.ego_strength:
+           ctrl_action[5] = -self.ego_strength
         dstb_action = joint_action[1].flatten()
+        dstb_action = np.clip(dstb_action, -self.adv_strength, self.adv_strength)
         expanded_dstb_action = np.zeros(np.shape(ctrl_action))
         expanded_dstb_action[2] = dstb_action[0]
         expanded_dstb_action[5] = dstb_action[1]
