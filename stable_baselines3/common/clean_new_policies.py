@@ -73,7 +73,7 @@ class CleanActorActorCriticPolicy(ActorCriticPolicy):
         # self.pi_dstb_features_extractor = self.make_features_extractor()
         super().__init__(observation_space = observation_space,
         action_space = action_space,
-        lr_schedule = lr_schedule[0],
+        lr_schedule = [lr_schedule[0]],
         # TODO(antonin): update type annotation when we remove shared network support
         net_arch = net_arch,
         activation_fn = activation_fn,
