@@ -79,7 +79,8 @@ class my_HalfCheetahEnv(MujocoEnv, utils.EzPickle):
         return control_cost
 
     def step(self, joint_action):
-        ctrl_action = joint_action[0].flatten()
+        ctrl_action = joint_action[0:self.action_space.shape[0]].flatten()
+        dstb_action = joint_action[self.action_space.shape[0]:].flatten()
         if ctrl_action[2] > self.ego_strength:
            ctrl_action[2] = self.ego_strength
         elif ctrl_action[2] < -self.ego_strength:
@@ -88,7 +89,7 @@ class my_HalfCheetahEnv(MujocoEnv, utils.EzPickle):
            ctrl_action[5] = self.ego_strength
         elif ctrl_action[5] < -self.ego_strength:
            ctrl_action[5] = -self.ego_strength
-        dstb_action = joint_action[1].flatten()
+        #dstb_action = joint_action[1].flatten()
         dstb_action = np.clip(dstb_action, -self.adv_strength, self.adv_strength)
         expanded_dstb_action = np.zeros(np.shape(ctrl_action))
         expanded_dstb_action[2] = dstb_action[0]

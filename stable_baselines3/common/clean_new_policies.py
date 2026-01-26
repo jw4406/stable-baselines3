@@ -124,7 +124,7 @@ class CleanActorActorCriticPolicy(ActorCriticPolicy):
             adversarial=True,
             context_dim=0,
             ego_action_dim=self.action_space.shape[0],
-            adv_action_dim=self.action_space.shape[0]
+            adv_action_dim=self.dstb_action_space.shape[0] if hasattr(self, 'dstb_action_space') else self.action_space.shape[0]
         ) 
 
     def _build_network(self, joint_schedule: Schedule) -> None:

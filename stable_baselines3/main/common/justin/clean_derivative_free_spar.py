@@ -249,7 +249,7 @@ class CleanDerivativeFreeSPAR(PPO):
                 gamma=self.gamma,
                 gae_lambda=self.gae_lambda,
                 n_envs=self.envs_per_matchup,
-                #dstb_action_space=self.dstb_action_space
+                dstb_action_space=self.dstb_action_space
             ))
             self.adversary_buffers = adversary_buffers
         self.env.num_envs = self.n_envs
@@ -282,7 +282,7 @@ class CleanDerivativeFreeSPAR(PPO):
             gamma=self.gamma,
             gae_lambda=self.gae_lambda,
             n_envs=self.n_envs,
-            #dstb_action_space=self.dstb_action_space
+            dstb_action_space=self.dstb_action_space if hasattr(self, 'dstb_action_space') else None
         )
 
         if hasattr(self, "num_adversaries"):
@@ -291,7 +291,8 @@ class CleanDerivativeFreeSPAR(PPO):
 
         self.policy_kwargs['matchups'] = self.matchups
         self.policy_kwargs['envs_per_matchup'] = self.envs_per_matchup
-        
+
+        self.policy_kwargs['dstb_action_space'] = self.dstb_action_space
         # Set features_extractor_class based on whether observation space is an image
         if is_image_space(self.observation_space):
             self.policy_kwargs['features_extractor_class'] = NatureCNN
@@ -390,9 +391,9 @@ class CleanDerivativeFreeSPAR(PPO):
             # print(clipped_actions, flush=True)
             # print(np.shape(clipped_actions),flush=True)
             # Clip the actions to avoid out of bound error
-            if isinstance(self.action_space, _BoxTypes):
-                clipped_actions = np.clip(np.hstack([actions, actions_other]), self.action_space.low,
-                                          self.action_space.high)
+            # if isinstance(self.action_space, _BoxTypes):
+            #     clipped_actions = np.clip(np.hstack([actions, actions_other]), self.action_space.low,
+            #                               self.action_space.high)
 
             new_obs, rewards, dones, infos = env.step(clipped_actions)
             rewards_other = -rewards

@@ -4,7 +4,9 @@ from gymnasium.envs.registration import register
 from main.common.justin.clean_derivative_free_spar import CleanDerivativeFreeSPAR
 import wandb
 import os
+import numpy as np
 import argparse
+from gymnasium.spaces import Box
 from stable_baselines3.a2c.my_pendulum import my_PendulumEnv
 from stable_baselines3.a2c.my_walker2d_v4 import my_Walker2dEnv
 from stable_baselines3.a2c.my_mountain_car_continuous import my_Continuous_MountainCarEnv
@@ -31,7 +33,11 @@ register(
     # Max number of steps per episode, using a `TimeLimitWrapper`
     max_episode_steps=200,
 )
-
+register(
+    id="my_half_cheetah",
+    entry_point=my_HalfCheetahEnv,
+    max_episode_steps=1000,
+)
 def env_generator(STATE=None, ego_strength=1.5, adv_strength=0.5):
     env_name = STATE[0].split(".")[1]
     return gymnasium.make(env_name, ego_strength=ego_strength, adv_strength=adv_strength)
@@ -46,8 +52,23 @@ def main(args):
     env_name = args.env_name
     model_name_prefix = f"{env_name}_ego_{args.ego_strength}_adv_{args.adv_strength}"
     print("CURRENT MODEL NAME PREFIX: %s" % model_name_prefix)
+
+
     ego_strength = args.ego_strength
     adv_strength = args.adv_strength
+    if env_name == "my_pendulum":
+        shape = (1,)
+    elif env_name == "my_half_cheetah":
+        shape = (2,)
+    elif env_name == "my_walker2d":
+        shape = (2,)
+    elif env_name == "my_mountain_car":
+        shape = (2,)
+    elif env_name == "my_hopper":
+        shape = (1,)
+    elif env_name == "my_ant":
+        shape = (8,)
+    dstb_action_space = Box(low=-adv_strength, high=adv_strength, shape=shape, dtype=np.float32)
 
     STATE = ["Champion.%s.%sVs%s.2Player.state" % (env_name, PLAYER, OPPONENT_LIST[0])]
     env = env_generator(STATE=STATE, ego_strength=ego_strength, adv_strength=adv_strength)
@@ -61,7 +82,7 @@ def main(args):
             v_learning_rate=args.v_lr,
             verbose=2,
             n_steps=args.num_env_steps,
-            batch_size=300,
+            batch_size=512,
             n_epochs=4,
             state_list=state_list,
             envs_per_matchup=1,
@@ -74,7 +95,8 @@ def main(args):
             use_lr_annealing=args.use_lr_annealing,
             lr_anneal_coeff=args.lr_anneal_coeff,
             ego_strength=ego_strength,
-            adv_strength=adv_strength
+            adv_strength=adv_strength,
+            dstb_action_space=dstb_action_space
         )
     checkpoint_interval = args.checkpoint_interval
     checkpoint_callback = SACheckpointCallback(save_freq=checkpoint_interval, save_path=args.save_dir,
@@ -110,7 +132,8 @@ if __name__ == "__main__":
     parser.add_argument("--save_dir", type=str, required=True, default=CHECKPOINT_DIR)
     args = parser.parse_args()
     wandb.login(key='d95a51c4001b862123a34a3853fe0306906d2f07')
-    wandb.init(project="gym_ippo",
+    wandb_project = "gym_ippo_%s_ego_%.1f_adv_%.1f" % (args.env_name, args.ego_strength, args.adv_strength)
+    wandb.init(project=wandb_project,
                entity='jw4406',
                config={"c_lr": args.c_lr,
                        "d_lr": args.d_lr,

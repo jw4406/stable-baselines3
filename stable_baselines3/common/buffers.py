@@ -727,13 +727,14 @@ class RolloutBuffer(BaseBuffer):
         return RolloutBufferSamples(*tuple(map(self.to_torch, data)))
 
 class Q_RolloutBuffer(RolloutBuffer):
-    def __init__(self, buffer_size: int, observation_space: spaces.Space, action_space: spaces.Space, device: Union[th.device, str] = "auto", gae_lambda: float = 1, gamma: float = 0.99, n_envs: int = 1):
+    def __init__(self, buffer_size: int, observation_space: spaces.Space, action_space: spaces.Space, dstb_action_space: spaces.Space, device: Union[th.device, str] = "auto", gae_lambda: float = 1, gamma: float = 0.99, n_envs: int = 1):
         super().__init__(buffer_size, observation_space, action_space, device, gae_lambda, gamma, n_envs)
+        self.dstb_action_dim = dstb_action_space.shape[0]
     def reset(self) -> None:
         self.next_observations = np.zeros((self.buffer_size, self.n_envs) + self.obs_shape, dtype=np.uint8)
         self.observations = np.zeros((self.buffer_size, self.n_envs) + self.obs_shape, dtype=np.uint8)
         self.ego_actions = np.zeros((self.buffer_size, self.n_envs, self.action_dim), dtype=np.float32)
-        self.adv_actions = np.zeros((self.buffer_size, self.n_envs, self.action_dim), dtype=np.float32)
+        self.adv_actions = np.zeros((self.buffer_size, self.n_envs, self.dstb_action_dim if hasattr(self, 'dstb_action_dim') else self.action_dim), dtype=np.float32)
         self.rewards = np.zeros((self.buffer_size, self.n_envs), dtype=np.float32)
         self.returns = np.zeros((self.buffer_size, self.n_envs), dtype=np.float32)
         self.episode_starts = np.zeros((self.buffer_size, self.n_envs), dtype=np.float32)
