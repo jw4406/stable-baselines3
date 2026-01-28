@@ -103,7 +103,7 @@ class CleanActorActorCriticPolicy(ActorCriticPolicy):
         self.pi_dstb_features_extractor = self.make_features_extractor()
         self.pi_ctrl_features_extractor = self.features_extractor
         #self.vf_features
-        net_arch = dict(pi=[256,256], vf=[256,256])
+        net_arch = dict(pi=[1024,1024], vf=[1024,1024])
         self.net_arch = net_arch
         self._build_network(lr_schedule)
         print("hello")
@@ -249,7 +249,11 @@ class CleanActorActorCriticPolicy(ActorCriticPolicy):
                 itertools.chain(self.vf_features_extractor.parameters(), self.value_net.parameters()),
                 joint_schedule[0](1), **self.optimizer_kwargs)
         else:
-            self.ctrl_optimizer = self.optimizer_class(itertools.chain(self.mlp_extractor.policy_net.parameters(), self.pi_ctrl_features_extractor.parameters(),self.action_net.parameters()), joint_schedule[0](1),maximize=False)
+            if isinstance(self.action_dist, DiagGaussianDistribution):
+                self.ctrl_optimizer = self.optimizer_class(itertools.chain(self.mlp_extractor.policy_net.parameters(), self.pi_ctrl_features_extractor.parameters(),self.action_net.parameters(), [self.log_std]), joint_schedule[0](1),maximize=False)
+            else:
+                self.ctrl_optimizer = self.optimizer_class(itertools.chain(self.mlp_extractor.policy_net.parameters(), self.pi_ctrl_features_extractor.parameters(),self.action_net.parameters()), joint_schedule[0](1),maximize=False)
+            #self.ctrl_optimizer = self.optimizer_class(itertools.chain(self.mlp_extractor.policy_net.parameters(), self.pi_ctrl_features_extractor.parameters(),self.action_net.parameters()), joint_schedule[0](1),maximize=False)
             if isinstance(self.action_dist, DiagGaussianDistribution):
                 # Collect all log_std parameters for all adversaries - need to wrap in iterables for chain
                 log_std_params = [self.dstb_log_std[select_matchup_env(self.matchups, i, self.envs_per_matchup)] for i in range(self.num_adversaries)]
@@ -379,8 +383,8 @@ class CleanActorActorCriticPolicy(ActorCriticPolicy):
             #adv_actions = adv_actions[0]
             #adv_log_prob = adv_log_prob[0]
         if zero_adv_action:
-            adv_actions = th.zeros_like(ego_actions)
-            adv_log_prob = th.zeros_like(ego_log_prob)
+            adv_actions = th.zeros_like(adv_actions)
+            adv_log_prob = th.zeros_like(adv_log_prob)
             #adv_entropy = th.zeros()
         
 

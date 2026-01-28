@@ -83,7 +83,7 @@ def main(args):
             verbose=2,
             n_steps=args.num_env_steps,
             batch_size=512,
-            n_epochs=4,
+            n_epochs=10,
             state_list=state_list,
             envs_per_matchup=1,
             env_generator_func=env_generator,
@@ -110,7 +110,7 @@ def main(args):
         name_prefix=f"{model_name_prefix}"
     )
     callback_list = CallbackList([checkpoint_callback, file_queue_callback])
-    finetune_model.learn(update_adversary=True,total_timesteps=TOTAL_TIMESTEPS, callback=callback_list)
+    finetune_model.learn(update_adversary=False, zero_adv_action=True,total_timesteps=TOTAL_TIMESTEPS, callback=callback_list)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
