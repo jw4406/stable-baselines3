@@ -290,12 +290,15 @@ class my_HopperEnv(MujocoEnv, utils.EzPickle):
         return observation
 
     def step(self, action):
-        ctrl_action = action[0][0, :]
-        if ctrl_action[-1] > self.ego_strength:
-            ctrl_action[-1] = self.ego_strength
-        if ctrl_action[-1] < -self.ego_strength:
-            ctrl_action[-1] = -self.ego_strength
-        dstb_action = action[1][0, :]
+        #ctrl_action = action[0][0, :]
+        ctrl_action = action[0:self.action_space.shape[0]].flatten()
+        dstb_action = action[self.action_space.shape[0]:].flatten()
+        for i in range(len(ctrl_action)):
+            if ctrl_action[i] > self.ego_strength:
+                ctrl_action[i] = self.ego_strength
+            elif ctrl_action[i] < -self.ego_strength:
+                ctrl_action[i] = -self.ego_strength
+        #dstb_action = action[1][0, :]
         dstb_action = np.clip(dstb_action, -self.adv_strength, self.adv_strength)
         ctrl_action[-1] += dstb_action
         action = ctrl_action

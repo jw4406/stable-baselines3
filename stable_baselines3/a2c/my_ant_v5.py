@@ -358,12 +358,15 @@ class my_AntEnv(MujocoEnv, utils.EzPickle):
         #action = action[0][0]
         ub = self.ego_strength
         lb = -self.ego_strength
-        if any(action[0][0] > ub):
-            action[0][0][action[0][0] > ub] = ub
-        if any(action[0][0] < lb):
-            action[0][0][action[0][0] < lb] = lb
-        dstb_action = np.clip(action[1], -self.adv_strength, self.adv_strength)
-        action = (action[0] + dstb_action)[0]
+        ctrl_action = action[0:self.action_space.shape[0]].flatten()
+        dstb_action = action[self.action_space.shape[0]:].flatten()
+        for i in range(len(ctrl_action)):
+            if ctrl_action[i] > self.ego_strength:
+                ctrl_action[i] = self.ego_strength
+            elif ctrl_action[i] < -self.ego_strength:
+                ctrl_action[i] = -self.ego_strength
+        dstb_action = np.clip(dstb_action, -self.adv_strength, self.adv_strength)
+        action = ctrl_action + dstb_action
         xy_position_before = self.data.body(self._main_body).xpos[:2].copy()
         #force = np.ones(3)*1000
         #self.data.xfrc_applied[0, :3] = force

@@ -38,6 +38,16 @@ register(
     entry_point=my_HalfCheetahEnv,
     max_episode_steps=1000,
 )
+register(
+    id="my_hopper",
+    entry_point=my_HopperEnv,
+    max_episode_steps=1000,
+)
+register(
+    id="my_ant",
+    entry_point=my_AntEnv,
+    max_episode_steps=1000,
+)
 def env_generator(STATE=None, ego_strength=1.5, adv_strength=0.5):
     env_name = STATE[0].split(".")[1]
     return gymnasium.make(env_name, ego_strength=ego_strength, adv_strength=adv_strength)
