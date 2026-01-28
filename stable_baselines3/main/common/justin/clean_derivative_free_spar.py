@@ -1482,6 +1482,7 @@ class CleanDerivativeFreeSPAR(PPO):
     @classmethod
     def load(cls, path: str, num_perturbed: int, **kwargs):
         model = super().load(path, **kwargs)
-        model._create_all_perturbed_agents(num_perturbed)
+        model.policy.to(model.device)
+        #model._create_all_perturbed_agents(num_perturbed)
         #TODO: Add a function that creates a callback and assigns it to self. Something like model._create_callback or passed in as an argument.
         return model

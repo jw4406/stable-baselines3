@@ -103,7 +103,7 @@ class CleanActorActorCriticPolicy(ActorCriticPolicy):
         self.pi_dstb_features_extractor = self.make_features_extractor()
         self.pi_ctrl_features_extractor = self.features_extractor
         #self.vf_features
-        net_arch = dict(pi=[1024,1024], vf=[1024,1024])
+        net_arch = dict(pi=[256,256], vf=[256,256])
         self.net_arch = net_arch
         self._build_network(lr_schedule)
         print("hello")
