@@ -11,6 +11,7 @@ from stable_baselines3.main.common.justin.clean_derivative_free_spar import Clea
 from stable_baselines3.common.save_util import load_from_zip_file
 from stable_baselines3.gym_ippo import env_generator
 from stable_baselines3.common.callbacks import ExploiterCheckpointCallback
+from gymnasium.spaces import Box
 # --- Configuration ---
 current_dir = os.path.dirname(os.path.abspath(__file__))
 print(current_dir)
@@ -34,7 +35,7 @@ if not os.listdir(TASK_DIR):
     print("Warning: The TASK_DIR is empty. Please run ippo.py --player PLAYER to generate a task file.")
 
 POLL_INTERVAL = 5  # Seconds to wait before checking for new tasks
-BR_TRAINING_STEPS = 10000000
+BR_TRAINING_STEPS = 2000
 
 
 def load_spar_model(task_file_path: str) -> None:
@@ -98,6 +99,7 @@ def train_best_response(model_to_exploit, task_file_path: str, eval_prot: bool, 
         TODO: Complete this.
     """
     checkpoint_path = task_file_path
+    done_model_checkpoint_path = os.path.join(DONE_DIR, os.path.basename(checkpoint_path))
     ftm = model_to_exploit
     # --- This is where your specific BR logic goes ---
     # 1. Load the frozen opponent
@@ -116,6 +118,8 @@ def train_best_response(model_to_exploit, task_file_path: str, eval_prot: bool, 
     # env = YourStreetFighterEnv(opponent_policy=fixed_opponent)
     if is_spar == True:
         env = env_generator(STATE=ftm.state_list, ego_strength=ftm.ego_strength, adv_strength=ftm.adv_strength)
+        dstb_action_space = Box(low=ftm.dstb_action_space.low, high=ftm.dstb_action_space.high, shape=ftm.dstb_action_space.shape)
+        env.action_space = dstb_action_space
     else:
         # NOT SURE WHAT TO DO HERE ABOUT LEAGUE MODELS
         env = env_generator(STATE=STATE)
@@ -125,11 +129,21 @@ def train_best_response(model_to_exploit, task_file_path: str, eval_prot: bool, 
     br_agent.is_spar = is_spar # TODO: This is a stupid hack to get the BR agent to know if it is a SPAR model or not. Remove this once we have a better way to do this.
     # 4. Train the BR agent
     br_model_name = f"br_to_{os.path.splitext(os.path.basename(checkpoint_path))[0]}.zip"
-    exploiter_callback = ExploiterCheckpointCallback(save_freq=100000, save_path=BR_MODEL_DIR, name_prefix=br_model_name)
+    exploiter_callback = ExploiterCheckpointCallback(save_freq=1000, save_path=BR_MODEL_DIR, name_prefix=br_model_name)
      
     if eval_only == False:
         print("eval_only was passed as False. Training the BR agent.")
         br_agent.learn(total_timesteps=BR_TRAINING_STEPS, callback=exploiter_callback)
+        local_plot_and_eval_file = os.path.join(current_dir, "local_plot_and_eval.py")
+        br_interval_num = exploiter_callback.n_calls // exploiter_callback.save_freq
+        br_model_path = os.path.join(BR_MODEL_DIR, f"br_to_{os.path.splitext(os.path.basename(checkpoint_path))[0]}.zip_{br_interval_num}000_steps.zip")
+        subprocess.Popen(["python", local_plot_and_eval_file, 
+        "--main_checkpoint_model_path", checkpoint_path,
+        "--done_model_checkpoint_path", done_model_checkpoint_path,
+        "--br_checkpoint_model_path", br_model_path,
+        "--env_id", env.unwrapped.spec.id,
+        "--ego_strength", str(ftm.ego_strength),
+        "--adv_strength", str(ftm.adv_strength)])
         agg_file = os.path.join(current_dir, "aggregate_to_wandb.py")
         subprocess.Popen(["python", agg_file, "--read_from_proj_name", proj_name, "--upload_to_proj_name", analysis_upload_proj_name])
 if __name__ == "__main__":
