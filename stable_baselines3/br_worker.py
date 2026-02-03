@@ -118,8 +118,9 @@ def train_best_response(model_to_exploit, task_file_path: str, eval_prot: bool, 
     # env = YourStreetFighterEnv(opponent_policy=fixed_opponent)
     if is_spar == True:
         env = env_generator(STATE=ftm.state_list, ego_strength=ftm.ego_strength, adv_strength=ftm.adv_strength)
-        dstb_action_space = Box(low=ftm.dstb_action_space.low, high=ftm.dstb_action_space.high, shape=ftm.dstb_action_space.shape)
-        env.action_space = dstb_action_space
+        if eval_prot is True: # we're training an optimal adversary
+            dstb_action_space = Box(low=ftm.dstb_action_space.low, high=ftm.dstb_action_space.high, shape=ftm.dstb_action_space.shape)
+            env.action_space = dstb_action_space
     else:
         # NOT SURE WHAT TO DO HERE ABOUT LEAGUE MODELS
         env = env_generator(STATE=STATE)

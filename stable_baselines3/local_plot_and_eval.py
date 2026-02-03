@@ -28,7 +28,8 @@ parser.add_argument("--adv_strength", type=float, required=True)
 args = parser.parse_args()
 MAIN_CHECKPOINT_MODEL_PATH = args.main_checkpoint_model_path
 DONE_MODEL_CHECKPOINT_PATH = args.done_model_checkpoint_path
-rewards_folder = os.path.join(os.path.dirname(MAIN_CHECKPOINT_MODEL_PATH), "rewards")
+rewards_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), "rewards")
+os.makedirs(rewards_folder, exist_ok=True)
 BR_MODEL_PATH = args.br_checkpoint_model_path
 ENV_ID = args.env_id
 register(
@@ -68,7 +69,7 @@ except FileNotFoundError:
     model = CleanDerivativeFreeSPAR.load(DONE_MODEL_CHECKPOINT_PATH, env=env, num_perturbed=1)
 env.action_space = model.dstb_action_space
 br_model = Exploiter.load(BR_MODEL_PATH, env=env, n_envs=1)
-nr = 5
+nr = 100
 rewards = []
 for i in range(nr):
     curr_reward = 0
@@ -89,6 +90,6 @@ for i in range(nr):
 
 # TODO: write out to a file and then aggregate the results and plot
 working_dir = pwd()
-os.makedirs(rewards_folder, exist_ok=True)
+#os.makedirs(rewards_folder, exist_ok=True)
 with open(os.path.join(rewards_folder, "%s.txt" % str(model.num_timesteps)), "w") as f:
     f.write(str(np.mean(rewards)))
