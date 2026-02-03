@@ -1,7 +1,7 @@
 #! /bin/bash
 
 # options: my_pendulum, my_half_cheetah, my_hopper, my_ant
-ENV_NAME=my_half_cheetah
+ENV_NAME=my_pendulum
 
 RUN_LIVE=False
 
@@ -39,6 +39,7 @@ CMD=(
   --ego_strength "$ego_strength"
   --adv_strength "$adv_strength"
   --save_dir "$save_dir"
+  --sanity_test "True"
 )
 
 if [[ "$RUN_LIVE" == "True" ]]; then
