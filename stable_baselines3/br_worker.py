@@ -104,15 +104,15 @@ def train_best_response(model_to_exploit, task_file_path: str, eval_prot: bool, 
     # --- This is where your specific BR logic goes ---
     # 1. Load the frozen opponent
     # fixed_opponent = PPO.load(checkpoint_path)
-    wandb.init(project=proj_name,
-                entity='jw4406',
-                group="br_workers",
-                config={"eval_rew": 0,
-                        "exploiter_rew": 0,
-                        "epochs": 0,
-                        "br_wr": 0,
-                        "main_training_epoch": 0,
-                        })
+    #wandb.init(project=proj_name,
+    #            entity='jw4406',
+    #            group="br_workers",
+    #            config={"eval_rew": 0,
+    #                    "exploiter_rew": 0,
+    #                    "epochs": 0,
+    #                    "br_wr": 0,
+    #                    "main_training_epoch": 0,
+    #                    })
     # 2. Create your environment, passing the frozen opponent to it
     #    so the BR agent can play against it.
     # env = YourStreetFighterEnv(opponent_policy=fixed_opponent)
@@ -145,11 +145,11 @@ def train_best_response(model_to_exploit, task_file_path: str, eval_prot: bool, 
         "--env_id", env.unwrapped.spec.id,
         "--ego_strength", str(ftm.ego_strength),
         "--adv_strength", str(ftm.adv_strength)])
-        agg_file = os.path.join(current_dir, "aggregate_to_wandb.py")
-        subprocess.Popen(["python", agg_file, "--read_from_proj_name", proj_name, "--upload_to_proj_name", analysis_upload_proj_name])
+        #agg_file = os.path.join(current_dir, "aggregate_to_wandb.py")
+        #subprocess.Popen(["python", agg_file, "--read_from_proj_name", proj_name, "--upload_to_proj_name", analysis_upload_proj_name])
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--eval_prot", action="store_true")
+    parser.add_argument("--eval_prot", choices=['True', 'False'], default='False', required=True)
     parser.add_argument("--eval_only", choices=['True', 'False'], default='False', required=True)
     parser.add_argument("--proj_name", type=str, required=True)
     parser.add_argument("--analysis_upload_proj_name", type=str, required=True)
@@ -159,12 +159,13 @@ if __name__ == "__main__":
     parser.add_argument("--use_mirror", choices=['True', 'False'], default='False', required=True)
     args = parser.parse_args()
 
+    args.eval_prot = args.eval_prot == 'True'
     if args.eval_only == 'True':
         print("WARNING!")
         print("This is an EVAL ONLY run. No exploiter training will be performed.")
         print("WARNING!")
     args.eval_only = args.eval_only == 'True'
-    wandb.login(key='d95a51c4001b862123a34a3853fe0306906d2f07')
+    #wandb.login(key='d95a51c4001b862123a34a3853fe0306906d2f07')
     todo_dir = os.path.join(TASK_DIR, "todo")
     processing_dir = os.path.join(TASK_DIR, "processing")
     error_dir = os.path.join(TASK_DIR, "error")

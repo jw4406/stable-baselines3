@@ -69,7 +69,7 @@ except FileNotFoundError:
     model = CleanDerivativeFreeSPAR.load(DONE_MODEL_CHECKPOINT_PATH, env=env, num_perturbed=1)
 env.action_space = model.dstb_action_space
 br_model = Exploiter.load(BR_MODEL_PATH, env=env, n_envs=1)
-nr = 100
+nr = 50 
 rewards = []
 for i in range(nr):
     curr_reward = 0

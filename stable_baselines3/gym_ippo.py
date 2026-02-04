@@ -120,7 +120,9 @@ def main(args):
         name_prefix=f"{model_name_prefix}"
     )
     callback_list = CallbackList([checkpoint_callback, file_queue_callback])
-    finetune_model.learn(update_adversary=False, zero_adv_action=True,total_timesteps=TOTAL_TIMESTEPS, callback=callback_list)
+    update_adversary = True if args.sanity_test else True
+    zero_adv_action = True if args.sanity_test else False
+    finetune_model.learn(update_adversary=update_adversary, zero_adv_action=zero_adv_action,total_timesteps=TOTAL_TIMESTEPS, callback=callback_list)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -130,9 +132,9 @@ if __name__ == "__main__":
     parser.add_argument("--v_lr", type=float, required=True, default=4e-6)
     parser.add_argument("--num_perturbs", type=int, required=True, default=10)
     parser.add_argument("--load_path", type=str, required=True, default=None)
-    parser.add_argument("--continue_training", type=bool, required=True, default=False)
+    parser.add_argument("--continue_training", type=str, choices=['True', 'False'], required=True, default='False')
     parser.add_argument("--model-file", type=str, required=True, default=None)
-    parser.add_argument("--use_lr_annealing", type=bool, required=True, default=False)
+    parser.add_argument("--use_lr_annealing", type=str, choices=['True', 'False'], required=True, default='False')
     parser.add_argument("--lr_anneal_coeff", type=float, required=True, default=0.995)
     parser.add_argument("--checkpoint_interval", type=int, required=True, default=100000)
     parser.add_argument("--num_env_steps", type=int, required=True, default=1024)
@@ -140,7 +142,11 @@ if __name__ == "__main__":
     parser.add_argument("--ego_strength", type=float, required=True, default=1.5)
     parser.add_argument("--adv_strength", type=float, required=True, default=0.5)
     parser.add_argument("--save_dir", type=str, required=True, default=CHECKPOINT_DIR)
+    parser.add_argument("--sanity_test", type=str, choices=['True', 'False'], required=True, default='False')
     args = parser.parse_args()
+    args.continue_training = args.continue_training == 'True'
+    args.sanity_test = args.sanity_test == 'True'
+    args.use_lr_annealing = args.use_lr_annealing == 'True'
     wandb.login(key='d95a51c4001b862123a34a3853fe0306906d2f07')
     wandb_project = "gym_ippo_%s_ego_%.1f_adv_%.1f" % (args.env_name, args.ego_strength, args.adv_strength)
     wandb.init(project=wandb_project,

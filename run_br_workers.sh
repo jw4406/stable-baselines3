@@ -17,6 +17,7 @@ LOAD_BR="False"
 WHICH_ENV="my_pendulum"
 IS_LEAGUE="False"
 USE_MIRROR="False"
+EVAL_PROT="True"
 
 # Create logs directory if it doesn't exist
 LOGS_DIR="${SCRIPT_DIR}/logs"
@@ -26,6 +27,7 @@ mkdir -p "${LOGS_DIR}"
 for i in $(seq 1 ${NUM_WORKERS}); do
     echo "Starting br_worker instance ${i}..."
     nohup python "${BR_WORKER_PATH}" \
+	--eval_prot "${EVAL_PROT}" \
         --eval_only "${EVAL_ONLY}" \
         --proj_name "${PROJ_NAME}" \
         --analysis_upload_proj_name "${ANALYSIS_UPLOAD_PROJ_NAME}" \
