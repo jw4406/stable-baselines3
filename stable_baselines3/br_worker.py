@@ -135,7 +135,7 @@ def train_best_response(model_to_exploit, task_file_path: str, eval_prot: bool, 
     if eval_only == False:
         print("eval_only was passed as False. Training the BR agent.")
         br_agent.learn(total_timesteps=BR_TRAINING_STEPS, callback=exploiter_callback)
-        local_plot_and_eval_file = os.path.join(current_dir, "local_plot_and_eval.py")
+        local_plot_and_eval_file = os.path.join(current_dir, "local_br_eval.py")
         br_interval_num = exploiter_callback.n_calls // exploiter_callback.save_freq
         br_model_path = os.path.join(BR_MODEL_DIR, f"br_to_{os.path.splitext(os.path.basename(checkpoint_path))[0]}.zip_{br_interval_num}000_steps.zip")
         subprocess.Popen(["python", local_plot_and_eval_file, 
