@@ -28,8 +28,10 @@ parser.add_argument("--adv_strength", type=float, required=True)
 args = parser.parse_args()
 MAIN_CHECKPOINT_MODEL_PATH = args.main_checkpoint_model_path
 DONE_MODEL_CHECKPOINT_PATH = args.done_model_checkpoint_path
-rewards_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), "rewards")
-os.makedirs(rewards_folder, exist_ok=True)
+br_rewards_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), "br_rewards")
+selfplay_rewards_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), "selfplay_rewards")
+os.makedirs(br_rewards_folder, exist_ok=True)
+os.makedirs(selfplay_rewards_folder, exist_ok=True)
 BR_MODEL_PATH = args.br_checkpoint_model_path
 ENV_ID = args.env_id
 register(
@@ -70,7 +72,7 @@ except FileNotFoundError:
 env.action_space = model.dstb_action_space
 br_model = Exploiter.load(BR_MODEL_PATH, env=env, n_envs=1)
 nr = 50 
-rewards = []
+rewards, selfplay_rewards = [], []
 for i in range(nr):
     curr_reward = 0
     obs = model.env.reset()
@@ -88,8 +90,26 @@ for i in range(nr):
     rewards.append(curr_reward)
     print(f"Episode {i+1} completed")
 
+for i in range(nr):
+    selfplay_reward = 0
+    obs = model.env.reset()
+    obs = np.expand_dims(obs, 0)
+    done = False
+    while not done:
+        with th.no_grad():   
+            action, _, _, adv_action, _, _ = model.policy(obs_as_tensor(obs, model.device))
+            #action_br, _, _ = br_model.policy(obs_as_tensor(obs, br_model.device))
+        action = action.cpu().numpy()
+        adv_action = adv_action.cpu().numpy()
+        clipped_action = np.hstack([action, adv_action])
+        obs, reward, done, info = model.env.step(clipped_action)
+        selfplay_reward += reward
+    selfplay_rewards.append(selfplay_reward)
+    print(f"Episode {i+1} completed")
 # TODO: write out to a file and then aggregate the results and plot
 working_dir = pwd()
 #os.makedirs(rewards_folder, exist_ok=True)
-with open(os.path.join(rewards_folder, "%s.txt" % str(model.num_timesteps)), "w") as f:
+with open(os.path.join(br_rewards_folder, "%s.txt" % str(model.num_timesteps)), "w") as f:
     f.write(str(np.mean(rewards)))
+with open(os.path.join(selfplay_rewards_folder, "%s.txt" % str(model.num_timesteps)), "w") as f:
+    f.write(str(np.mean(selfplay_rewards)))

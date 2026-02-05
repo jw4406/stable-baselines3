@@ -35,7 +35,7 @@ if not os.listdir(TASK_DIR):
     print("Warning: The TASK_DIR is empty. Please run ippo.py --player PLAYER to generate a task file.")
 
 POLL_INTERVAL = 5  # Seconds to wait before checking for new tasks
-BR_TRAINING_STEPS = 2000
+BR_TRAINING_STEPS = 4096
 
 
 def load_spar_model(task_file_path: str) -> None:

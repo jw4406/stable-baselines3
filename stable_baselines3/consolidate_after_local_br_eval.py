@@ -2,6 +2,7 @@ import os
 import csv
 import matplotlib.pyplot as plt
 import pandas as pd
+from datetime import datetime
 
 def consolidate_stats(stats_dir, output_filename, value_header):
     """
@@ -104,9 +105,9 @@ if __name__ == "__main__":
     current_dir = os.path.dirname(os.path.abspath(__file__))
     #wr_stats_dir = os.path.join(current_dir, "trained_models/wr_stats")
     mean_rew_stats_dir = os.path.join(current_dir, "rewards")
-    
+    this_moment = datetime.today().strftime("%Y-%m-%d_%H:%M:%S")
     #output_wr_file = os.path.join(current_dir, "win_rates.csv")
-    output_mean_rew_file = os.path.join(current_dir, "mean_rewards.csv")
+    output_mean_rew_file = os.path.join(current_dir, f"mean_rewards_{this_moment}.csv")
 
     #consolidate_stats(wr_stats_dir, output_wr_file, "WinRate")
     consolidate_stats(mean_rew_stats_dir, output_mean_rew_file, "MeanReward")
