@@ -97,7 +97,7 @@ for i in range(nr):
     done = False
     while not done:
         with th.no_grad():   
-            action, _, _, adv_action, _, _ = model.policy(obs_as_tensor(obs, model.device))
+            action, _, adv_action, _, _, _ = model.policy(obs_as_tensor(obs, model.device))
             #action_br, _, _ = br_model.policy(obs_as_tensor(obs, br_model.device))
         action = action.cpu().numpy()
         adv_action = adv_action.cpu().numpy()

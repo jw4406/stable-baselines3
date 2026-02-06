@@ -58,7 +58,7 @@ def consolidate_stats(stats_dir, output_filename, value_header):
         except IOError as e:
             print(f"Error writing to {output_filename}. Source files were retained. Error: {e}")
 
-def plot_csv_data(csv_path):
+def plot_csv_data(csv_path, base_filename=None):
     """
     Reads a CSV file with two columns (Global Step and a value) and creates a plot.
 
@@ -78,7 +78,6 @@ def plot_csv_data(csv_path):
         y_col = df.columns[1]
 
         # Create the plot
-        plt.figure(figsize=(10, 6))
         plt.plot(df[x_col], df[y_col], marker='o', linestyle='-')
 
         # Add titles and labels
@@ -88,12 +87,12 @@ def plot_csv_data(csv_path):
         plt.grid(True)
         
         # Save the plot
-        base_filename = os.path.splitext(os.path.basename(csv_path))[0]
+        base_filename = os.path.splitext(os.path.basename(csv_path))[0] if base_filename is None else base_filename
         output_filename = f"{base_filename}_plot.png"
         plt.savefig(output_filename)
 
         print(f"Plot saved to {output_filename}")
-        plt.close()
+        #plt.close()
 
     except FileNotFoundError:
         print(f"Error: File not found at '{csv_path}'")
@@ -102,13 +101,23 @@ def plot_csv_data(csv_path):
 
 
 if __name__ == "__main__":
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    #wr_stats_dir = os.path.join(current_dir, "trained_models/wr_stats")
-    mean_rew_stats_dir = os.path.join(current_dir, "rewards")
-    this_moment = datetime.today().strftime("%Y-%m-%d_%H:%M:%S")
-    #output_wr_file = os.path.join(current_dir, "win_rates.csv")
-    output_mean_rew_file = os.path.join(current_dir, f"mean_rewards_{this_moment}.csv")
 
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+
+    br_mean_rew_stats_dir = os.path.join(current_dir, "br_rewards")
+    selfplay_mean_rew_stats_dir = os.path.join(current_dir, "selfplay_rewards")
+
+    this_moment = datetime.today().strftime("%Y-%m-%d_%H:%M:%S")
+
+    output_br_mean_rew_file = os.path.join(current_dir, f"br_mean_rewards_{this_moment}.csv")
+    output_selfplay_mean_rew_file = os.path.join(current_dir, f"selfplay_mean_rewards_{this_moment}.csv")
     #consolidate_stats(wr_stats_dir, output_wr_file, "WinRate")
-    consolidate_stats(mean_rew_stats_dir, output_mean_rew_file, "MeanReward")
-    plot_csv_data(output_mean_rew_file)
+    consolidate_stats(br_mean_rew_stats_dir, output_br_mean_rew_file, "MeanReward")
+    consolidate_stats(selfplay_mean_rew_stats_dir, output_selfplay_mean_rew_file, "MeanReward")
+    br_base_filename = "br_mean_rewards_%s" % this_moment
+    plt.figure(figsize=(10, 6))
+    plot_csv_data(output_br_mean_rew_file, base_filename=br_base_filename)
+    selfplay_base_filename = "selfplay_mean_rewards_%s" % this_moment
+    plot_csv_data(output_selfplay_mean_rew_file, base_filename=selfplay_base_filename)
+    plt.legend(["BR", "Selfplay"])
+    plt.savefig(os.path.join(current_dir, f"br_vs_selfplay_mean_rewards_{this_moment}.png"))
