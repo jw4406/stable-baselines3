@@ -121,3 +121,4 @@ if __name__ == "__main__":
     plot_csv_data(output_selfplay_mean_rew_file, base_filename=selfplay_base_filename)
     plt.legend(["BR", "Selfplay"])
     plt.savefig(os.path.join(current_dir, f"br_vs_selfplay_mean_rewards_{this_moment}.png"))
+    print(f"Combined plot saved to {os.path.join(current_dir, f'br_vs_selfplay_mean_rewards_{this_moment}.png')}")

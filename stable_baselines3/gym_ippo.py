@@ -120,7 +120,7 @@ def main(args):
         name_prefix=f"{model_name_prefix}"
     )
     callback_list = CallbackList([checkpoint_callback, file_queue_callback])
-    update_adversary = True if args.sanity_test else True
+    update_adversary = False if args.sanity_test else True
     zero_adv_action = True if args.sanity_test else False
     finetune_model.learn(update_adversary=update_adversary, zero_adv_action=zero_adv_action,total_timesteps=TOTAL_TIMESTEPS, callback=callback_list)
 

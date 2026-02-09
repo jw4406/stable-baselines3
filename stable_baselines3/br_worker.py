@@ -157,7 +157,9 @@ if __name__ == "__main__":
     parser.add_argument("--which_env", choices=['my_pendulum', 'my_walker2d_v4', 'my_mountain_car_continuous', 'my_half_cheetah', 'my_hopper', 'my_ant'], required=True)
     parser.add_argument("--is_league", choices=['True', 'False'], default='False', required=True)
     parser.add_argument("--use_mirror", choices=['True', 'False'], default='False', required=True)
+    parser.add_argument("--task_dir", type=str, required=False)
     args = parser.parse_args()
+
 
     args.eval_prot = args.eval_prot == 'True'
     if args.eval_only == 'True':
@@ -167,6 +169,10 @@ if __name__ == "__main__":
     args.eval_only = args.eval_only == 'True'
     #wandb.login(key='d95a51c4001b862123a34a3853fe0306906d2f07')
     todo_dir = os.path.join(TASK_DIR, "todo")
+
+    if args.task_dir is not None:
+        print(f"WARNING: Using custom task directory: {args.task_dir}")
+        todo_dir = os.path.join(args.task_dir, "todo")
     processing_dir = os.path.join(TASK_DIR, "processing")
     error_dir = os.path.join(TASK_DIR, "error")
     done_dir = os.path.join(TASK_DIR, "done")
