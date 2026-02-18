@@ -25,7 +25,10 @@ parser.add_argument("--br_checkpoint_model_path", type=str, required=True)
 parser.add_argument("--env_id", type=str, required=True)
 parser.add_argument("--ego_strength", type=float, required=True)
 parser.add_argument("--adv_strength", type=float, required=True)
+parser.add_argument("--exploiter_is_cds", type=str, required=True)
+parser.add_argument("--br_index", type=int, required=True)
 args = parser.parse_args()
+args.exploiter_is_cds = args.exploiter_is_cds == 'True'
 MAIN_CHECKPOINT_MODEL_PATH = args.main_checkpoint_model_path
 DONE_MODEL_CHECKPOINT_PATH = args.done_model_checkpoint_path
 br_rewards_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), "br_rewards")
@@ -69,8 +72,14 @@ try:
     model = CleanDerivativeFreeSPAR.load(MAIN_CHECKPOINT_MODEL_PATH, env=env, num_perturbed=1)
 except FileNotFoundError:
     model = CleanDerivativeFreeSPAR.load(DONE_MODEL_CHECKPOINT_PATH, env=env, num_perturbed=1)
-env.action_space = model.dstb_action_space
-br_model = Exploiter.load(BR_MODEL_PATH, env=env, n_envs=1)
+if args.exploiter_is_cds:
+    pass
+else:
+    env.action_space = model.dstb_action_space
+if args.exploiter_is_cds:
+    br_model = CleanDerivativeFreeSPAR.load(BR_MODEL_PATH, env=env, num_perturbed=1)
+else:
+    br_model = Exploiter.load(BR_MODEL_PATH, env=env, n_envs=1)
 nr = 50 
 rewards, selfplay_rewards = [], []
 for i in range(nr):
@@ -81,7 +90,10 @@ for i in range(nr):
     while not done:
         with th.no_grad():   
             action, _, _, _, _, _ = model.policy(obs_as_tensor(obs, model.device))
-            action_br, _, _ = br_model.policy(obs_as_tensor(obs, br_model.device))
+            if args.exploiter_is_cds:
+                ego_actions, ego_log_probs, action_br, adv_log_probs, values, q_values = br_model.policy(obs_as_tensor(obs, br_model.device), deterministic=False, ego_forward=True, adv_forward=True, zero_ego_action=False, zero_adv_action=True)
+            else:
+                action_br, _, _ = br_model.policy(obs_as_tensor(obs, br_model.device))
         action = action.cpu().numpy()
         action_br = action_br.cpu().numpy()
         clipped_action = np.hstack([action, action_br])
@@ -109,7 +121,7 @@ for i in range(nr):
 # TODO: write out to a file and then aggregate the results and plot
 working_dir = pwd()
 #os.makedirs(rewards_folder, exist_ok=True)
-with open(os.path.join(br_rewards_folder, "%s.txt" % str(model.num_timesteps)), "w") as f:
+with open(os.path.join(br_rewards_folder, "%s_br%d.txt" % (str(model.num_timesteps), args.br_index)), "w") as f:
     f.write(str(np.mean(rewards)))
-with open(os.path.join(selfplay_rewards_folder, "%s.txt" % str(model.num_timesteps)), "w") as f:
+with open(os.path.join(selfplay_rewards_folder, "%s_br%d.txt" % (str(model.num_timesteps), args.br_index)), "w") as f:
     f.write(str(np.mean(selfplay_rewards)))

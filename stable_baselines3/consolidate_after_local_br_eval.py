@@ -81,7 +81,7 @@ def plot_csv_data(csv_path, base_filename=None):
         plt.plot(df[x_col], df[y_col], marker='o', linestyle='-')
 
         # Add titles and labels
-        plt.title(f'{y_col} vs. {x_col}')
+        plt.title("Exploiter performance compared to belief on performance")
         plt.xlabel(x_col)
         plt.ylabel(y_col)
         plt.grid(True)

@@ -6,6 +6,7 @@ import random
 import numpy as np
 import wandb
 import subprocess
+import multiprocessing as mp
 from stable_baselines3.common.preprocessing import is_image_space
 from stable_baselines3.main.common.justin.clean_derivative_free_spar import CleanDerivativeFreeSPAR
 from stable_baselines3.common.save_util import load_from_zip_file
@@ -35,7 +36,7 @@ if not os.listdir(TASK_DIR):
     print("Warning: The TASK_DIR is empty. Please run ippo.py --player PLAYER to generate a task file.")
 
 POLL_INTERVAL = 5  # Seconds to wait before checking for new tasks
-BR_TRAINING_STEPS = 1000000
+BR_TRAINING_STEPS = 10000
 
 
 def load_spar_model(task_file_path: str) -> None:
@@ -91,7 +92,20 @@ def load_spar_model(task_file_path: str) -> None:
         )
         ftm.set_parameters(params, exact_match=True, device=ftm.device)
     return ftm
-def train_best_response(model_to_exploit, task_file_path: str, eval_prot: bool, use_mirror: bool, eval_only: bool, proj_name: str, analysis_upload_proj_name: str, is_spar: bool = False) -> None:
+
+
+def train_best_response(
+    model_to_exploit,
+    task_file_path: str,
+    eval_prot: bool,
+    use_mirror: bool,
+    eval_only: bool,
+    proj_name: str,
+    analysis_upload_proj_name: str,
+    is_spar: bool = False,
+    br_index: int = 0,
+    from_scratch: bool = False,
+) -> None:
     """
     The core logic for a single best-response training run.
 
@@ -121,32 +135,83 @@ def train_best_response(model_to_exploit, task_file_path: str, eval_prot: bool, 
         if eval_prot is True: # we're training an optimal adversary
             dstb_action_space = Box(low=ftm.dstb_action_space.low, high=ftm.dstb_action_space.high, shape=ftm.dstb_action_space.shape)
             env.action_space = dstb_action_space
+        else:
+            assert eval_prot is False 
+            # we're training an optimal ego against the current adversary
+            ego_action_space = Box(low=ftm.action_space.low, high=ftm.action_space.high, shape=ftm.action_space.shape)
+            env.action_space = ego_action_space
     else:
         # NOT SURE WHAT TO DO HERE ABOUT LEAGUE MODELS
         env = env_generator(STATE=STATE)
 
     # 3. Create a new agent to be the best response
-    br_agent = Exploiter('CnnPolicy' if is_image_space(env.observation_space) else 'MlpPolicy', env, device='cuda', exploited=ftm, n_steps=2048, batch_size=512, n_epochs=5, exploiting='ego')
+    br_agent = Exploiter('CnnPolicy' if is_image_space(env.observation_space) else 'MlpPolicy', env, device='cuda', exploited=ftm, n_steps=2048, batch_size=512, n_epochs=5, exploiting='ego' if eval_prot is True else 'adv')
     br_agent.is_spar = is_spar # TODO: This is a stupid hack to get the BR agent to know if it is a SPAR model or not. Remove this once we have a better way to do this.
     # 4. Train the BR agent
-    br_model_name = f"br_to_{os.path.splitext(os.path.basename(checkpoint_path))[0]}.zip"
+    br_model_name = f"br{br_index}_to_{os.path.splitext(os.path.basename(checkpoint_path))[0]}.zip"
     exploiter_callback = ExploiterCheckpointCallback(save_freq=1000, save_path=BR_MODEL_DIR, name_prefix=br_model_name)
      
     if eval_only == False:
         print("eval_only was passed as False. Training the BR agent.")
-        br_agent.learn(total_timesteps=BR_TRAINING_STEPS, callback=exploiter_callback)
+        if from_scratch == True:
+            br_agent.learn(total_timesteps=BR_TRAINING_STEPS, callback=exploiter_callback)
+        else:
+            # if eval prot is True we are training an optimal adversary so we need to update the adversary
+            # if eval prot is False we are training an optimal ego against the current adversary so we need to update the ego
+            ftm.exploited = None
+            ftm.learn(total_timesteps=BR_TRAINING_STEPS, callback=exploiter_callback, update_ego=not eval_prot, update_adversary=eval_prot)
+        #br_agent.learn(total_timesteps=BR_TRAINING_STEPS, callback=exploiter_callback)
         local_plot_and_eval_file = os.path.join(current_dir, "local_br_eval.py")
         br_interval_num = exploiter_callback.n_calls // exploiter_callback.save_freq
-        br_model_path = os.path.join(BR_MODEL_DIR, f"br_to_{os.path.splitext(os.path.basename(checkpoint_path))[0]}.zip_{br_interval_num}000_steps.zip")
+        br_model_path = os.path.join(BR_MODEL_DIR, f"br{br_index}_to_{os.path.splitext(os.path.basename(checkpoint_path))[0]}.zip_{br_interval_num}000_steps.zip")
         subprocess.Popen(["python", local_plot_and_eval_file, 
         "--main_checkpoint_model_path", checkpoint_path,
         "--done_model_checkpoint_path", done_model_checkpoint_path,
         "--br_checkpoint_model_path", br_model_path,
         "--env_id", env.unwrapped.spec.id,
         "--ego_strength", str(ftm.ego_strength),
-        "--adv_strength", str(ftm.adv_strength)])
+        "--adv_strength", str(ftm.adv_strength),
+        "--exploiter_is_cds", str(not from_scratch),
+        "--br_index", str(br_index),
+        ])
         #agg_file = os.path.join(current_dir, "aggregate_to_wandb.py")
         #subprocess.Popen(["python", agg_file, "--read_from_proj_name", proj_name, "--upload_to_proj_name", analysis_upload_proj_name])
+
+
+def run_br_for_task_in_subprocess(
+    task_file_path: str,
+    eval_prot: bool,
+    use_mirror: bool,
+    eval_only: bool,
+    proj_name: str,
+    analysis_upload_proj_name: str,
+    is_spar: bool,
+    br_index: int,
+    from_scratch: bool = False,
+) -> None:
+    """
+    Worker function for running a single BR training instance in a separate process.
+    Each subprocess loads its own copy of the model to avoid pickling issues.
+    """
+    if is_spar:
+        loaded_model = load_spar_model(task_file_path)
+    else:
+        raise NotImplementedError("Non-SPAR multiprocessing BR training is not implemented.")
+
+    train_best_response(
+        loaded_model,
+        task_file_path,
+        eval_prot=eval_prot,
+        use_mirror=use_mirror,
+        eval_only=eval_only,
+        proj_name=proj_name,
+        analysis_upload_proj_name=analysis_upload_proj_name,
+        is_spar=is_spar,
+        br_index=br_index,
+        from_scratch = from_scratch,
+    )
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--eval_prot", choices=['True', 'False'], default='False', required=True)
@@ -158,6 +223,7 @@ if __name__ == "__main__":
     parser.add_argument("--is_league", choices=['True', 'False'], default='False', required=True)
     parser.add_argument("--use_mirror", choices=['True', 'False'], default='False', required=True)
     parser.add_argument("--task_dir", type=str, required=False)
+    parser.add_argument("--num_brs", type=int, default=6, help="Number of independent BR agents to train per main checkpoint.")
     args = parser.parse_args()
 
 
@@ -206,8 +272,43 @@ if __name__ == "__main__":
                 os.rename(todo_path, processing_path)
 
                 # Now that we've claimed it, process it
-                loaded_model = load_spar_model(processing_path)
-                train_best_response(loaded_model,processing_path, eval_prot=args.eval_prot, use_mirror=args.use_mirror, eval_only=args.eval_only, proj_name=args.proj_name, is_spar=True, analysis_upload_proj_name=args.analysis_upload_proj_name)
+                if args.num_brs == 1:
+                    loaded_model = load_spar_model(processing_path)
+                    train_best_response(
+                        loaded_model,
+                        processing_path,
+                        eval_prot=args.eval_prot,
+                        use_mirror=args.use_mirror,
+                        eval_only=args.eval_only,
+                        proj_name=args.proj_name,
+                        analysis_upload_proj_name=args.analysis_upload_proj_name,
+                        is_spar=True,
+                        br_index=2,
+                        from_scratch=True,
+                    )
+                else:
+                    processes = []
+                    for br_idx in range(args.num_brs):
+                        p = mp.Process(
+                            target=run_br_for_task_in_subprocess,
+                            args=(
+                                processing_path,
+                                args.eval_prot,
+                                args.use_mirror,
+                                args.eval_only,
+                                args.proj_name,
+                                args.analysis_upload_proj_name,
+                                True,  # is_spar
+                                br_idx,
+                                True if br_idx > args.num_brs // 2 else False,
+                            ),
+                        )
+                        p.start()
+                        processes.append(p)
+
+                    # Wait for all BR processes to finish before marking task as done
+                    for p in processes:
+                        p.join()
 
                 # Move it to 'done' when finished
                 done_path = os.path.join(done_dir, task_filename)

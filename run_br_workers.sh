@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Number of parallel br_worker instances to run
-NUM_WORKERS=20
+NUM_WORKERS=10
 
 # Get the directory where this script is located
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"

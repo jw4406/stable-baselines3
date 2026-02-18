@@ -462,7 +462,7 @@ class OnPolicyAlgorithm(BaseAlgorithm):
             continue_training = self.collect_rollouts(self.env, callback, self.rollout_buffer,
                                                       n_rollout_steps=self.n_steps)
             if isinstance(self, Exploiter):
-                if len(rews) > 500: 
+                if len(rews) > 2500: 
                     if (max(rews[-window:]) - min(rews[-window:])) <= tolerance * 1.5:
                         print(f"Exploiter reward is stable at {safe_mean(rews[-window:])}")
                         continue_training = False
@@ -487,7 +487,7 @@ class OnPolicyAlgorithm(BaseAlgorithm):
                     self.logger.record("rollout/ep_rew_mean", safe_mean([ep_info["r"] for ep_info in self.ep_info_buffer]))
                     #wandb.log({"eval_rew": safe_mean([ep_info["r"] for ep_info in self.ep_info_buffer])})
                     self.logger.record("rollout/ep_len_mean", safe_mean([ep_info["l"] for ep_info in self.ep_info_buffer]))
-                    if len(rews) > 1500:
+                    if len(rews) > 5000:
                         break
                 self._dump_logs(iteration)
 
