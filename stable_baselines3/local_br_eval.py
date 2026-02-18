@@ -19,6 +19,7 @@ from stable_baselines3.a2c.my_pendulum import my_PendulumEnv
 from stable_baselines3.a2c.my_walker2d_v4 import my_Walker2dEnv
 from stable_baselines3.a2c.my_mountain_car_continuous import my_Continuous_MountainCarEnv
 parser = argparse.ArgumentParser()
+parser.add_argument("--eval_prot", type=str, required=True)
 parser.add_argument("--main_checkpoint_model_path", type=str, required=True)
 parser.add_argument("--done_model_checkpoint_path", type=str, required=True)
 parser.add_argument("--br_checkpoint_model_path", type=str, required=True)
@@ -81,7 +82,7 @@ if args.exploiter_is_cds:
 else:
     br_model = Exploiter.load(BR_MODEL_PATH, env=env, n_envs=1)
 nr = 50 
-rewards, selfplay_rewards = [], []
+exploiting_ego_rewards, selfplay_rewards, exploiting_adv_rewards = [], [], []
 for i in range(nr):
     curr_reward = 0
     obs = model.env.reset()
@@ -89,18 +90,44 @@ for i in range(nr):
     done = False
     while not done:
         with th.no_grad():   
-            action, _, _, _, _, _ = model.policy(obs_as_tensor(obs, model.device))
+            action, _, adv_action, _, _, _ = model.policy(obs_as_tensor(obs, model.device))
             if args.exploiter_is_cds:
-                ego_actions, ego_log_probs, action_br, adv_log_probs, values, q_values = br_model.policy(obs_as_tensor(obs, br_model.device), deterministic=False, ego_forward=True, adv_forward=True, zero_ego_action=False, zero_adv_action=True)
+                left_br_action, left_br_log_probs, right_br_action, right_br_log_probs, values, q_values = br_model.policy(obs_as_tensor(obs, br_model.device), deterministic=False, ego_forward=True, adv_forward=True, zero_ego_action=False, zero_adv_action=True)
+                if args.eval_prot:
+                    action_br = right_br_action
+                else:
+                    action_br = left_br_action
             else:
                 action_br, _, _ = br_model.policy(obs_as_tensor(obs, br_model.device))
         action = action.cpu().numpy()
         action_br = action_br.cpu().numpy()
-        clipped_action = np.hstack([action, action_br])
+        if args.eval_prot:
+            clipped_action = np.hstack([action, action_br])
+        else:
+            clipped_action = np.hstack([action_br, action])
         obs, reward, done, info = model.env.step(clipped_action)
         curr_reward += reward
-    rewards.append(curr_reward)
+    exploiting_ego_rewards.append(curr_reward)
     print(f"Episode {i+1} completed")
+# for i in range(nr):
+#     curr_reward = 0
+#     obs = model.env.reset()
+#     obs = np.expand_dims(obs, 0)
+#     done = False
+#     while not done:
+#         with th.no_grad():
+#             if args.exploiter_is_cds:
+#                 ego_actions, ego_log_probs, action_br, adv_log_probs, values, q_values = br_model.policy(obs_as_tensor(obs, br_model.device), deterministic=False, ego_forward=True, adv_forward=True, zero_ego_action=False, zero_adv_action=True)
+#             else:
+#                 action_br, _, _ = br_model.policy(obs_as_tensor(obs, br_model.device))
+#             action, _, adv_action, _, _, _ = model.policy(obs_as_tensor(obs, model.device))
+#         action = action.cpu().numpy()
+
+#         clipped_action = np.hstack([action_br, adv_action])
+#         obs, reward, done, info = model.env.step(clipped_action)
+#         curr_reward += reward
+#     exploiting_adv_rewards.append(curr_reward)
+#     print(f"Episode {i+1} completed")
 
 for i in range(nr):
     selfplay_reward = 0
@@ -121,7 +148,9 @@ for i in range(nr):
 # TODO: write out to a file and then aggregate the results and plot
 working_dir = pwd()
 #os.makedirs(rewards_folder, exist_ok=True)
-with open(os.path.join(br_rewards_folder, "%s_br%d.txt" % (str(model.num_timesteps), args.br_index)), "w") as f:
-    f.write(str(np.mean(rewards)))
+with open(os.path.join(br_rewards_folder, "%s_br%d_ego.txt" % (str(model.num_timesteps), args.br_index)), "w") as f:
+    f.write(str(np.mean(exploiting_ego_rewards)))
+with open(os.path.join(br_rewards_folder, "%s_br%d_adv.txt" % (str(model.num_timesteps), args.br_index)), "w") as f:
+    f.write(str(np.mean(exploiting_adv_rewards)))
 with open(os.path.join(selfplay_rewards_folder, "%s_br%d.txt" % (str(model.num_timesteps), args.br_index)), "w") as f:
     f.write(str(np.mean(selfplay_rewards)))

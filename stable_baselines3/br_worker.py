@@ -165,6 +165,7 @@ def train_best_response(
         br_interval_num = exploiter_callback.n_calls // exploiter_callback.save_freq
         br_model_path = os.path.join(BR_MODEL_DIR, f"br{br_index}_to_{os.path.splitext(os.path.basename(checkpoint_path))[0]}.zip_{br_interval_num}000_steps.zip")
         subprocess.Popen(["python", local_plot_and_eval_file, 
+        "--eval_prot", str(eval_prot),
         "--main_checkpoint_model_path", checkpoint_path,
         "--done_model_checkpoint_path", done_model_checkpoint_path,
         "--br_checkpoint_model_path", br_model_path,
@@ -302,6 +303,23 @@ if __name__ == "__main__":
                                 br_idx,
                                 True if br_idx > args.num_brs // 2 else False,
                             ),
+                        )
+                        p.start()
+                        processes.append(p)
+                    for br_idx in range(args.num_brs):
+                        p = mp.Process(
+                            target=run_br_for_task_in_subprocess,
+                            args=(
+                                processing_path,
+                                not args.eval_prot,
+                                args.use_mirror,
+                                args.eval_only,
+                                args.proj_name,
+                                args.analysis_upload_proj_name,
+                                True,  # is_spar
+                                br_idx,
+                                True if br_idx > args.num_brs // 2 else False,
+                            )
                         )
                         p.start()
                         processes.append(p)

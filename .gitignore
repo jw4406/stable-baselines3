@@ -63,3 +63,5 @@ stable_baselines3/main/trained_models/tasks/processing/*
 stable_baselines3/rewards/
 stable_baselines3/main/trained_models/tasks/error/*
 stable_baselines3/main/trained_models/tasks/done/
+stable_baselines3/selfplay_rewards/*
+stable_baselines3/br_rewards/*
