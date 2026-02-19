@@ -18,6 +18,7 @@ from stable_baselines3.a2c.my_hopper_v5 import my_HopperEnv
 from stable_baselines3.a2c.my_pendulum import my_PendulumEnv
 from stable_baselines3.a2c.my_walker2d_v4 import my_Walker2dEnv
 from stable_baselines3.a2c.my_mountain_car_continuous import my_Continuous_MountainCarEnv
+from gymnasium.spaces import Box
 parser = argparse.ArgumentParser()
 parser.add_argument("--eval_prot", type=str, required=True)
 parser.add_argument("--main_checkpoint_model_path", type=str, required=True)
@@ -30,6 +31,7 @@ parser.add_argument("--exploiter_is_cds", type=str, required=True)
 parser.add_argument("--br_index", type=int, required=True)
 args = parser.parse_args()
 args.exploiter_is_cds = args.exploiter_is_cds == 'True'
+args.eval_prot = args.eval_prot == 'True'
 MAIN_CHECKPOINT_MODEL_PATH = args.main_checkpoint_model_path
 DONE_MODEL_CHECKPOINT_PATH = args.done_model_checkpoint_path
 br_rewards_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), "br_rewards")
@@ -73,16 +75,37 @@ try:
     model = CleanDerivativeFreeSPAR.load(MAIN_CHECKPOINT_MODEL_PATH, env=env, num_perturbed=1)
 except FileNotFoundError:
     model = CleanDerivativeFreeSPAR.load(DONE_MODEL_CHECKPOINT_PATH, env=env, num_perturbed=1)
-if args.exploiter_is_cds:
-    pass
-else:
-    env.action_space = model.dstb_action_space
+
+# if args.eval_prot is True: # we're training an optimal adversary
+#     dstb_action_space = Box(low=model.dstb_action_space.low, high=model.dstb_action_space.high, shape=model.dstb_action_space.shape)
+#     env.action_space = dstb_action_space
+# else:
+#     assert args.eval_prot is False 
+#     # we're training an optimal ego against the current adversary
+#     ego_action_space = Box(low=model.action_space.low, high=model.action_space.high, shape=model.action_space.shape)
+#     env.action_space = ego_action_space
+
+# if args.exploiter_is_cds:
+#     pass
+# else:
+#     env.action_space = model.dstb_action_space
+
 if args.exploiter_is_cds:
     br_model = CleanDerivativeFreeSPAR.load(BR_MODEL_PATH, env=env, num_perturbed=1)
 else:
+    if args.eval_prot is True: # we're training an optimal adversary
+        dstb_action_space = Box(low=model.dstb_action_space.low, high=model.dstb_action_space.high, shape=model.dstb_action_space.shape)
+        env.action_space = dstb_action_space
+    else:
+        assert args.eval_prot is False 
+        # we're training an optimal ego against the current adversary
+        ego_action_space = Box(low=model.action_space.low, high=model.action_space.high, shape=model.action_space.shape)
+        env.action_space = ego_action_space
+    #print("#$%*&^%$EVAL PROT: %s$%^&*", args.eval_prot)
+    #print("$@#$%^&*()(*&^%$#@)%s$#%^&*()(*&^%$#@", args.exploiter_is_cds)
     br_model = Exploiter.load(BR_MODEL_PATH, env=env, n_envs=1)
 nr = 50 
-exploiting_ego_rewards, selfplay_rewards, exploiting_adv_rewards = [], [], []
+exploiter_rewards, selfplay_rewards = [], []
 for i in range(nr):
     curr_reward = 0
     obs = model.env.reset()
@@ -107,8 +130,8 @@ for i in range(nr):
             clipped_action = np.hstack([action_br, action])
         obs, reward, done, info = model.env.step(clipped_action)
         curr_reward += reward
-    exploiting_ego_rewards.append(curr_reward)
-    print(f"Episode {i+1} completed")
+    exploiter_rewards.append(curr_reward)
+    print(f"Episode {i+1} completed", flush=True)
 # for i in range(nr):
 #     curr_reward = 0
 #     obs = model.env.reset()
@@ -144,13 +167,15 @@ for i in range(nr):
         obs, reward, done, info = model.env.step(clipped_action)
         selfplay_reward += reward
     selfplay_rewards.append(selfplay_reward)
-    print(f"Episode {i+1} completed")
+    print(f"Episode {i+1} completed", flush=True)
 # TODO: write out to a file and then aggregate the results and plot
 working_dir = pwd()
 #os.makedirs(rewards_folder, exist_ok=True)
-with open(os.path.join(br_rewards_folder, "%s_br%d_ego.txt" % (str(model.num_timesteps), args.br_index)), "w") as f:
-    f.write(str(np.mean(exploiting_ego_rewards)))
-with open(os.path.join(br_rewards_folder, "%s_br%d_adv.txt" % (str(model.num_timesteps), args.br_index)), "w") as f:
-    f.write(str(np.mean(exploiting_adv_rewards)))
+if args.eval_prot:
+    with open(os.path.join(br_rewards_folder, "%s_br%d_adv.txt" % (str(model.num_timesteps), args.br_index)), "w") as f:
+        f.write(str(np.mean(exploiter_rewards)))
+else:
+    with open(os.path.join(br_rewards_folder, "%s_br%d_ego.txt" % (str(model.num_timesteps), args.br_index)), "w") as f:
+        f.write(str(np.mean(exploiter_rewards)))
 with open(os.path.join(selfplay_rewards_folder, "%s_br%d.txt" % (str(model.num_timesteps), args.br_index)), "w") as f:
     f.write(str(np.mean(selfplay_rewards)))

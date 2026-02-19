@@ -148,7 +148,7 @@ def train_best_response(
     br_agent = Exploiter('CnnPolicy' if is_image_space(env.observation_space) else 'MlpPolicy', env, device='cuda', exploited=ftm, n_steps=2048, batch_size=512, n_epochs=5, exploiting='ego' if eval_prot is True else 'adv')
     br_agent.is_spar = is_spar # TODO: This is a stupid hack to get the BR agent to know if it is a SPAR model or not. Remove this once we have a better way to do this.
     # 4. Train the BR agent
-    br_model_name = f"br{br_index}_to_{os.path.splitext(os.path.basename(checkpoint_path))[0]}.zip"
+    br_model_name = f"br{br_index}_to_{os.path.splitext(os.path.basename(checkpoint_path))[0]}_exploiting_{'ego' if eval_prot is True else 'adv'}.zip"
     exploiter_callback = ExploiterCheckpointCallback(save_freq=1000, save_path=BR_MODEL_DIR, name_prefix=br_model_name)
      
     if eval_only == False:
@@ -163,7 +163,7 @@ def train_best_response(
         #br_agent.learn(total_timesteps=BR_TRAINING_STEPS, callback=exploiter_callback)
         local_plot_and_eval_file = os.path.join(current_dir, "local_br_eval.py")
         br_interval_num = exploiter_callback.n_calls // exploiter_callback.save_freq
-        br_model_path = os.path.join(BR_MODEL_DIR, f"br{br_index}_to_{os.path.splitext(os.path.basename(checkpoint_path))[0]}.zip_{br_interval_num}000_steps.zip")
+        br_model_path = os.path.join(BR_MODEL_DIR, f"{br_model_name}_{br_interval_num}000_steps.zip")
         subprocess.Popen(["python", local_plot_and_eval_file, 
         "--eval_prot", str(eval_prot),
         "--main_checkpoint_model_path", checkpoint_path,
@@ -273,60 +273,60 @@ if __name__ == "__main__":
                 os.rename(todo_path, processing_path)
 
                 # Now that we've claimed it, process it
-                if args.num_brs == 1:
-                    loaded_model = load_spar_model(processing_path)
-                    train_best_response(
-                        loaded_model,
-                        processing_path,
-                        eval_prot=args.eval_prot,
-                        use_mirror=args.use_mirror,
-                        eval_only=args.eval_only,
-                        proj_name=args.proj_name,
-                        analysis_upload_proj_name=args.analysis_upload_proj_name,
-                        is_spar=True,
-                        br_index=2,
-                        from_scratch=True,
+                # if args.num_brs == 1:
+                #     loaded_model = load_spar_model(processing_path)
+                #     train_best_response(
+                #         loaded_model,
+                #         processing_path,
+                #         eval_prot=args.eval_prot,
+                #         use_mirror=args.use_mirror,
+                #         eval_only=args.eval_only,
+                #         proj_name=args.proj_name,
+                #         analysis_upload_proj_name=args.analysis_upload_proj_name,
+                #         is_spar=True,
+                #         br_index=2,
+                #         from_scratch=True,
+                #     )
+                # else:
+                processes = []
+                for br_idx in range(args.num_brs):
+                    p = mp.Process(
+                        target=run_br_for_task_in_subprocess,
+                        args=(
+                            processing_path,
+                            args.eval_prot,
+                            args.use_mirror,
+                            args.eval_only,
+                            args.proj_name,
+                            args.analysis_upload_proj_name,
+                            True,  # is_spar
+                            br_idx,
+                            True if br_idx >= args.num_brs // 2 else False,
+                        ),
                     )
-                else:
-                    processes = []
-                    for br_idx in range(args.num_brs):
-                        p = mp.Process(
-                            target=run_br_for_task_in_subprocess,
-                            args=(
-                                processing_path,
-                                args.eval_prot,
-                                args.use_mirror,
-                                args.eval_only,
-                                args.proj_name,
-                                args.analysis_upload_proj_name,
-                                True,  # is_spar
-                                br_idx,
-                                True if br_idx > args.num_brs // 2 else False,
-                            ),
+                    p.start()
+                    processes.append(p)
+                for br_idx in range(args.num_brs):
+                    p = mp.Process(
+                        target=run_br_for_task_in_subprocess,
+                        args=(
+                            processing_path,
+                            not args.eval_prot,
+                            args.use_mirror,
+                            args.eval_only,
+                            args.proj_name,
+                            args.analysis_upload_proj_name,
+                            True,  # is_spar
+                            br_idx,
+                            True if br_idx >= args.num_brs // 2 else False,
                         )
-                        p.start()
-                        processes.append(p)
-                    for br_idx in range(args.num_brs):
-                        p = mp.Process(
-                            target=run_br_for_task_in_subprocess,
-                            args=(
-                                processing_path,
-                                not args.eval_prot,
-                                args.use_mirror,
-                                args.eval_only,
-                                args.proj_name,
-                                args.analysis_upload_proj_name,
-                                True,  # is_spar
-                                br_idx,
-                                True if br_idx > args.num_brs // 2 else False,
-                            )
-                        )
-                        p.start()
-                        processes.append(p)
+                    )
+                    p.start()
+                    processes.append(p)
 
                     # Wait for all BR processes to finish before marking task as done
-                    for p in processes:
-                        p.join()
+                for p in processes:
+                    p.join()
 
                 # Move it to 'done' when finished
                 done_path = os.path.join(done_dir, task_filename)

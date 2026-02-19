@@ -1,0 +1,120 @@
+/home/jw4406/codebase/stable-baselines3/stable_baselines3
+WORKER [3537210]: Starting. Watching /home/jw4406/codebase/stable-baselines3/stable_baselines3/main/trained_models/tasks/todo for tasks.
+WORKER [3537486]: Processing task: my_pendulum_ego_1.5_adv_0.5_1000000_steps.task
+Wrapping the env with a `Monitor` wrapper
+Wrapping the env in a DummyVecEnv.
+hello
+eval_only was passed as False. Training the BR agent.
+Recorded reward: -997.55
+how long it took to get here:  4.977455074
+WORKER [3537487]: Processing task: my_pendulum_ego_1.5_adv_0.5_1000000_steps.task
+Wrapping the env with a `Monitor` wrapper
+Wrapping the env in a DummyVecEnv.
+hello
+eval_only was passed as False. Training the BR agent.
+Recorded reward: -1485.78
+how long it took to get here:  4.98485299
+Process Process-1:
+Process Process-2:
+Traceback (most recent call last):
+  File "/home/jw4406/codebase/stable-baselines3/stable_baselines3/br_worker.py", line 329, in <module>
+Traceback (most recent call last):
+    p.join()
+  File "/home/jw4406/anaconda3/envs/mujoco_sb3_parallel/lib/python3.11/multiprocessing/process.py", line 149, in join
+  File "/home/jw4406/anaconda3/envs/mujoco_sb3_parallel/lib/python3.11/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/home/jw4406/anaconda3/envs/mujoco_sb3_parallel/lib/python3.11/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/jw4406/codebase/stable-baselines3/stable_baselines3/br_worker.py", line 202, in run_br_for_task_in_subprocess
+    train_best_response(
+  File "/home/jw4406/codebase/stable-baselines3/stable_baselines3/br_worker.py", line 157, in train_best_response
+    br_agent.learn(total_timesteps=BR_TRAINING_STEPS, callback=exploiter_callback)
+  File "/home/jw4406/codebase/stable-baselines3/stable_baselines3/ppo/ppo.py", line 315, in learn
+    return super().learn(
+           ^^^^^^^^^^^^^^
+  File "/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/on_policy_algorithm.py", line 462, in learn
+    continue_training = self.collect_rollouts(self.env, callback, self.rollout_buffer,
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/exploiter.py", line 124, in collect_rollouts
+    _, _, EXPLOITED_ACTIONS, _, _, _ = self.exploited.policy(obs_tensor)
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jw4406/anaconda3/envs/mujoco_sb3_parallel/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jw4406/anaconda3/envs/mujoco_sb3_parallel/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/clean_new_policies.py", line 391, in forward
+    values = self.value_forward(obs)
+             ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/clean_new_policies.py", line 357, in value_forward
+    values[i * latents_per_adv : (i+1) * latents_per_adv, :] = self.value_net[key](latent_vf[i * latents_per_adv : (i+1) * latents_per_adv, :])
+                                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    res = self._popen.wait(timeout)
+  File "/home/jw4406/anaconda3/envs/mujoco_sb3_parallel/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jw4406/anaconda3/envs/mujoco_sb3_parallel/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jw4406/anaconda3/envs/mujoco_sb3_parallel/lib/python3.11/site-packages/torch/nn/modules/container.py", line 215, in forward
+    def forward(self, input):
+    
+KeyboardInterrupt
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jw4406/anaconda3/envs/mujoco_sb3_parallel/lib/python3.11/multiprocessing/popen_fork.py", line 43, in wait
+    return self.poll(os.WNOHANG if timeout == 0.0 else 0)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Traceback (most recent call last):
+  File "/home/jw4406/anaconda3/envs/mujoco_sb3_parallel/lib/python3.11/multiprocessing/popen_fork.py", line 27, in poll
+    pid, sts = os.waitpid(self.pid, flag)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+KeyboardInterrupt
+  File "/home/jw4406/anaconda3/envs/mujoco_sb3_parallel/lib/python3.11/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/home/jw4406/anaconda3/envs/mujoco_sb3_parallel/lib/python3.11/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/jw4406/codebase/stable-baselines3/stable_baselines3/br_worker.py", line 202, in run_br_for_task_in_subprocess
+    train_best_response(
+  File "/home/jw4406/codebase/stable-baselines3/stable_baselines3/br_worker.py", line 157, in train_best_response
+    br_agent.learn(total_timesteps=BR_TRAINING_STEPS, callback=exploiter_callback)
+  File "/home/jw4406/codebase/stable-baselines3/stable_baselines3/ppo/ppo.py", line 315, in learn
+    return super().learn(
+           ^^^^^^^^^^^^^^
+  File "/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/on_policy_algorithm.py", line 462, in learn
+    continue_training = self.collect_rollouts(self.env, callback, self.rollout_buffer,
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/exploiter.py", line 119, in collect_rollouts
+    EXPLOITED_ACTIONS, _, _, _, _, _ = self.exploited.policy(obs_tensor)
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jw4406/anaconda3/envs/mujoco_sb3_parallel/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jw4406/anaconda3/envs/mujoco_sb3_parallel/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/clean_new_policies.py", line 382, in forward
+    adv_actions, adv_log_prob = self.adv_forward(obs, deterministic)
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/clean_new_policies.py", line 334, in adv_forward
+    dstb_distribution = self._get_adv_action_dist_from_latent(latent_pi_dstb, buf_num=[i for i in range(self.num_adversaries)])
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/clean_new_policies.py", line 317, in _get_adv_action_dist_from_latent
+    return [self.dstb_action_dist[buf_num[i]].proba_distribution(mean_actions=dstb_actions[buf_num[i] * latents_per_adv : (buf_num[i]+1) * latents_per_adv, :], log_std=self.dstb_log_std[select_matchup_env(self.matchups, buf_num[i], self.envs_per_matchup)]) for i in range(len(buf_num))]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/clean_new_policies.py", line 317, in <listcomp>
+    return [self.dstb_action_dist[buf_num[i]].proba_distribution(mean_actions=dstb_actions[buf_num[i] * latents_per_adv : (buf_num[i]+1) * latents_per_adv, :], log_std=self.dstb_log_std[select_matchup_env(self.matchups, buf_num[i], self.envs_per_matchup)]) for i in range(len(buf_num))]
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jw4406/codebase/stable-baselines3/stable_baselines3/common/distributions.py", line 164, in proba_distribution
+    self.distribution = Normal(mean_actions, action_std)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jw4406/anaconda3/envs/mujoco_sb3_parallel/lib/python3.11/site-packages/torch/distributions/normal.py", line 51, in __init__
+    self.loc, self.scale = broadcast_all(loc, scale)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jw4406/anaconda3/envs/mujoco_sb3_parallel/lib/python3.11/site-packages/torch/distributions/utils.py", line 53, in broadcast_all
+    return torch.broadcast_tensors(*values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jw4406/anaconda3/envs/mujoco_sb3_parallel/lib/python3.11/site-packages/torch/functional.py", line 47, in broadcast_tensors
+    def broadcast_tensors(*tensors):
+    
+KeyboardInterrupt
