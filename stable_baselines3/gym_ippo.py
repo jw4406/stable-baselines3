@@ -13,6 +13,7 @@ from stable_baselines3.a2c.my_mountain_car_continuous import my_Continuous_Mount
 from stable_baselines3.a2c.my_half_cheetah import my_HalfCheetahEnv
 from stable_baselines3.a2c.my_hopper_v5 import my_HopperEnv
 from stable_baselines3.a2c.my_ant_v5 import my_AntEnv
+from stable_baselines3.common.env_util import make_vec_env
 # from stable_baselines3.common.adversarial_envs.my_pendulum import my_PendulumEnv
 # from stable_baselines3.common.adversarial_envs.my_walker2d_v4 import my_Walker2dEnv
 # from stable_baselines3.common.adversarial_envs.my_mountain_car_continuous import my_Continuous_MountainCarEnv
@@ -48,9 +49,10 @@ register(
     entry_point=my_AntEnv,
     max_episode_steps=1000,
 )
-def env_generator(STATE=None, ego_strength=1.5, adv_strength=0.5):
+def env_generator(STATE=None, ego_strength=1.5, adv_strength=0.5, n_envs=6):
     env_name = STATE[0].split(".")[1]
-    return gymnasium.make(env_name, ego_strength=ego_strength, adv_strength=adv_strength)
+    envs = make_vec_env(env_name, n_envs=n_envs, wrapper_kwargs={'ego_strength': ego_strength, 'adv_strength': adv_strength})
+    return envs
 PLAYER = "ego0"
 OPPONENT_LIST = ["adv0"]
 TOTAL_TIMESTEPS = 100000000
