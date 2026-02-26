@@ -10,7 +10,8 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 BR_WORKER_PATH="${SCRIPT_DIR}/stable_baselines3/br_worker.py"
 
 # Arguments from launch.json
-NUM_BRS=2
+NUM_BRS="2"
+DEBUG="False"
 EVAL_ONLY="False"
 PROJ_NAME="pendulum_br_training"
 ANALYSIS_UPLOAD_PROJ_NAME="pendulum_br_analysis"
@@ -37,6 +38,7 @@ for i in $(seq 1 ${NUM_WORKERS}); do
         --is_league "${IS_LEAGUE}" \
         --use_mirror "${USE_MIRROR}" \
 	--num_brs "${NUM_BRS}" \
+	--DEBUG "${DEBUG}" \
         > "${LOGS_DIR}/br_worker_${i}.log" 2>&1 &
     
     echo "br_worker instance ${i} started with PID $!"

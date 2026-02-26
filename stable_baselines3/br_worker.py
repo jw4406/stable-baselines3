@@ -36,10 +36,10 @@ if not os.listdir(TASK_DIR):
     print("Warning: The TASK_DIR is empty. Please run ippo.py --player PLAYER to generate a task file.")
 
 POLL_INTERVAL = 5  # Seconds to wait before checking for new tasks
-BR_TRAINING_STEPS = 10000000
+BR_TRAINING_STEPS = 100000
 
 
-def load_spar_model(task_file_path: str) -> None:
+def load_spar_model(task_file_path: str, n_envs: int = 2) -> None:
     worker_id = os.getpid()
     print(f"WORKER [{worker_id}]: Processing task: {os.path.basename(task_file_path)}")
 
@@ -64,7 +64,7 @@ def load_spar_model(task_file_path: str) -> None:
     uniques = list(dict.fromkeys(data['state_list']).keys())
     # need to get the strengths as well
     STATE = uniques
-    env = env_generator(STATE=STATE)
+    env = env_generator(STATE=STATE, n_envs=n_envs)
     #env.num_envs = 1 # HACKY FOR NOW!
     try:
         ftm = CleanDerivativeFreeSPAR.load(path=checkpoint_path, env=env, num_perturbed=1)
@@ -207,7 +207,7 @@ def run_br_for_task_in_subprocess(
     Each subprocess loads its own copy of the model to avoid pickling issues.
     """
     if is_spar:
-        loaded_model = load_spar_model(task_file_path)# LEARNING RATE
+        loaded_model = load_spar_model(task_file_path, n_envs=n_envs)# LEARNING RATE
         loaded_model.c_learning_rate = 1e-4
         loaded_model.d_learning_rate = 2e-4
         loaded_model.v_learning_rate = 5e-4
@@ -311,27 +311,27 @@ if __name__ == "__main__":
                 #     )
                 # else:
                 processes = []
-                # for br_idx in range(args.num_brs):
-                #     target = run_br_for_task_in_subprocess
-                #     training_args = (
-                #         processing_path,
-                #         args.eval_prot,
-                #         args.use_mirror,
-                #         args.eval_only,
-                #         args.proj_name,
-                #         args.analysis_upload_proj_name,
-                #         args.n_envs,
-                #         True,  # is_spar
-                #         br_idx,
-                #         True if br_idx >= args.num_brs // 2 else False,
-                #     )
-                #     if args.DEBUG:
-                #         print(f"DEBUG: Running BR {br_idx} for task {task_filename}")
-                #         target(*training_args)
-                #     else:
-                #         p = mp.Process(target=target, args=training_args)
-                #         p.start()
-                #         processes.append(p)
+                for br_idx in range(args.num_brs):
+                    target = run_br_for_task_in_subprocess
+                    training_args = (
+                        processing_path,
+                        args.eval_prot,
+                        args.use_mirror,
+                        args.eval_only,
+                        args.proj_name,
+                        args.analysis_upload_proj_name,
+                        args.n_envs,
+                        True,  # is_spar
+                        br_idx,
+                        True if br_idx >= args.num_brs // 2 else False,
+                    )
+                    if args.DEBUG:
+                        print(f"DEBUG: Running BR {br_idx} for task {task_filename}")
+                        target(*training_args)
+                    else:
+                        p = mp.Process(target=target, args=training_args)
+                        p.start()
+                        processes.append(p)
                 for br_idx in range(args.num_brs):
                     target = run_br_for_task_in_subprocess
                     training_args = (
