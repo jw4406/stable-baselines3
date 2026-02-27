@@ -504,6 +504,7 @@ class ExploiterCheckpointCallback(CheckpointCallback):
             self.model.exploited = []
             self.model.save(model_path)
             self.model.exploited = exploited
+            self.model_path = model_path
             if self.verbose >= 2:
                 print(f"Saving model checkpoint to {model_path}")
 

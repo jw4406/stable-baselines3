@@ -174,7 +174,8 @@ def train_best_response(
             env_id = env.envs[0].unwrapped.spec.id
         local_plot_and_eval_file = os.path.join(current_dir, "local_br_eval.py")
         br_interval_num = exploiter_callback.n_calls // exploiter_callback.save_freq if single else exploiter_callback.n_calls * len(env.envs) // exploiter_callback.save_freq
-        br_model_path = os.path.join(BR_MODEL_DIR, f"{br_model_name}_{br_interval_num}000_steps.zip")
+        #br_model_path = os.path.join(BR_MODEL_DIR, f"{br_model_name}_{br_interval_num}000_steps.zip")
+        br_model_path = exploiter_callback.model_path
         subprocess.Popen(["python", local_plot_and_eval_file, 
         "--eval_prot", str(eval_prot),
         "--main_checkpoint_model_path", checkpoint_path,
