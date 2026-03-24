@@ -26,6 +26,7 @@ from stable_baselines3.common.utils import obs_as_tensor, safe_mean, explained_v
 #from common.justin.Doubly_TSS_SPAR import Doubly_TSS_SPAR as dtss
 from stable_baselines3.common.vec_env import VecEnv
 from stable_baselines3.common.callbacks import BaseCallback
+from .br_tracker import BRConvergenceTracker
 #from stable_baselines3.main.common.justin.derivative_free_spar import ParallelUpdater
 from .calc_F import _get_buffers_and_keys, _calculate_policy_loss, _compute_grads, calc_F_grad_single, _calculate_q_policy_loss
 import numpy as np
@@ -257,7 +258,7 @@ class CleanDerivativeFreeSPAR(PPO):
         self.num_workers = num_workers
 
         #Create learning rate schedulers
-
+        self.br_tracker = BRConvergenceTracker(patience=500, tolerance=75, window_size=1500)
     def _setup_model(self) -> None:
         assert self.state_list is not None
         assert self.num_adversaries is not None
@@ -309,8 +310,8 @@ class CleanDerivativeFreeSPAR(PPO):
         self.policy.gamma = self.gamma
 
         self.policy = self.policy.to(self.device)
-        if hasattr(self.policy, 'dstb_log_std'):
-            self.policy.dstb_log_std = {key: self.policy.dstb_log_std[key].to(self.device) for key in self.policy.dstb_log_std}
+        #if hasattr(self.policy, 'dstb_log_std'):
+        #    self.policy.dstb_log_std = {key: self.policy.dstb_log_std[key].to(self.device) for key in self.policy.dstb_log_std}
         #self.ctrl_scheduler = ReduceLROnPlateau(self.policy.ctrl_optimizer, factor=0.5, patience=10)
         #self.dstb_scheduler = ReduceLROnPlateau(self.policy.dstb_optimizer, factor=0.5, patience=10)
         #self.value_scheduler = ReduceLROnPlateau(self.policy.value_optimizer, factor=0.5, patience=10)
@@ -698,7 +699,11 @@ class CleanDerivativeFreeSPAR(PPO):
                         rews.append(safe_mean([ep_info["r"] for ep_info in self.ep_info_buffer]))
                         self.logger.record("rollout/ep_rew_mean", safe_mean([ep_info["r"] for ep_info in self.ep_info_buffer]))
                         if wandb.run is not None:   
-                            wandb.log({"eval_rew": safe_mean([ep_info["r"] for ep_info in self.ep_info_buffer])})
+                            #wandb.log({"eval_rew": safe_mean([ep_info["r"] for ep_info in self.ep_info_buffer])})
+                            data = [[self.num_timesteps, safe_mean([ep_info["r"] for ep_info in self.ep_info_buffer])]]
+                            #table = wandb.Table(data=data, columns=["training_timesteps", "agent_reward"])
+                            agent_reward = safe_mean([ep_info["r"] for ep_info in self.ep_info_buffer])
+                            wandb.log({"training_timesteps": self.num_timesteps, "agent_reward": agent_reward})
                         self.logger.record("rollout/ep_len_mean", safe_mean([ep_info["l"] for ep_info in self.ep_info_buffer]))
                     self.logger.record("time/fps", fps)
                     self.logger.record("time/time_elapsed", int(time_elapsed), exclude="tensorboard")
@@ -926,7 +931,7 @@ class CleanDerivativeFreeSPAR(PPO):
             clip_range_vf = self.clip_range_vf(self._current_progress_remaining)
 
         entropy_losses = []
-        pg_losses, value_losses = [], []
+        pg_losses, value_losses, mean_percentage_errors, median_percentage_errors = [], [], [], []
         clip_fractions = []
 
         continue_training = True
@@ -1013,6 +1018,10 @@ class CleanDerivativeFreeSPAR(PPO):
                         )
                     # Value loss using the TD(gae_lambda) target
                     value_loss = F.mse_loss(rollout_data.returns, values_pred)
+                    with torch.no_grad():
+                        percentage_error = th.abs(values_pred - rollout_data.returns) / rollout_data.returns
+                        mean_percentage_errors.append(percentage_error.mean().item())
+                        median_percentage_errors.append(percentage_error.median().item())
                     value_losses.append(value_loss.item())
 
                     # Entropy loss favor exploration
@@ -1056,6 +1065,17 @@ class CleanDerivativeFreeSPAR(PPO):
                     self.policy.adv_grads_autograd_order.append([self.policy.dstb_optimizer.param_groups[0]['params'][i].grad for i in range(len(self.policy.dstb_optimizer.param_groups[0]['params']))])
                     self.policy.value_grads_autograd_order.append([self.policy.value_optimizer.param_groups[0]['params'][i].grad for i in range(len(self.policy.value_optimizer.param_groups[0]['params']))])
                     self.policy.value_loss.append(value_loss)
+                    if hasattr(self, "training_br"):
+                        if update_ego:
+                            grads = self.ego_grads_autograd_order
+                        else:
+                            grads = self.policy.adv_grads_autograd_order
+                        second_level_grads = [x for xs in grads for x in xs]
+                        norm = 0
+                        for x in second_level_grads:
+                            norm = norm + x.norm()
+                        #flat_grads = np.asarray([x for xs in second_level_grads for x in xs])
+                        self.br_tracker.check(norm)
                     # Clip grad norm
                     #th.nn.utils.clip_grad_norm_(self.policy.parameters(), self.max_grad_norm)
                     if update_ego:
@@ -1079,6 +1099,8 @@ class CleanDerivativeFreeSPAR(PPO):
         #self.logger.record("train/entropy_loss", np.mean(entropy_losses))
         #self.logger.record("train/policy_gradient_loss", np.mean(pg_losses))
         self.logger.record("train/value_loss", np.mean(value_losses))
+        self.logger.record("train/mean_percentage_error", np.mean(mean_percentage_errors))
+        self.logger.record("train/median_percentage_error", np.mean(median_percentage_errors))
         #self.logger.record("train/approx_kl", np.mean(approx_kl_divs))
         #self.logger.record("train/clip_fraction", np.mean(clip_fractions))
         #self.logger.record("train/loss", loss.item())
@@ -1349,7 +1371,14 @@ class CleanDerivativeFreeSPAR(PPO):
         self.logger.record(f"train/{prefix}_explained_variance", explained_var)
 
         if hasattr(self.policy, "log_std"):
-            self.logger.record("train/std", th.exp(self.policy.log_std).mean().item())
+            temp_std = th.exp(self.policy.log_std).mean().item()
+            self.logger.record("train/ego_std", th.exp(self.policy.log_std).mean().item())
+            for i in range(len(list(self.policy.dstb_log_std.keys()))):
+                key = list(self.policy.dstb_log_std.keys())[i]
+                name = "train/adv_std_%s" % key
+                adv_temp_std = th.exp(self.policy.dstb_log_std[key]).mean().item()
+                self.logger.record(name, th.exp(self.policy.dstb_log_std[key]).mean().item())
+            #self.logger.record("train/adv_std", th.exp(self.policy.log_std).mean().item())
 
         self.logger.record("train/n_updates", self._n_updates, exclude="tensorboard")
         self.logger.record("train/clip_range", clip_range)

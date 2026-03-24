@@ -51,7 +51,7 @@ register(
 )
 def env_generator(STATE=None, ego_strength=1.5, adv_strength=0.5, n_envs=6):
     env_name = STATE[0].split(".")[1]
-    envs = make_vec_env(env_name, n_envs=n_envs, wrapper_kwargs={'ego_strength': ego_strength, 'adv_strength': adv_strength})
+    envs = make_vec_env(env_name, n_envs=n_envs, env_kwargs={"ego_strength": ego_strength, "adv_strength": adv_strength})
     return envs
 PLAYER = "ego0"
 OPPONENT_LIST = ["adv0"]
@@ -83,7 +83,7 @@ def main(args):
     dstb_action_space = Box(low=-adv_strength, high=adv_strength, shape=shape, dtype=np.float32)
 
     STATE = ["Champion.%s.%sVs%s.2Player.state" % (env_name, PLAYER, OPPONENT_LIST[0])]
-    env = env_generator(STATE=STATE, ego_strength=ego_strength, adv_strength=adv_strength)
+    env = env_generator(STATE=STATE, ego_strength=ego_strength, adv_strength=adv_strength, n_envs=args.envs_per_matchup)
     state_list = STATE
     finetune_model = CleanDerivativeFreeSPAR(
             policy="AACCnnPolicy",
@@ -97,7 +97,7 @@ def main(args):
             batch_size=512,
             n_epochs=10,
             state_list=state_list,
-            envs_per_matchup=1,
+            envs_per_matchup=args.envs_per_matchup,
             env_generator_func=env_generator,
             num_adversaries=1,
             n_env_per_adv=1,
@@ -122,9 +122,32 @@ def main(args):
         name_prefix=f"{model_name_prefix}"
     )
     callback_list = CallbackList([checkpoint_callback, file_queue_callback])
-    update_adversary = False if args.sanity_test else True
-    zero_adv_action = True if args.sanity_test else False
-    finetune_model.learn(update_adversary=update_adversary, zero_adv_action=zero_adv_action,total_timesteps=TOTAL_TIMESTEPS, callback=callback_list)
+    if args.ego_style == 'learning':
+        update_ego=True
+        zero_ego_action=False
+    elif args.ego_style == 'zero_action':
+        update_ego=False
+        zero_ego_action=True
+    elif args.ego_style == 'random_action':
+        update_ego=False
+        zero_ego_action=False
+    else:
+        raise ValueError(f"Invalid ego style: {args.ego_style}")
+    if args.adv_style == 'learning':
+        update_adversary=True
+        zero_adv_action=False
+    elif args.adv_style == 'zero_action':
+        update_adversary=False
+        zero_adv_action=True
+    elif args.adv_style == 'random_action':
+        update_adversary=False
+        zero_adv_action=False
+    else:
+        raise ValueError(f"Invalid adv style: {args.adv_style}")
+    print("--------------------------------")
+    print("Ego style: %s, Adv style: %s" % (args.ego_style, args.adv_style))
+    print(f"Update ego: {update_ego}, Zero ego action: {zero_ego_action}, Update adversary: {update_adversary}, Zero adv action: {zero_adv_action}")
+    finetune_model.learn(update_ego=update_ego, zero_ego_action=zero_ego_action, update_adversary=update_adversary, zero_adv_action=zero_adv_action, total_timesteps=TOTAL_TIMESTEPS, callback=callback_list)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -144,10 +167,15 @@ if __name__ == "__main__":
     parser.add_argument("--ego_strength", type=float, required=True, default=1.5)
     parser.add_argument("--adv_strength", type=float, required=True, default=0.5)
     parser.add_argument("--save_dir", type=str, required=True, default=CHECKPOINT_DIR)
-    parser.add_argument("--sanity_test", type=str, choices=['True', 'False'], required=True, default='False')
+    parser.add_argument("--ego_style", type=str, choices=['zero_action', 'random_action', 'learning'], required=True, default='zero_action')
+    parser.add_argument("--adv_style", type=str, choices=['zero_action', 'random_action', 'learning'], required=True, default='zero_action')
+
     args = parser.parse_args()
     args.continue_training = args.continue_training == 'True'
-    args.sanity_test = args.sanity_test == 'True'
+    # args.train_ego = args.train_ego == 'True'
+    # args.train_adversary = args.train_adversary == 'True'
+    # args.random_ego = args.random_ego == 'True'
+    # args.random_adversary = args.random_adversary == 'True'
     args.use_lr_annealing = args.use_lr_annealing == 'True'
     wandb.login(key='d95a51c4001b862123a34a3853fe0306906d2f07')
     wandb_project = "gym_ippo_%s_ego_%.1f_adv_%.1f" % (args.env_name, args.ego_strength, args.adv_strength)
@@ -158,4 +186,8 @@ if __name__ == "__main__":
                        "v_lr": args.v_lr,
                        "num_env_steps": args.num_env_steps,
                        "envs_per_matchup": args.envs_per_matchup})
+    wandb.define_metric("training_timesteps")
+    wandb.define_metric("agent_reward")
+    wandb.define_metric(step_metric="agent_reward", name="training_timesteps")
+    #wandb.define_metric(step_metric="explained_variance", name="training_timesteps")
     main(args)

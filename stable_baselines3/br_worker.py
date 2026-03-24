@@ -36,7 +36,7 @@ if not os.listdir(TASK_DIR):
     print("Warning: The TASK_DIR is empty. Please run ippo.py --player PLAYER to generate a task file.")
 
 POLL_INTERVAL = 5  # Seconds to wait before checking for new tasks
-BR_TRAINING_STEPS = 100000
+BR_TRAINING_STEPS = 120000
 
 
 def load_spar_model(task_file_path: str, n_envs: int = 2) -> None:
@@ -106,6 +106,7 @@ def train_best_response(
     is_spar: bool = False,
     br_index: int = 0,
     from_scratch: bool = False,
+    exploiter_save_freq: int = 100000,
 ) -> None:
     """
     The core logic for a single best-response training run.
@@ -150,7 +151,7 @@ def train_best_response(
     br_agent.is_spar = is_spar # TODO: This is a stupid hack to get the BR agent to know if it is a SPAR model or not. Remove this once we have a better way to do this.
     # 4. Train the BR agent
     br_model_name = f"br{br_index}_to_{os.path.splitext(os.path.basename(checkpoint_path))[0]}_exploiting_{'ego' if eval_prot is True else 'adv'}.zip"
-    exploiter_callback = ExploiterCheckpointCallback(save_freq=1000, save_path=BR_MODEL_DIR, name_prefix=br_model_name)
+    exploiter_callback = ExploiterCheckpointCallback(save_freq=exploiter_save_freq // n_envs, save_path=BR_MODEL_DIR, name_prefix=br_model_name)
      
     if eval_only == False:
         print("eval_only was passed as False. Training the BR agent.")
@@ -163,6 +164,7 @@ def train_best_response(
             ftm.policy.num_env_per_adv = len(env.envs)
             ftm.policy.envs_per_matchup = len(env.envs)
             ftm.exploited = None
+            ftm.training_br = True
             ftm.learn(total_timesteps=BR_TRAINING_STEPS, callback=exploiter_callback, update_ego=not eval_prot, update_adversary=eval_prot)
         #br_agent.learn(total_timesteps=BR_TRAINING_STEPS, callback=exploiter_callback)
 
@@ -202,6 +204,7 @@ def run_br_for_task_in_subprocess(
     is_spar: bool,
     br_index: int,
     from_scratch: bool = False,
+    exploiter_save_freq: int = 100000,
 ) -> None:
     """
     Worker function for running a single BR training instance in a separate process.
@@ -237,6 +240,7 @@ def run_br_for_task_in_subprocess(
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--eval_prot", choices=['True', 'False'], default='False', required=True)
+    parser.add_argument("--eval_adv", choices=['True', 'False'], default='False', required=True)
     parser.add_argument("--eval_only", choices=['True', 'False'], default='False', required=True)
     parser.add_argument("--proj_name", type=str, required=True)
     parser.add_argument("--analysis_upload_proj_name", type=str, required=True)
@@ -248,19 +252,40 @@ if __name__ == "__main__":
     parser.add_argument("--num_brs", type=int, default=6, help="Number of independent BR agents to train per main checkpoint.")
     parser.add_argument("--n_envs", type=int, default=2, help="Number of environments to run in parallel.")
     parser.add_argument("--DEBUG", choices=['True', 'False'], default='False', required=True)
+    parser.add_argument("--num_full_exploiters", type=int, default=4, help="Number of full exploiters to train.")
+    parser.add_argument("--num_continue_exploiters", type=int, default=4, help="Number of continue exploiters to train.")
+    parser.add_argument("--dedicated_exploiter", choices=['True', 'False'], default='False', required=True)
+    parser.add_argument("--continue_exploiters", choices=['True', 'False'], default='False', required=True)
+    parser.add_argument("--exploiter_save_freq", type=int, required=True, default=100000, help="Frequency of exploiter checkpoint saves.")
+    # whether or not we want to do full br training or continuing the CDS as exploiter
     args = parser.parse_args()
     args.DEBUG = args.DEBUG == 'True'
+    args.dedicated_exploiter = args.dedicated_exploiter == 'True'
+    args.continue_exploiters = args.continue_exploiters == 'True'
+
 
     args.eval_prot = args.eval_prot == 'True'
+    args.eval_adv = args.eval_adv == 'True'
     if args.eval_only == 'True':
         print("WARNING!")
         print("This is an EVAL ONLY run. No exploiter training will be performed.")
         print("WARNING!")
+    if not args.eval_prot or not args.eval_adv:
+        print("WARNING!")
+        training_type = "adversary" if args.eval_prot else "ego " # if eval_prot is True we are training an optimal adversary so we need to update the adversary
+        print(f"WARNING! Only {training_type} training will be performed.")
+    print("Dedicated exploiter: ", args.dedicated_exploiter)
+    print("Number of full exploiters: ", args.num_full_exploiters)
+    print("Continue exploiters: ", args.continue_exploiters)
+    print("Number of continue exploiters: ", args.num_continue_exploiters)
+    print("Number of environments: ", args.n_envs)
+    if args.exploiter_save_freq > BR_TRAINING_STEPS:
+        print("WARNING! Exploiter save frequency is greater than BR training steps. This will result in no exploiter checkpoints being saved AND AN ERROR RIGHT BEFORE LOCAL BR EVAL")
     args.eval_only = args.eval_only == 'True'
     wandb.login(key='d95a51c4001b862123a34a3853fe0306906d2f07')
     todo_dir = os.path.join(TASK_DIR, "todo")
 
-    if args.task_dir is not None:
+    if args.task_dir is not None and args.task_dir != "":
         print(f"WARNING: Using custom task directory: {args.task_dir}")
         todo_dir = os.path.join(args.task_dir, "todo")
     processing_dir = os.path.join(TASK_DIR, "processing")
@@ -312,49 +337,104 @@ if __name__ == "__main__":
                 #     )
                 # else:
                 processes = []
-                for br_idx in range(args.num_brs):
-                    target = run_br_for_task_in_subprocess
-                    training_args = (
-                        processing_path,
-                        args.eval_prot,
-                        args.use_mirror,
-                        args.eval_only,
-                        args.proj_name,
-                        args.analysis_upload_proj_name,
-                        args.n_envs,
-                        True,  # is_spar
-                        br_idx,
-                        True if br_idx >= args.num_brs // 2 else False,
-                    )
-                    if args.DEBUG:
-                        print(f"DEBUG: Running BR {br_idx} for task {task_filename}")
-                        target(*training_args)
-                    else:
-                        p = mp.Process(target=target, args=training_args)
-                        p.start()
-                        processes.append(p)
-                for br_idx in range(args.num_brs):
-                    target = run_br_for_task_in_subprocess
-                    training_args = (
-                        processing_path,
-                        not args.eval_prot,
-                        args.use_mirror,
-                        args.eval_only,
-                        args.proj_name,
-                        args.analysis_upload_proj_name,
-                        args.n_envs,
-                        True,  # is_spar
-                        br_idx,
-                        True if br_idx >= args.num_brs // 2 else False,
-                    )
-                    if args.DEBUG:
-                        print(f"DEBUG: Running BR {br_idx} for task {task_filename}")
-                        target(*training_args)
-                    else:
-                        p = mp.Process(target=target, args=training_args)
-                        p.start()
-                        processes.append(p)
-
+                if args.eval_prot == True:
+                    if args.continue_exploiters == True:
+                        from_scratch = False
+                        for br_idx in range(args.num_continue_exploiters):
+                            target = run_br_for_task_in_subprocess
+                            training_args = (
+                                processing_path,
+                                args.eval_prot,
+                                args.use_mirror,
+                                args.eval_only,
+                                args.proj_name,
+                                args.analysis_upload_proj_name,
+                                args.n_envs,
+                                True,  # is_spar
+                                br_idx,
+                                from_scratch,
+                                args.exploiter_save_freq,
+                            )
+                            if args.DEBUG:
+                                print(f"DEBUG: Running BR {br_idx} for task {task_filename}")
+                                target(*training_args)
+                            else:
+                                p = mp.Process(target=target, args=training_args)
+                                p.start()
+                                processes.append(p)
+                    if args.dedicated_exploiter == True:
+                        from_scratch = True
+                        for br_idx in range(args.num_full_exploiters):
+                            target = run_br_for_task_in_subprocess
+                            training_args = (
+                                processing_path,
+                                args.eval_prot,
+                                args.use_mirror,
+                                args.eval_only,
+                                args.proj_name,
+                                args.analysis_upload_proj_name,
+                                args.n_envs,
+                                True,  # is_spar
+                                br_idx,
+                                from_scratch,
+                                args.exploiter_save_freq,
+                            )
+                            if args.DEBUG:
+                                print(f"DEBUG: Running BR {br_idx} for task {task_filename}")
+                                target(*training_args)
+                            else:
+                                p = mp.Process(target=target, args=training_args)
+                                p.start()
+                                processes.append(p)
+                if args.eval_adv == True:
+                    if args.continue_exploiters == True:   
+                        from_scratch = False
+                        for br_idx in range(args.num_continue_exploiters):
+                            target = run_br_for_task_in_subprocess
+                            training_args = (
+                                processing_path,
+                                args.eval_adv,
+                                args.use_mirror,
+                                args.eval_only,
+                                args.proj_name,
+                                args.analysis_upload_proj_name,
+                                args.n_envs,
+                                True,  # is_spar
+                                br_idx,
+                                from_scratch,
+                                args.exploiter_save_freq,
+                            )
+                            if args.DEBUG:
+                                print(f"DEBUG: Running BR {br_idx} for task {task_filename}")
+                                target(*training_args)
+                            else:
+                                p = mp.Process(target=target, args=training_args)
+                                p.start()
+                                processes.append(p)
+                    if args.dedicated_exploiter == True:
+                        from_scratch = True
+                        for br_idx in range(args.num_full_exploiters):
+                            target = run_br_for_task_in_subprocess
+                            training_args = (
+                                processing_path,
+                                args.eval_adv,
+                                args.use_mirror,
+                                args.eval_only,
+                                args.proj_name,
+                                args.analysis_upload_proj_name,
+                                args.n_envs,
+                                True,  # is_spar
+                                br_idx,
+                                from_scratch,
+                                args.exploiter_save_freq,
+                            )
+                            if args.DEBUG:
+                                print(f"DEBUG: Running BR {br_idx} for task {task_filename}")
+                                target(*training_args)
+                            else:
+                                p = mp.Process(target=target, args=training_args)
+                                p.start()
+                                processes.append(p)
                     # Wait for all BR processes to finish before marking task as done
                 if not args.DEBUG:
                     for p in processes:

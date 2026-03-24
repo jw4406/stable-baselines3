@@ -143,7 +143,7 @@ class CleanActorActorCriticPolicy(ActorCriticPolicy):
                 latent_dim=latent_dim_pi, log_std_init=self.log_std_init
             )
             self.dstb_action_net = nn.ModuleDict()
-            self.dstb_log_std = {}  # Store log_std Parameters in a regular dict since they're not Modules
+            self.dstb_log_std = nn.ParameterDict()  # Store log_std Parameters in a regular dict since they're not Modules
             for i in range(self.num_adversaries):
                 key = select_matchup_env(self.matchups, i, self.envs_per_matchup)
                 mean_net, log_std_param = self.dstb_action_dist[i].proba_distribution_net(latent_dim=latent_dim_pi, log_std_init=self.log_std_init)
@@ -256,8 +256,8 @@ class CleanActorActorCriticPolicy(ActorCriticPolicy):
             #self.ctrl_optimizer = self.optimizer_class(itertools.chain(self.mlp_extractor.policy_net.parameters(), self.pi_ctrl_features_extractor.parameters(),self.action_net.parameters()), joint_schedule[0](1),maximize=False)
             if isinstance(self.action_dist, DiagGaussianDistribution):
                 # Collect all log_std parameters for all adversaries - need to wrap in iterables for chain
-                log_std_params = [self.dstb_log_std[select_matchup_env(self.matchups, i, self.envs_per_matchup)] for i in range(self.num_adversaries)]
-                self.dstb_optimizer = self.optimizer_class(itertools.chain(self.mlp_extractor.dstb_net.parameters(), self.pi_dstb_features_extractor.parameters(), self.dstb_action_net.parameters(), iter(log_std_params)), joint_schedule[1](1), maximize=False)
+                #log_std_params = [self.dstb_log_std[select_matchup_env(self.matchups, i, self.envs_per_matchup)] for i in range(self.num_adversaries)]
+                self.dstb_optimizer = self.optimizer_class(itertools.chain(self.mlp_extractor.dstb_net.parameters(), self.pi_dstb_features_extractor.parameters(), self.dstb_action_net.parameters(), self.dstb_log_std.parameters()), joint_schedule[1](1), maximize=False)
             else:
                 self.dstb_optimizer = self.optimizer_class(itertools.chain(self.mlp_extractor.dstb_net.parameters(), self.pi_dstb_features_extractor.parameters(), self.dstb_action_net.parameters()), joint_schedule[1](1), maximize=False)
             self.extractor_and_trunk_length = 12

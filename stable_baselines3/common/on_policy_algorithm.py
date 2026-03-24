@@ -485,7 +485,10 @@ class OnPolicyAlgorithm(BaseAlgorithm):
                     print("Recorded reward: %.2f" % safe_mean([ep_info["r"] for ep_info in self.ep_info_buffer]), flush=True)
                     print("how long it took to get here: ", time_elapsed, flush=True)
                     self.logger.record("rollout/ep_rew_mean", safe_mean([ep_info["r"] for ep_info in self.ep_info_buffer]))
-                    wandb.log({"eval_rew": safe_mean([ep_info["r"] for ep_info in self.ep_info_buffer])})
+                    data = [[self.num_timesteps, safe_mean([ep_info["r"] for ep_info in self.ep_info_buffer])]]
+                    table = wandb.Table(data=data, columns=["training_timesteps", "agent_reward"])
+                    #wandb.log({"eval_rew": safe_mean([ep_info["r"] for ep_info in self.ep_info_buffer])})
+                    wandb.log({"agent_reward": wandb.plot.line(table, "training_timesteps", "agent_reward", title="Agent Reward")})
                     self.logger.record("rollout/ep_len_mean", safe_mean([ep_info["l"] for ep_info in self.ep_info_buffer]))
                     if len(rews) > 15000:
                         break
